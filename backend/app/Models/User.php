@@ -32,7 +32,7 @@ class User extends Authenticatable
         ];
     }
 
-    public function histories()
+    public function history()
     {
         return $this->hasMany(OrderStatusHistory::class);
     }
