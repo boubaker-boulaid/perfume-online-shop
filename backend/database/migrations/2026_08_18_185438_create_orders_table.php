@@ -25,8 +25,8 @@ return new class extends Migration
             $table->decimal('shipping_cost',10,2)->default(0);
             $table->dateTime('confirmation_sent_at')->nullable(); //prevent the confirmation email being sent twice 
             $table->decimal('total',10,2); //subtotal + shipping_cost
-            $table->string('status')->index();
-            $table->string('payment_status');
+            $table->string('status')->index()->default('pending');
+            $table->string('payment_status')->default('unpaid');
             $table->dateTime('whatsapp_opened_at')->nullable();
             $table->timestamps();
             $table->index('created_at');

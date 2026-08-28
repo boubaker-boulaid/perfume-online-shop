@@ -39,7 +39,7 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
-    public function histories()
+    public function history()
     {
         return $this->hasMany(OrderStatusHistory::class);
     }
