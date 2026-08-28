@@ -17,12 +17,15 @@ return new class extends Migration
             $table->string('name');
             $table->string('slug')->unique();
             $table->text('description')->nullable();
+            $table->text('notes')->nullable();
             $table->string('sku')->nullable(); //custom reference code
             $table->decimal('price', 10, 2);
+            $table->integer('sort_order')->default(0);
             $table->decimal('compare_at_price',10, 2)->nullable(); //the old price to show a discount
             $table->integer('stock')->default(0);
             $table->string('image_path');
             $table->boolean('is_active')->default(true);
+            $table->index('is_active');
             $table->boolean('is_featured')->default(false);
             $table->timestamps();
         });
