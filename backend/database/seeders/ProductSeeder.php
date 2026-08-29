@@ -101,7 +101,7 @@ class ProductSeeder extends Seeder
 
     private function copyImage(string $imageName):string
     {
-        $newPath = 'pruducts/'. $imageName; // storage/app/public/products/imageName.jpg
+        $newPath = 'products/'. $imageName; // storage/app/public/products/imageName.jpg
         $imageSource = database_path('seeders/assets/pr-images/'. $imageName);
 
         if (! is_file($imageSource)){
