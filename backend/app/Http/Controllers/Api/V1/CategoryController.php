@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\ApiResponseTrait;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\CategoryResource;
 use App\Models\Category;
 use Illuminate\Http\Request;
 
@@ -15,8 +16,8 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $categories = Category::where('is_active', true)->latest()->paginate(10);
-        return $this->ok($categories, 'Categories retrieved');
+        $categories = Category::where('is_active', true)->withCount('products')->latest()->paginate(10);
+        return $this->ok(CategoryResource::collection($categories), 'Categories retrieved');
     }
 
     /**

@@ -25,10 +25,10 @@ class FiltersRequest extends FormRequest
     {
         return [
             'q' => 'nullable|string|max:100',
-            'category' => 'nullable|exists:categories,slug',
+            'category' => ['nullable', Rule::exists('categories', 'slug')->where('is_active', true)],
             'min_price' => 'nullable|numeric|min:0',
-            'max_price' => ['nullable', Rule::exists('categories', 'slug')->where('is_active', true)],
-            'sort' => 'nullable|in:price_desc,price_asc, newest, oldest'
+            'max_price' => 'nullable|numeric|min:0',
+            'sort' => 'nullable|in:price_desc,price_asc,newest,oldest'
         ];
     }
 }
