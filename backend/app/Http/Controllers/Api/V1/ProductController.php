@@ -6,7 +6,6 @@ use App\ApiResponseTrait;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\FiltersRequest;
 use App\Http\Resources\ProductResource;
-use App\Models\Category;
 use Illuminate\Http\Request;
 use App\Models\Product;
 
@@ -51,9 +50,11 @@ class ProductController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(string $slug)
     {
-        //
+        $product = Product::with('category')->where('is_active', true)->where('slug', $slug)->firstOrFail();
+
+        return $this->okNoPgs(new ProductResource($product), 'Product Retrieved');
     }
 
     /**
