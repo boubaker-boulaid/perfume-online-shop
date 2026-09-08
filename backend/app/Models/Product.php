@@ -9,7 +9,7 @@ use App\Models\OrderItem;
 class Product extends Model
 {
     protected $fillable = [
-        'category_id', 'name', 'slug', 'description', 'sku', 'price', 'compare_at_price', 'stock', 'image_path', 'is_active', 'is_featured'
+        'category_id', 'name', 'slug', 'description', 'notes', 'sort_order', 'sku', 'price', 'compare_at_price', 'stock', 'image_path', 'is_active', 'is_featured'
     ];
 
     protected $casts = [
