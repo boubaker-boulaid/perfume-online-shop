@@ -74,4 +74,9 @@ return Application::configure(basePath: dirname(__DIR__))
                 )
             };
         });
+
+        $exceptions->dontReport([
+            ModelNotFoundException::class,
+            ValidationException::class
+        ]);
     })->create();
