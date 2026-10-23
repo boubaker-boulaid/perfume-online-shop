@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('order_sequednces', function (Blueprint $table) {
+        Schema::create('order_sequences', function (Blueprint $table) {
             $table->integer('year')->unique();
             $table->integer('last_number');
         });

@@ -53,7 +53,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 // Handler::prepareException() before this callback runs, so the
                 // original is only reachable via getPrevious().
                 $e instanceof NotFoundHttpException && $e->getPrevious() instanceof ModelNotFoundException
-                => $res('The requested resource was not found.', 404),
+                => $res($e->getMessage() ?:'The requested resource was not found.', 404),
 
                 $e instanceof NotFoundHttpException => $res('The requested API endpoint does not exists.', 404),
 
