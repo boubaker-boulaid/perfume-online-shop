@@ -54,6 +54,13 @@ class OrderService
 
                 $this->saveOrderItems($order, $products, $data['items']);
 
+                Log::channel('orders')->info("Order placed", [
+                    'order_number' => $order->order_number,
+                    'customer_name' => $order->customer_name,
+                    'total' => $order->total,
+                    'items' => $order->items->count()
+                ]);
+
                 return $order;
             });
         } catch (InsufficientStockException $e) {

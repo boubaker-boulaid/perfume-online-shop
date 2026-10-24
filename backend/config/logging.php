@@ -135,6 +135,13 @@ return [
             'path' => storage_path('logs/laravel.log'),
         ],
 
+        'orders' => [
+            'driver' => 'dialy',
+            'path' => storage_path('logs/orders/order.log'),
+            'level' => 'info',
+            'days' => 90 
+        ]
+
     ],
 
 ];
