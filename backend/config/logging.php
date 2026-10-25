@@ -140,6 +140,13 @@ return [
             'path' => storage_path('logs/orders/order.log'),
             'level' => 'info',
             'days' => 90 
+        ],
+
+        'queues' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/queues/queue.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 30
         ]
 
     ],

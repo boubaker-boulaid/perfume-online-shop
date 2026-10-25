@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Exceptions\InsufficientStockException;
+use App\Jobs\SendOrderConfirmation;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
@@ -28,6 +29,7 @@ class OrderService
                 // check if another order with the same idempotency_key already exists
                 $orderExists = Order::where('idempotency_key', $data['idempotency_key'])->first();
                 if ($orderExists) {
+                    SendOrderConfirmation::dispatch($orderExists);
                     return $orderExists;
                 }
 
@@ -53,6 +55,8 @@ class OrderService
                 ]);
 
                 $this->saveOrderItems($order, $products, $data['items']);
+
+                SendOrderConfirmation::dispatch($order);
 
                 Log::channel('orders')->info("Order placed", [
                     'order_number' => $order->order_number,
