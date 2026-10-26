@@ -55,6 +55,7 @@ class OrderService
                 ]);
 
                 $this->saveOrderItems($order, $products, $data['items']);
+                $order->load('items');
 
                 SendOrderConfirmation::dispatch($order);
 

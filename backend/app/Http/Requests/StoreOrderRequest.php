@@ -27,7 +27,7 @@ class StoreOrderRequest extends FormRequest
             'customer_name' => ['required', 'string', 'max:50'],
             'phone' => ['required', 'string', 'max:12', 'regex:/^\+?[0-9\s().-]+$/'],
             'city' => ['required', 'string', 'max:50'],
-            'address' => ['required', 'text'],
+            'address' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email'],
             'idempotency_key' => ['required', 'string', 'uuid'],
             'items' => ['required', 'array', 'min:1', 'max:99'],
