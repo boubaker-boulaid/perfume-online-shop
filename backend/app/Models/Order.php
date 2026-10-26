@@ -43,4 +43,33 @@ class Order extends Model
     {
         return $this->hasMany(OrderStatusHistory::class);
     }
+
+    public function whatsappMessage():string
+    {
+        // local helper for formating the money
+        $money = fn($v) => number_format((float) $v, 2, ',', ''). ' DH';
+
+        $lines = collect([
+            "New Order {$this->order_number}",
+            "",
+        ])->concat($this->items->map(
+            fn ($i) => "{$i->product_name}: quantite{$i->quantite} / cost {$money($i->line_total)} " 
+        ))->concat([
+            "",
+            "Shipping: ". ($this->shipping_cost == 0 ? "free" : $money($this->shipping_cost)),
+            "Total: {$this->total}",
+            "Name: {$this->customer_name}",
+            "City: {$this->city}",
+            "Address: {$this->address}",  
+        ]);
+
+        if ($this->note) $lines->push($this->note);
+
+        return $lines->implode('\n');
+    }
+
+    public function whatsappLink():string
+    {
+        return 'https://wa.me/'. config('shop.whatsapp.number') . '?text='. rawurldecode($this->whatsappMessage());
+    }
 }
