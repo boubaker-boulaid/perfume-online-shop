@@ -31,9 +31,9 @@ class StoreOrderRequest extends FormRequest
             'email' => ['required', 'email'],
             'idempotency_key' => ['required', 'string', 'uuid'],
             'items' => ['required', 'array', 'min:1', 'max:99'],
-            'items.*' => ['required', 'array:product_id,quantite'],
+            'items.*' => ['required', 'array:product_id,quantity'],
             'items.*.product_id' => ['required', Rule::exists('products', 'id')->where('is_active', true)],
-            'items.*.quantite' => ['required', 'integer', 'min:1', 'max:99']
+            'items.*.quantity' => ['required', 'integer', 'min:1', 'max:99']
         ];
     }
 }

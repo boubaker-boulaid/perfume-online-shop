@@ -1,5 +1,5 @@
 @php
-    $money = fn ($v) => number_format((float) $v, 2, ',', ' ') . ' DA';
+    $money = fn ($v) => number_format((float) $v, 2, ',', ' ') . ' DH';
 @endphp
 <!DOCTYPE html>
 <html>

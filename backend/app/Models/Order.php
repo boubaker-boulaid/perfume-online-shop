@@ -53,11 +53,11 @@ class Order extends Model
             "New Order {$this->order_number}",
             "",
         ])->concat($this->items->map(
-            fn ($i) => "{$i->product_name}: quantite{$i->quantite} / cost {$money($i->line_total)} " 
+            fn ($i) => "{$i->product_name}: quantity {$i->quantity} / cost {$money($i->line_total)} " 
         ))->concat([
             "",
             "Shipping: ". ($this->shipping_cost == 0 ? "free" : $money($this->shipping_cost)),
-            "Total: {$this->total}",
+            "Total: {$money($this->total)}",
             "Name: {$this->customer_name}",
             "City: {$this->city}",
             "Address: {$this->address}",  
@@ -65,11 +65,11 @@ class Order extends Model
 
         if ($this->note) $lines->push($this->note);
 
-        return $lines->implode('\n');
+        return $lines->implode("\n");
     }
 
     public function whatsappLink():string
     {
-        return 'https://wa.me/'. config('shop.whatsapp.number') . '?text='. rawurldecode($this->whatsappMessage());
+        return 'https://wa.me/'. config('shop.whatsapp.number') . '?text='. rawurlencode($this->whatsappMessage());
     }
 }

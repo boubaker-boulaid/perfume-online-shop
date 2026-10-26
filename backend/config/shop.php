@@ -2,6 +2,6 @@
 
 return [
     'whatsapp' => [
-        'number' => env('SHOP_WHATSAPP_NUMBER', '0666666666')
+        'number' => env('SHOP_WHATSAPP_NUMBER', '212693303131')
     ]
 ];

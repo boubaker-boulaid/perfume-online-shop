@@ -37,7 +37,7 @@ class OrderService
                 // calculate the total
                 $total = collect($data['items'])->sum(function ($item) use ($products) {
                     $product = $products->get($item['product_id']);
-                    return $product->price * $item['quantite'];
+                    return $product->price * $item['quantity'];
                 });
 
                 $orderNumber = $this->generateOrderNumber();
@@ -90,8 +90,8 @@ class OrderService
                 throw new ModelNotFoundException('Product with id ' . $item['product_id'] . ' not found.');
             }
 
-            if ($product->stock < $item['quantite']) {
-                throw new InsufficientStockException($product->name, $item['quantite'], $product->stock);
+            if ($product->stock < $item['quantity']) {
+                throw new InsufficientStockException($product->name, $item['quantity'], $product->stock);
             }
         }
 
@@ -131,8 +131,8 @@ class OrderService
                 'product_id' => $p->id,
                 'product_name' => $p->name,
                 'unit_price' => $p->price,
-                'quantity' => $i['quantite'],
-                'line_total' => $i['quantite'] * $p->price
+                'quantity' => $i['quantity'],
+                'line_total' => $i['quantity'] * $p->price
             ]);
         });
     }
