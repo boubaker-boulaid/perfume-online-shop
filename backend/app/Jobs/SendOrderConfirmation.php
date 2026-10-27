@@ -20,7 +20,7 @@ class SendOrderConfirmation implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public Order $order)
+    public function __construct(public int $orderId)
     {
         //
     }
@@ -30,19 +30,23 @@ class SendOrderConfirmation implements ShouldQueue
      */
     public function handle(): void
     {
-        if ($this->order->confirmation_sent_at) {
+        $order = Order::findOrFail($this->orderId);
+
+        $claimed = Order::query()
+            ->whereKey($this->orderId)
+            ->whereNull('confirmation_sent_at')
+            ->update(['confirmation_sent_at' => now()]);
+
+        if ($claimed === 0) {
             return;
         }
+
         // send an email to the company email
-        Mail::to(config('mail.admin_address'))->send(new AdminOrderPlacedMail($this->order));
-        if ($this->order->email) {
-            // send confirmation email to the customer 
-            Mail::to($this->order->email)->send(new CustomerOrderPlacedMail($this->order));
+        Mail::to(config('mail.admin_address'))->send(new AdminOrderPlacedMail($order));
+        if ($order->email) {
+            // send confirmation email to the customer
+            Mail::to($order->email)->send(new CustomerOrderPlacedMail($order));
         }
-        
-        $this->order->forceFill([
-            'confirmation_sent_at' => now()
-        ])->save();
     }
 
     public function failed(\Throwable $e)

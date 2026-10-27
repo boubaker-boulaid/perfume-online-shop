@@ -27,9 +27,11 @@ class OrderService
         try {
             return DB::transaction(function () use ($data) {
                 // check if another order with the same idempotency_key already exists
-                $orderExists = Order::where('idempotency_key', $data['idempotency_key'])->first();
+                $orderExists = Order::where('idempotency_key', $data['idempotency_key'])->lockForUpdate()->first();
                 if ($orderExists) {
-                    SendOrderConfirmation::dispatch($orderExists);
+                    if (is_null($orderExists->confirmation_sent_at)) {
+                        SendOrderConfirmation::dispatch($orderExists->id);
+                    }
                     return $orderExists;
                 }
 
@@ -50,6 +52,7 @@ class OrderService
                     'email' => $data['email'],
                     'city' => $data['city'],
                     'address' => $data['address'],
+                    'note' => $data['note'],
                     'subtotal' => $total,
                     'total' => $total
                 ]);
@@ -57,7 +60,7 @@ class OrderService
                 $this->saveOrderItems($order, $products, $data['items']);
                 $order->load('items');
 
-                SendOrderConfirmation::dispatch($order);
+                SendOrderConfirmation::dispatch($order->id);
 
                 Log::channel('orders')->info("Order placed", [
                     'order_number' => $order->order_number,
