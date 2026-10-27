@@ -5,8 +5,6 @@ namespace App\Http\Controllers\Api\V1;
 use App\ApiResponseTrait;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreOrderRequest;
-use App\Http\Resources\OrderResource;
-use App\Models\Order;
 use App\Services\OrderService;
 use Illuminate\Http\Request;
 
@@ -34,7 +32,8 @@ class OrderController extends Controller
         $order = $this->orderService->place($request->validated());
 
         return $this->created([
-            'order' => new OrderResource($order),
+            'order_number' => $order->order_number,
+            'total' => $order->total,
             'whatsapp_link' => $order->whatsappLink()
         ], 'The order was created successfully.');
     }
