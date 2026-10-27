@@ -7,34 +7,22 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\FiltersRequest;
 use App\Http\Resources\ProductResource;
 use Illuminate\Http\Request;
-use App\Models\Product;
+use App\Services\ProductService;
 
 class ProductController extends Controller
 {
     use ApiResponseTrait;
+
+    public function __construct(protected ProductService $product_service)
+    {
+        
+    }
     /**
      * Display a listing of the resource.
      */
     public function index(FiltersRequest $request)
     {
-        $validated = $request->validated();
-
-        $query = Product::query();
-        $query->when($validated['q'] ?? null, fn($q, $search) => $q->where('name', 'like', '%' . $search . '%'))
-            ->when($validated['category'] ?? null, fn($q, $cat) => $q->whereRelation('category', 'slug', $cat))
-            ->when($validated['min_price'] ?? null, fn($q, $min) => $q->where('price', '>=', $min))
-            ->when($validated['max_price'] ?? null, fn($q, $max) => $q->where('price', '<=', $max))
-        ;
-
-        match ($validated['sort'] ?? null) {
-            'price_desc' => $query->orderByDesc('price'),
-            'price_asc' => $query->orderBy('price'),
-            'oldest' => $query->oldest(),
-            'newest' => $query->latest(),
-            default => $query->latest(),
-        };
-
-        $products = $query->with('category')->where('is_active', true)->paginate(10);
+        $products = $this->product_service->getProducts($request->validated());
 
         return $this->ok(ProductResource::collection($products), 'Products retrieved.');
     }
@@ -52,9 +40,7 @@ class ProductController extends Controller
      */
     public function show(string $slug)
     {
-        $product = Product::with('category')->where('is_active', true)->where('slug', $slug)->firstOrFail();
-
-        return $this->okNoPgs(new ProductResource($product), 'Product Retrieved');
+        return $this->okNoPgs(new ProductResource($this->product_service->getProduct($slug)), 'Product Retrieved');
     }
 
     /**
