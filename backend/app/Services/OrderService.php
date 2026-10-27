@@ -140,4 +140,12 @@ class OrderService
             ]);
         });
     }
+
+
+    public function updateWhatsappOpened(string $orderNumber)
+    {
+        Order::where('order_number', $orderNumber)->whereNull('whatsapp_opened_at')->update([
+            'whatsapp_opened_at' => now(),
+        ]);
+    }
 }

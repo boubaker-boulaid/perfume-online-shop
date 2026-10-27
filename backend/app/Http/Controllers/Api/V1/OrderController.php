@@ -6,6 +6,7 @@ use App\ApiResponseTrait;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Resources\OrderResource;
+use App\Models\Order;
 use App\Services\OrderService;
 use Illuminate\Http\Request;
 
@@ -36,6 +37,12 @@ class OrderController extends Controller
             'order' => new OrderResource($order),
             'whatsapp_link' => $order->whatsappLink()
         ], 'The order was created successfully.');
+    }
+
+    public function whatsappOpened(string $orderNumber)
+    {
+        $this->orderService->updateWhatsappOpened($orderNumber);
+        return $this->noContent();
     }
 
     /**
