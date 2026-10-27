@@ -58,4 +58,10 @@ class ProductController extends Controller
     {
         //
     }
+
+    public function featured()
+    {
+        $products = $this->product_service->getFeatured();
+        return $this->okNoPgs(ProductResource::collection($products), 'Featured products retrieved');
+    }
 }

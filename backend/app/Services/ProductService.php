@@ -17,13 +17,13 @@ class ProductService
     public function getProducts(array $filters)
     {
         $query = Product::query();
-        $query->when($validated['q'] ?? null, fn($q, $search) => $q->where('name', 'like', '%' . $search . '%'))
-            ->when($validated['category'] ?? null, fn($q, $cat) => $q->whereRelation('category', 'slug', $cat))
-            ->when($validated['min_price'] ?? null, fn($q, $min) => $q->where('price', '>=', $min))
-            ->when($validated['max_price'] ?? null, fn($q, $max) => $q->where('price', '<=', $max))
+        $query->when($filters['q'] ?? null, fn($q, $search) => $q->where('name', 'like', '%' . $search . '%'))
+            ->when($filters['category'] ?? null, fn($q, $cat) => $q->whereRelation('category', 'slug', $cat))
+            ->when($filters['min_price'] ?? null, fn($q, $min) => $q->where('price', '>=', $min))
+            ->when($filters['max_price'] ?? null, fn($q, $max) => $q->where('price', '<=', $max))
         ;
 
-        match ($validated['sort'] ?? null) {
+        match ($filters['sort'] ?? null) {
             'price_desc' => $query->orderByDesc('price'),
             'price_asc' => $query->orderBy('price'),
             'oldest' => $query->oldest(),
@@ -36,8 +36,13 @@ class ProductService
 
     public function getProduct(string $slug)
     {
-        return Product::with('ctegory')->where('is_active', true)->where('slug', $slug)
+        return Product::with('category')->where('is_active', true)->where('slug', $slug)
                     ->firstOrFail();
     }
 
+    public function getFeatured()
+    {
+        return Product::with('category')->where('is_active', true)->where('is_featured',true)
+                    ->inRandomOrder()->take(5)->get();
+    }
 }
