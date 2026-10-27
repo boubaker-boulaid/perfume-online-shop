@@ -31,18 +31,18 @@ class ProductService
             default => $query->latest(),
         };
 
-        return $query->with('category')->where('is_active', true)->paginate(10);
+        return $query->with('category')->active()->paginate(10);
     }
 
     public function getProduct(string $slug)
     {
-        return Product::with('category')->where('is_active', true)->where('slug', $slug)
+        return Product::with('category')->active()->where('slug', $slug)
                     ->firstOrFail();
     }
 
     public function getFeatured()
     {
-        return Product::with('category')->where('is_active', true)->where('is_featured',true)
+        return Product::with('category')->active()->featured()
                     ->inRandomOrder()->take(5)->get();
     }
 }

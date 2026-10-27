@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Category;
 use App\Models\OrderItem;
+use Illuminate\Database\Eloquent\Builder;
 
 class Product extends Model
 {
@@ -19,6 +20,18 @@ class Product extends Model
         'is_active' => 'bool', 
         'is_featured' => 'bool'
     ];
+    
+    // scope the query to include only active products 
+    public function scopeActive(Builder $query)
+    {
+        $query->where('is_active', true);
+    }
+
+    // scope a query to include only featured products
+    public function scopeFeatured(Builder $query)
+    {
+        $query->where('is_featured', true);
+    }
 
     public function category()
     {

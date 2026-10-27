@@ -16,7 +16,7 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $categories = Category::where('is_active', true)->withCount('products')->latest()->paginate(10);
+        $categories = Category::active()->withCount('products')->latest()->paginate(10);
         return $this->ok(CategoryResource::collection($categories), 'Categories retrieved');
     }
 
