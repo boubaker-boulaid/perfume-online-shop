@@ -52,7 +52,7 @@ class OrderService
                     'email' => $data['email'],
                     'city' => $data['city'],
                     'address' => $data['address'],
-                    'note' => $data['note'],
+                    'note' => $data['note'] ?? null,
                     'subtotal' => $total,
                     'total' => $total
                 ]);
