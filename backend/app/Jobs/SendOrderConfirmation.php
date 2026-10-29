@@ -42,7 +42,7 @@ class SendOrderConfirmation implements ShouldQueue
         }
 
         // send an email to the company email
-        Mail::to(config('mail.admin_address'))->send(new AdminOrderPlacedMail($order));
+        Mail::to(config('shop.mail.address'))->send(new AdminOrderPlacedMail($order));
         if ($order->email) {
             // send confirmation email to the customer
             Mail::to($order->email)->send(new CustomerOrderPlacedMail($order));
