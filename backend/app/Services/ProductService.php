@@ -47,11 +47,16 @@ class ProductService
 
         return $query;
     }
-    
+
     public function getProduct(string $slug)
     {
         return Product::with('category')->active()->where('slug', $slug)
                     ->firstOrFail();
+    }
+
+    public function getAdminProduct(string $slug)
+    {
+        return Product::with('category')->where('slug', $slug)->firstOrFail();
     }
 
     public function getFeatured()

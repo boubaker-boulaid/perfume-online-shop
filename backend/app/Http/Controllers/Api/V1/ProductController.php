@@ -47,9 +47,15 @@ class ProductController extends Controller
      */
     public function show(string $slug)
     {
-        return $this->okNoPgs(new ProductResource($this->product_service->getProduct($slug)), 'Product Retrieved');
+        return $this->okNoPgs(new ProductResource($this->product_service->getAdminProduct($slug)), 
+            'Product Retrieved');
     }
 
+    public function showActive(string $slug)
+    {
+        return $this->okNoPgs(new ProductResource($this->product_service->getProduct($slug)),
+            'Product Retrieved');
+    }
     /**
      * Update the specified resource in storage.
      */
