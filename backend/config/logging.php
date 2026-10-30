@@ -136,7 +136,7 @@ return [
         ],
 
         'orders' => [
-            'driver' => 'dialy',
+            'driver' => 'daily',
             'path' => storage_path('logs/orders/order.log'),
             'level' => 'info',
             'days' => 90 

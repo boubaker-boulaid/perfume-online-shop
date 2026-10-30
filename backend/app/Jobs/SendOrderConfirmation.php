@@ -32,14 +32,8 @@ class SendOrderConfirmation implements ShouldQueue
     {
         $order = Order::findOrFail($this->orderId);
 
-        $claimed = Order::query()
-            ->whereKey($this->orderId)
-            ->whereNull('confirmation_sent_at')
-            ->update(['confirmation_sent_at' => now()]);
-
-        if ($claimed === 0) {
-            return;
-        }
+        // stop if the email already sent
+        if ($order->confirmation_sent_at) return;
 
         // send an email to the company email
         Mail::to(config('shop.mail.address'))->send(new AdminOrderPlacedMail($order));
@@ -47,6 +41,8 @@ class SendOrderConfirmation implements ShouldQueue
             // send confirmation email to the customer
             Mail::to($order->email)->send(new CustomerOrderPlacedMail($order));
         }
+
+        $order->update(['confirmation_sent_at' => now()]);
     }
 
     public function failed(\Throwable $e)

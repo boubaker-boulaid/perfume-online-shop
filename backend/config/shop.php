@@ -6,9 +6,9 @@ return [
     ],
 
     'admin' => [
-        'name' => env('SHOP_ADMIN_NAME', 'Admin1'),
-        'email' => env('SHOP_ADMIN_EMAIL', 'admin1@gmail.com'),
-        'password' => env('SHOP_ADMIN_PASSWORD', 'password'),
+        'name' => env('SHOP_ADMIN_NAME'),
+        'email' => env('SHOP_ADMIN_EMAIL'),
+        'password' => env('SHOP_ADMIN_PASSWORD'),
     ],
 
     'mail' => [

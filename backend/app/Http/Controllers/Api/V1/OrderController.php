@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreOrderRequest;
 use App\Services\OrderService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
 
 class OrderController extends Controller
 {
@@ -34,7 +35,10 @@ class OrderController extends Controller
         return $this->created([
             'order_number' => $order->order_number,
             'total' => $order->total,
-            'whatsapp_link' => $order->whatsappLink()
+            'whatsapp_link' => $order->whatsappLink(),
+            'whatsapp_opened_url' => URL::temporarySignedRoute('orders.whatsapp-opened', now()->addMinutes(30), [
+                'orderNumber' => $order->order_number
+            ]),
         ], 'The order was created successfully.');
     }
 

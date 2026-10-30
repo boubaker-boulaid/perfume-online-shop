@@ -14,7 +14,7 @@ Route::get('/status', function () {
 
 Route::prefix('v1')->group(function () {
     // customers public routes
-    Route::prefix('/')->group(base_path('routes/customer.php'));
+    Route::group([], base_path('routes/customer.php'));
 
     // admin routes
     Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(base_path('routes/admin.php'));
