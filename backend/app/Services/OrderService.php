@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -73,6 +74,8 @@ class OrderService
             });
         } catch (InsufficientStockException $e) {
             throw $e;
+        } catch (UniqueConstraintViolationException $e) {
+            return Order::where('idempotency_key', $data['idempotency_key'])->firstOrFail();
         } catch (\Exception $e) {
             Log::channel('daily')->error("Failed to place order: {$e->getMessage()}", [
                 'payload' => $data,
@@ -97,6 +100,8 @@ class OrderService
             if ($product->stock < $item['quantity']) {
                 throw new InsufficientStockException($product->name, $item['quantity'], $product->stock);
             }
+
+            $product->decrement('stock', $item['quantity']);
         }
 
         return $products;
