@@ -16,6 +16,20 @@ class ProductService
 
     public function getProducts(array $filters)
     {
+        $query = $this->filteredProducts($filters);
+
+        return $query->with('category')->active()->paginate(10);
+    }
+
+    public function getAdminProducts(array $filters)
+    {
+        $query = $this->filteredProducts($filters);
+
+        return $query->with('category')->paginate(10);
+    }
+
+    protected function filteredProducts(array $filters) 
+    {
         $query = Product::query();
         $query->when($filters['q'] ?? null, fn($q, $search) => $q->where('name', 'like', '%' . $search . '%'))
             ->when($filters['category'] ?? null, fn($q, $cat) => $q->whereRelation('category', 'slug', $cat))
@@ -31,9 +45,9 @@ class ProductService
             default => $query->latest(),
         };
 
-        return $query->with('category')->active()->paginate(10);
+        return $query;
     }
-
+    
     public function getProduct(string $slug)
     {
         return Product::with('category')->active()->where('slug', $slug)

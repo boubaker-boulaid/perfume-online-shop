@@ -36,7 +36,7 @@ class OrderController extends Controller
             'order_number' => $order->order_number,
             'total' => $order->total,
             'whatsapp_link' => $order->whatsappLink(),
-            'whatsapp_opened_url' => URL::temporarySignedRoute('orders.whatsapp-opened', now()->addMinutes(30), [
+            'whatsapp_opened_url' => URL::temporarySignedRoute('customer.orders.whatsapp-opened', now()->addMinutes(30), [
                 'orderNumber' => $order->order_number
             ]),
         ], 'The order was created successfully.');

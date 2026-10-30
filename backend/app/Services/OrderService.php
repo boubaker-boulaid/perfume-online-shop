@@ -85,7 +85,7 @@ class OrderService
         }
     }
 
-    public function lockAndValidateProduct(array $items)
+    protected function lockAndValidateProduct(array $items)
     {
         $productsIds = collect($items)->pluck('product_id');
         $products = Product::whereIn('id', $productsIds)->lockForUpdate()->get()->keyBy('id');
@@ -107,7 +107,7 @@ class OrderService
         return $products;
     }
 
-    public function generateOrderNumber()
+    protected function generateOrderNumber()
     {
         $year = now()->year;
         // get the sequence of the current year and lock the table to prevant having the same name for several orders placed at the same time 
@@ -131,7 +131,7 @@ class OrderService
         return sprintf('ORD-%d-%06d', $year, $number);
     }
 
-    public function saveOrderItems(Order $order, Collection $products, array $items)
+    protected function saveOrderItems(Order $order, Collection $products, array $items)
     {
         collect($items)->each(function ($i) use ($products, $order) {
             $p = $products->get($i['product_id']);

@@ -22,6 +22,13 @@ class ProductController extends Controller
      */
     public function index(FiltersRequest $request)
     {
+        $products = $this->product_service->getAdminProducts($request->validated());
+
+        return $this->ok(ProductResource::collection($products), 'Products retrieved.');
+    }
+
+    public function active(FiltersRequest $request)
+    {
         $products = $this->product_service->getProducts($request->validated());
 
         return $this->ok(ProductResource::collection($products), 'Products retrieved.');

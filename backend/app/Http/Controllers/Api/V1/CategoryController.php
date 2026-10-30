@@ -20,6 +20,7 @@ class CategoryController extends Controller
         return $this->ok(CategoryResource::collection($categories), 'Categories retrieved');
     }
 
+
     /**
      * Store a newly created resource in storage.
      */
