@@ -3,12 +3,7 @@
 use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\OrderController;
 use App\Http\Controllers\Api\V1\ProductController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
-Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
-    return $request->user();
-});
 
 // api status/health check
 Route::get('/status', function () {
@@ -27,4 +22,7 @@ Route::prefix('v1')->group(function () {
     Route::get('products/{slug}', [ProductController::class, 'show']);
     Route::post('orders', [OrderController::class, 'store']);
     Route::patch('orders/{orderNumber}/whatsapp-opened', [OrderController::class, 'whatsappOpened']);
+
+    // admin routes
+    Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(base_path('routes/admin.php'));
 });
