@@ -28,7 +28,7 @@ class ProductService
         return $query->with('category')->paginate(10);
     }
 
-    protected function filteredProducts(array $filters) 
+    private function filteredProducts(array $filters) 
     {
         $query = Product::query();
         $query->when($filters['q'] ?? null, fn($q, $search) => $q->where('name', 'like', '%' . $search . '%'))
