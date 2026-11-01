@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\OrderFiltersRequest;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Resources\OrderResource;
+use App\Models\Order;
 use App\Services\OrderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
@@ -15,7 +16,7 @@ class OrderController extends Controller
 {
     use ApiResponseTrait;
 
-    public function __construct(protected OrderService $orderService)
+    public function __construct(protected OrderService $order_service)
     {
     }
 
@@ -24,7 +25,7 @@ class OrderController extends Controller
      */
     public function index(OrderFiltersRequest $request)
     {
-        $orders = $this->orderService->getOrders($request->validated());
+        $orders = $this->order_service->getOrders($request->validated());
 
         return $this->ok(OrderResource::collection($orders), 'Orders retrieved.');
     }
@@ -34,7 +35,7 @@ class OrderController extends Controller
      */
     public function store(StoreOrderRequest $request)
     {
-        $order = $this->orderService->place($request->validated());
+        $order = $this->order_service->place($request->validated());
 
         return $this->created([
             'order_number' => $order->order_number,
@@ -48,16 +49,16 @@ class OrderController extends Controller
 
     public function whatsappOpened(string $orderNumber)
     {
-        $this->orderService->updateWhatsappOpened($orderNumber);
+        $this->order_service->updateWhatsappOpened($orderNumber);
         return $this->noContent();
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Order $order)
     {
-        //
+        return $this->okNoPgs(new OrderResource($this->order_service->getOrder($order)), 'Order retrieved.');
     }
 
     /**

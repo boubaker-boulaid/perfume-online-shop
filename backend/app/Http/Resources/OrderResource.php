@@ -5,6 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Http\Resources\OrderItemResource;
+use App\Http\Resources\OrderStatusHistoryResource;
 
 class OrderResource extends JsonResource
 {
@@ -27,6 +28,7 @@ class OrderResource extends JsonResource
             'note' => $this->note,
             'items' => OrderItemResource::collection($this->whenLoaded('items')),
             'items_count' => $this->whenCounted('items'),
+            'history' => OrderStatusHistoryResource::collection($this->whenLoaded('history')),
             'shipping_cost' => $this->shipping_cost,
             'subtotal' => $this->subtotal,
             'total' => $this->total,

@@ -183,4 +183,9 @@ class OrderService
 
         return $query->with('items')->withCount('items')->paginate(10);
     }
+
+    public function getOrder(Order $order)
+    {
+        return $order->load(['history.user', 'items'])->loadCount('items');
+    }
 }
