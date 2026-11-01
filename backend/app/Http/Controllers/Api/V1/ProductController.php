@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\ApiResponseTrait;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\FiltersRequest;
+use App\Http\Requests\StoreProductRequest;
 use App\Http\Resources\ProductResource;
 use Illuminate\Http\Request;
 use App\Services\ProductService;
@@ -37,9 +38,11 @@ class ProductController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreProductRequest $request)
     {
-        //
+        $product = $this->product_service->createProduct($request->validated(), $request->file('image'));
+
+        return $this->created(new ProductResource($product), 'Product created.');
     }
 
     /**

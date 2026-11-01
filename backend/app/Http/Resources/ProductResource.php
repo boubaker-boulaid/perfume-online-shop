@@ -29,7 +29,7 @@ class ProductResource extends JsonResource
             'compare_at_price' => $this->compare_at_price,
             'stock' => $this->stock,
             'sort_order' => $this->sort_order,
-            'image_path' => Storage::url($this->image_path),
+            'image_path' => Storage::disk('public')->url($this->image_path),
             'is_active' => $this->is_active,
             'is_featured' => $this->is_featured,
             'created_at' => $this->created_at?->toISOString(),

@@ -3,6 +3,10 @@
 namespace App\Services;
 
 use App\Models\Product;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Throwable;
 
 class ProductService
 {
@@ -63,5 +67,36 @@ class ProductService
     {
         return Product::with('category')->active()->featured()
                     ->inRandomOrder()->take(5)->get();
+    }
+
+    public function createProduct(array $data, UploadedFile $image)
+    {
+        $data['slug'] = $data['slug'] ?? $this->uniqueSlug($data['name']);
+        $data['image_path'] = $image->store('products', 'public');
+        unset($data['image']);
+
+        try {
+            $product = Product::create($data);
+        } catch (Throwable $e) {
+            // don't leave an orphan image behind if the insert fails
+            Storage::disk('public')->delete($data['image_path']);
+            throw $e;
+        }
+
+        return $product->load('category');
+    }
+
+    // generate a slug from the name, adding a suffix (-2, -3...) when it's already taken
+    protected function uniqueSlug(string $name): string
+    {
+        $base = Str::slug($name);
+        $slug = $base;
+        $i = 2;
+
+        while (Product::where('slug', $slug)->exists()) {
+            $slug = $base . '-' . $i++;
+        }
+
+        return $slug;
     }
 }
