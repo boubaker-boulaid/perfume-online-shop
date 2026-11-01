@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Api\V1;
 use App\ApiResponseTrait;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\FiltersRequest;
+use App\Http\Requests\StoreProductRequest;
+use App\Http\Requests\UpdateProductRequest;
 use App\Http\Resources\ProductResource;
-use Illuminate\Http\Request;
+use App\Models\Product;
 use App\Services\ProductService;
 
 class ProductController extends Controller
@@ -22,6 +24,13 @@ class ProductController extends Controller
      */
     public function index(FiltersRequest $request)
     {
+        $products = $this->product_service->getAdminProducts($request->validated());
+
+        return $this->ok(ProductResource::collection($products), 'Products retrieved.');
+    }
+
+    public function active(FiltersRequest $request)
+    {
         $products = $this->product_service->getProducts($request->validated());
 
         return $this->ok(ProductResource::collection($products), 'Products retrieved.');
@@ -30,33 +39,44 @@ class ProductController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreProductRequest $request)
     {
-        //
+        $product = $this->product_service->createProduct($request->validated(), $request->file('image'));
+
+        return $this->created(new ProductResource($product), 'Product created.');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $slug)
+    public function show(Product $product)
     {
-        return $this->okNoPgs(new ProductResource($this->product_service->getProduct($slug)), 'Product Retrieved');
+        return $this->okNoPgs(new ProductResource($product->load('category')),
+            'Product Retrieved');
     }
 
+    public function showActive(string $slug)
+    {
+        return $this->okNoPgs(new ProductResource($this->product_service->getProduct($slug)),
+            'Product Retrieved');
+    }
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateProductRequest $request, Product $product)
     {
-        //
+        $product = $this->product_service->updateProduct($product, $request->validated(), $request->file('image'));
+
+        return $this->okNoPgs(new ProductResource($product), 'Product updated.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Product $product)
     {
-        //
+        $this->product_service->deleteProduct($product);
+        return $this->noContent();
     }
 
     public function featured()
