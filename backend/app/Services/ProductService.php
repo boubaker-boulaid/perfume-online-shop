@@ -58,11 +58,6 @@ class ProductService
                     ->firstOrFail();
     }
 
-    public function getAdminProduct(string $slug)
-    {
-        return Product::with('category')->where('slug', $slug)->firstOrFail();
-    }
-
     public function getFeatured()
     {
         return Product::with('category')->active()->featured()
@@ -72,18 +67,26 @@ class ProductService
     public function createProduct(array $data, UploadedFile $image)
     {
         $data['slug'] = $this->uniqueSlug($data['name']);
-        $data['image_path'] = $image->store('products', 'public');
+        $data['image_path'] = $this->storeImage($image);
         unset($data['image']);
 
         try {
             $product = Product::create($data);
         } catch (Throwable $e) {
             // don't leave an orphan image behind if the insert fails
-            Storage::disk('public')->delete($data['image_path']);
+            $this->removeImage($data['image_path']);
             throw $e;
         }
 
         return $product->load('category');
+    }
+
+    protected function storeImage(UploadedFile $image){
+        return $image->store('products', 'public');
+    }
+
+    protected function removeImage(string $imagePath){
+        Storage::disk('public')->delete($imagePath);
     }
 
     // generate a slug from the name, adding a suffix (-2, -3...) when it's already taken
@@ -98,5 +101,32 @@ class ProductService
         }
 
         return $slug;
+    }
+
+    public function updateProduct(Product $product, array $data, ?UploadedFile $image)
+    {
+        $oldImage = $product->image_path;
+        unset($data['image']);
+
+        if ($image) {
+            $data['image_path'] = $this->storeImage($image);
+        }
+
+        try {
+            $product->update($data);
+        } catch (Throwable $e) {
+            // don't leave the new image orphaned if the update fails
+            if ($image) {
+                $this->removeImage($data['image_path']);
+            }
+            throw $e;
+        }
+
+        // only remove the old image once the new one is saved
+        if ($image) {
+            $this->removeImage($oldImage);
+        }
+
+        return $product->load('category');
     }
 }

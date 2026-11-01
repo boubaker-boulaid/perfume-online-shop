@@ -8,4 +8,6 @@ Route::get('me', function (Request $request) {
     return $request->user();
 });
 
-Route::apiResource('products', ProductController::class);
+Route::apiResource('products', ProductController::class)->parameters([
+    'products' => 'product:slug',
+]);

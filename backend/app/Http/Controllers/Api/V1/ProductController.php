@@ -6,8 +6,9 @@ use App\ApiResponseTrait;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\FiltersRequest;
 use App\Http\Requests\StoreProductRequest;
+use App\Http\Requests\UpdateProductRequest;
 use App\Http\Resources\ProductResource;
-use Illuminate\Http\Request;
+use App\Models\Product;
 use App\Services\ProductService;
 
 class ProductController extends Controller
@@ -48,9 +49,9 @@ class ProductController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $slug)
+    public function show(Product $product)
     {
-        return $this->okNoPgs(new ProductResource($this->product_service->getAdminProduct($slug)), 
+        return $this->okNoPgs(new ProductResource($product->load('category')),
             'Product Retrieved');
     }
 
@@ -62,15 +63,17 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateProductRequest $request, Product $product)
     {
-        //
+        $product = $this->product_service->updateProduct($product, $request->validated(), $request->file('image'));
+
+        return $this->okNoPgs(new ProductResource($product), 'Product updated.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Product $product)
     {
         //
     }
