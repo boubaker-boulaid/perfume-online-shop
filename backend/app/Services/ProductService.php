@@ -71,7 +71,7 @@ class ProductService
 
     public function createProduct(array $data, UploadedFile $image)
     {
-        $data['slug'] = $data['slug'] ?? $this->uniqueSlug($data['name']);
+        $data['slug'] = $this->uniqueSlug($data['name']);
         $data['image_path'] = $image->store('products', 'public');
         unset($data['image']);
 
