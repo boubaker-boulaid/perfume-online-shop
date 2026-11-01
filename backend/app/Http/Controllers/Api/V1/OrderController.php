@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\ApiResponseTrait;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\OrderFiltersRequest;
-use App\Http\Requests\StoreOrderRequest;
-use App\Http\Resources\OrderResource;
+use App\Http\Requests\V1\OrderFiltersRequest;
+use App\Http\Requests\V1\StoreOrderRequest;
+use App\Http\Resources\V1\OrderResource;
 use App\Models\Order;
 use App\Services\OrderService;
 use Illuminate\Http\Request;

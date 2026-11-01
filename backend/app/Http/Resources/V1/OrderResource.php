@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\V1;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use App\Http\Resources\OrderItemResource;
-use App\Http\Resources\OrderStatusHistoryResource;
+use App\Http\Resources\V1\OrderItemResource;
+use App\Http\Resources\V1\OrderStatusHistoryResource;
 
 class OrderResource extends JsonResource
 {

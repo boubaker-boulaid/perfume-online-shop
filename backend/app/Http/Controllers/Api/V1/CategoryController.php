@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\ApiResponseTrait;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreCategoryRequest;
-use App\Http\Requests\UpdateCategoryRequest;
-use App\Http\Resources\CategoryResource;
+use App\Http\Requests\V1\StoreCategoryRequest;
+use App\Http\Requests\V1\UpdateCategoryRequest;
+use App\Http\Resources\V1\CategoryResource;
 use App\Models\Category;
 use App\Services\CategoryService;
 
