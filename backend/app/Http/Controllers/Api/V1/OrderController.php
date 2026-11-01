@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\ApiResponseTrait;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\OrderFiltersRequest;
 use App\Http\Requests\StoreOrderRequest;
+use App\Http\Resources\OrderResource;
 use App\Services\OrderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
@@ -20,9 +22,11 @@ class OrderController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(OrderFiltersRequest $request)
     {
-        //
+        $orders = $this->orderService->getOrders($request->validated());
+
+        return $this->ok(OrderResource::collection($orders), 'Orders retrieved.');
     }
 
     /**
