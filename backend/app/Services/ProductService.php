@@ -3,13 +3,14 @@
 namespace App\Services;
 
 use App\Models\Product;
+use App\Services\Concerns\HandlesSlugsAndImages;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Throwable;
 
 class ProductService
 {
+    use HandlesSlugsAndImages;
+
     /**
      * Create a new class instance.
      */
@@ -66,8 +67,8 @@ class ProductService
 
     public function createProduct(array $data, UploadedFile $image)
     {
-        $data['slug'] = $this->uniqueSlug($data['name']);
-        $data['image_path'] = $this->storeImage($image);
+        $data['slug'] = $this->uniqueSlug(Product::class, $data['name']);
+        $data['image_path'] = $this->storeImage($image, 'products');
         unset($data['image']);
 
         try {
@@ -81,37 +82,13 @@ class ProductService
         return $product->load('category');
     }
 
-    protected function storeImage(UploadedFile $image)
-    {
-        return $image->store('products', 'public');
-    }
-
-    protected function removeImage(string $imagePath)
-    {
-        Storage::disk('public')->delete($imagePath);
-    }
-
-    // generate a slug from the name, adding a suffix (-2, -3...) when it's already taken
-    protected function uniqueSlug(string $name): string
-    {
-        $base = Str::slug($name);
-        $slug = $base;
-        $i = 2;
-
-        while (Product::where('slug', $slug)->exists()) {
-            $slug = $base . '-' . $i++;
-        }
-
-        return $slug;
-    }
-
     public function updateProduct(Product $product, array $data, ?UploadedFile $image)
     {
         $oldImage = $product->image_path;
         unset($data['image']);
 
         if ($image) {
-            $data['image_path'] = $this->storeImage($image);
+            $data['image_path'] = $this->storeImage($image, 'products');
         }
 
         try {
@@ -134,11 +111,9 @@ class ProductService
 
     public function deleteProduct(Product $product)
     {
-        try {
-            $product->delete();
-        } catch (Throwable $e) {
-            throw $e;
-        }
+
+        $product->delete();
+
         $this->removeImage($product->image_path);
     }
 }

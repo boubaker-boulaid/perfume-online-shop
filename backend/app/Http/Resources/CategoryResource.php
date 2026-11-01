@@ -23,7 +23,7 @@ class CategoryResource extends JsonResource
             'products' => ProductResource::collection($this->whenLoaded('products')),
             'products_count' => $this->whenCounted('products'),
             'description' => $this->description,
-            'image_path' => $this->image_path ? Storage::url($this->image_path) : null,
+            'image_path' => $this->image_path ? Storage::disk('public')->url($this->image_path) : null,
             'is_active' => $this->is_active,
             'sort_order' => $this->sort_order,
             'created_at' => $this->created_at?->toISOString(),
