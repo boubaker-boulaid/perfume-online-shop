@@ -32,7 +32,7 @@ class ProductService
         return $query->with('category')->paginate(10);
     }
 
-    private function filteredProducts(array $filters) 
+    private function filteredProducts(array $filters)
     {
         $query = Product::query();
         $query->when($filters['q'] ?? null, fn($q, $search) => $q->where('name', 'like', '%' . $search . '%'))
@@ -55,13 +55,13 @@ class ProductService
     public function getProduct(string $slug)
     {
         return Product::with('category')->active()->where('slug', $slug)
-                    ->firstOrFail();
+            ->firstOrFail();
     }
 
     public function getFeatured()
     {
         return Product::with('category')->active()->featured()
-                    ->inRandomOrder()->take(5)->get();
+            ->inRandomOrder()->take(5)->get();
     }
 
     public function createProduct(array $data, UploadedFile $image)
@@ -81,11 +81,13 @@ class ProductService
         return $product->load('category');
     }
 
-    protected function storeImage(UploadedFile $image){
+    protected function storeImage(UploadedFile $image)
+    {
         return $image->store('products', 'public');
     }
 
-    protected function removeImage(string $imagePath){
+    protected function removeImage(string $imagePath)
+    {
         Storage::disk('public')->delete($imagePath);
     }
 
@@ -128,5 +130,15 @@ class ProductService
         }
 
         return $product->load('category');
+    }
+
+    public function deleteProduct(Product $product)
+    {
+        try {
+            $product->delete();
+        } catch (Throwable $e) {
+            throw $e;
+        }
+        $this->removeImage($product->image_path);
     }
 }

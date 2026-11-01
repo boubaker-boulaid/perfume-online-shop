@@ -75,7 +75,8 @@ class ProductController extends Controller
      */
     public function destroy(Product $product)
     {
-        //
+        $this->product_service->deleteProduct($product);
+        return $this->noContent();
     }
 
     public function featured()
