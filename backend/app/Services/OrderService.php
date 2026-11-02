@@ -153,4 +153,39 @@ class OrderService
             'whatsapp_opened_at' => now(),
         ]);
     }
+
+    public function getOrders(array $filters)
+    {
+        $query = Order::query();
+        $query->when($filters['q'] ?? null, function ($q, $search) {
+            $q->whereAny(['customer_name', 'phone', 'order_number'], 'like', '%'. $search .'%');
+        })->when($filters['status'] ?? null, function ($q, $status) {
+            $q->where('status', $status);
+        })->when($filters['payment_status'] ?? null, function ($q, $payment_status) {
+            $q->where('payment_status', $payment_status);
+        })->when($filters['city'] ?? null, function ($q, $city) {
+            $q->where('city', 'like', '%'. $city .'%');
+        })->when($filters['date_from'] ?? null, function ($q, $from) {
+            $q->whereDate('created_at', '>=', $from);
+        })->when($filters['date_to'] ?? null, function ($q, $to) {
+            $q->whereDate('created_at', '<=', $to);
+        })->when($filters['older_than_hours'] ?? null, function ($q, $hours) {
+            // e.g. pending orders older than 24h whose customer never sent the whatsapp message
+            $q->where('created_at', '<=', now()->subHours($hours));
+        });
+
+        match ($filters['sort'] ?? null) {
+            'oldest' => $query->oldest(),
+            'total_desc' => $query->orderByDesc('total'),
+            'total_asc' => $query->orderBy('total'),
+            default => $query->latest(),
+        };
+
+        return $query->with('items')->withCount('items')->paginate(10);
+    }
+
+    public function getOrder(Order $order)
+    {
+        return $order->load(['history.user', 'items'])->loadCount('items');
+    }
 }
