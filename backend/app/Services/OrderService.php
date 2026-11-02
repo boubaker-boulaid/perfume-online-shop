@@ -188,4 +188,63 @@ class OrderService
     {
         return $order->load(['history.user', 'items'])->loadCount('items');
     }
+
+    // cancel pending orders older than $olderThanHours and give their stock back
+    public function cancelUnpaidOrders(int $olderThanHours, bool $onlyUnopened = false): int
+    {
+        $note = $onlyUnopened
+            ? "Auto-cancelled: WhatsApp not opened within {$olderThanHours}h."
+            : "Auto-cancelled: not confirmed within {$olderThanHours}h.";
+
+        $orderIds = $this->unpaidOrdersQuery($olderThanHours, $onlyUnopened)->pluck('id');
+
+        // one transaction per order, so a failure on one doesn't undo the others
+        return $orderIds->filter(fn($id) => $this->cancelUnpaidOrder($id, $olderThanHours, $onlyUnopened, $note))->count();
+    }
+
+    private function unpaidOrdersQuery(int $olderThanHours, bool $onlyUnopened)
+    {
+        return Order::where('status', 'pending')
+            ->where('created_at', '<=', now()->subHours($olderThanHours))
+            ->when($onlyUnopened, fn($q) => $q->whereNull('whatsapp_opened_at'));
+    }
+
+    private function cancelUnpaidOrder(int $orderId, int $olderThanHours, bool $onlyUnopened, string $note): bool
+    {
+        return DB::transaction(function () use ($orderId, $olderThanHours, $onlyUnopened, $note) {
+            // re-check the conditions in the update itself: if the admin confirmed the order
+            // (or the customer opened whatsapp) in the meantime, nothing is updated and the stock stays
+            $cancelled = $this->unpaidOrdersQuery($olderThanHours, $onlyUnopened)
+                ->where('id', $orderId)
+                ->update(['status' => 'cancelled']);
+
+            if (! $cancelled) {
+                return false;
+            }
+
+            $order = Order::with('items')->find($orderId);
+
+            foreach ($order->items as $item) {
+                // product_id is null when the product was deleted, nothing to give back
+                if ($item->product_id) {
+                    Product::where('id', $item->product_id)->increment('stock', $item->quantity);
+                }
+            }
+
+            $order->history()->create([
+                'user_id' => null, // done by the system, not an admin
+                'from_status' => 'pending',
+                'to_status' => 'cancelled',
+                'note' => $note,
+            ]);
+
+            Log::channel('orders')->info("Order auto-cancelled", [
+                'order_number' => $order->order_number,
+                'reason' => $note,
+                'items' => $order->items->count(),
+            ]);
+
+            return true;
+        });
+    }
 }
