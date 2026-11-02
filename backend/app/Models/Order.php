@@ -41,7 +41,7 @@ class Order extends Model
 
     public function history()
     {
-        return $this->hasMany(OrderStatusHistory::class);
+        return $this->hasMany(OrderStatusHistory::class)->oldest();
     }
 
     public function whatsappMessage():string
