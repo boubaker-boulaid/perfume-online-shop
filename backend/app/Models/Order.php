@@ -20,6 +20,7 @@ class Order extends Model
         'subtotal',
         'shipping_cost',
         'confirmation_sent_at',
+        'reminder_sent_at',
         'total',
         'status',
         'payment_status',
@@ -30,6 +31,7 @@ class Order extends Model
         'subtotal' => 'decimal:2',
         'shipping_cost' => 'decimal:2',
         'confirmation_sent_at' => 'datetime',
+        'reminder_sent_at' => 'datetime',
         'total' => 'decimal:2',
         'whatsapp_opened_at' => 'datetime'
     ];
