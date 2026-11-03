@@ -7,6 +7,7 @@ use App\Jobs\SendOrderConfirmation;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Collection;
@@ -187,5 +188,111 @@ class OrderService
     public function getOrder(Order $order)
     {
         return $order->load(['history.user', 'items'])->loadCount('items');
+    }
+
+    // cancel pending orders older than $olderThanHours and give their stock back
+    public function cancelUnpaidOrders(int $olderThanHours, bool $onlyUnopened = false): int
+    {
+        $note = $onlyUnopened
+            ? "Auto-cancelled: WhatsApp not opened within {$olderThanHours}h."
+            : "Auto-cancelled: not confirmed within {$olderThanHours}h.";
+
+        $orderIds = $this->unpaidOrdersQuery($olderThanHours, $onlyUnopened)->pluck('id');
+
+        // one transaction per order, so a failure on one doesn't undo the others
+        return $orderIds->filter(fn($id) => $this->cancelUnpaidOrder($id, $olderThanHours, $onlyUnopened, $note))->count();
+    }
+
+    private function unpaidOrdersQuery(int $olderThanHours, bool $onlyUnopened)
+    {
+        return Order::where('status', 'pending')
+            ->where('created_at', '<=', now()->subHours($olderThanHours))
+            ->when($onlyUnopened, fn($q) => $q->whereNull('whatsapp_opened_at'));
+    }
+
+    private function cancelUnpaidOrder(int $orderId, int $olderThanHours, bool $onlyUnopened, string $note): bool
+    {
+        return DB::transaction(function () use ($orderId, $olderThanHours, $onlyUnopened, $note) {
+            // re-check the conditions in the update itself: if the admin confirmed the order
+            // (or the customer opened whatsapp) in the meantime, nothing is updated and the stock stays
+            $cancelled = $this->unpaidOrdersQuery($olderThanHours, $onlyUnopened)
+                ->where('id', $orderId)
+                ->update(['status' => 'cancelled']);
+
+            if (! $cancelled) {
+                return false;
+            }
+
+            $order = Order::with('items')->find($orderId);
+
+            $this->restoreStock($order);
+
+            $order->history()->create([
+                'user_id' => null, // done by the system, not an admin
+                'from_status' => 'pending',
+                'to_status' => 'cancelled',
+                'note' => $note,
+            ]);
+
+            Log::channel('orders')->info("Order auto-cancelled", [
+                'order_number' => $order->order_number,
+                'reason' => $note,
+                'items' => $order->items->count(),
+            ]);
+
+            return true;
+        });
+    }
+
+    public function changeStatus(Order $order, string $to, ?User $user, ?string $note)
+    {
+        return DB::transaction(function () use ($order, $to, $user, $note) {
+            // re-read the order under the lock so we check the real current status,
+            // not the one loaded by route binding (another admin may have changed it)
+            $order = Order::whereKey($order->id)->lockForUpdate()->firstOrFail();
+            $from = $order->status;
+
+            if (! $order->canTransitionTo($to)) abort(422, "Cannot change order status from {$from} to {$to}.");
+
+            // restore the stock if the order is cancelled
+            if ($to === 'cancelled') {
+                $this->restoreStock($order->load('items'));
+            }
+
+            // save the new status (cash on delivery: delivered means the money was collected)
+            $changes = ['status' => $to];
+            if ($to === 'delivered') {
+                $changes['payment_status'] = 'paid';
+            }
+            $order->update($changes);
+
+            $order->history()->create([
+                'user_id' => $user?->id,
+                'from_status' => $from,
+                'to_status' => $to,
+                'note' => $note
+            ]);
+
+            Log::channel('orders')->info('Status Changed:', [
+                'order_number' => $order->order_number,
+                'from_status' => $from,
+                'to_status' => $to,
+                'payment_status' => $order->payment_status,
+                'by' => $user?->name ?? 'system'
+            ]);
+
+            return $order;
+        });
+    }
+
+    // give back the stock of every item of the order (items must be loaded)
+    private function restoreStock(Order $order): void
+    {
+        foreach ($order->items as $item) {
+            // product_id is null when the product was deleted, nothing to give back
+            if ($item->product_id) {
+                Product::where('id', $item->product_id)->increment('stock', $item->quantity);
+            }
+        }
     }
 }
