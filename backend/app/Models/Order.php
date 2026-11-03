@@ -74,4 +74,19 @@ class Order extends Model
     {
         return 'https://wa.me/'. config('shop.whatsapp.number') . '?text='. rawurlencode($this->whatsappMessage());
     }
+
+    // status allowed transitions the key is the current status and the value is statuses it can move to 
+    public const TRANSITIONS = [
+        'pending' => ['confirmed', 'cancelled'],
+        'confirmed' => ['shipped', 'cancelled'],
+        'shipped' => ['delivered'],
+        'delivered' => [],
+        'cancelled' => []
+    ];
+
+    public function canTransitionTo(string $status): bool
+    {
+        // check if the new status is in the array(value in TRANSITIONS) of the current status
+        return in_array($status, self::TRANSITIONS[$this->status] ?? [], true);
+    }
 }

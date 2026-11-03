@@ -20,3 +20,4 @@ Route::apiResource('categories', CategoryController::class)->parameters([
 
 Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
 Route::get('orders/{order:order_number}', [OrderController::class, 'show'])->name('orders.show');
+Route::patch('orders/{order:order_number}/status', [OrderController::class, 'status'])->name('orders.status');

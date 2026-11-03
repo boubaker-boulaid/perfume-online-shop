@@ -6,6 +6,7 @@ use App\ApiResponseTrait;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\OrderFiltersRequest;
 use App\Http\Requests\V1\StoreOrderRequest;
+use App\Http\Requests\V1\UpdateStatusRequest;
 use App\Http\Resources\V1\OrderResource;
 use App\Models\Order;
 use App\Services\OrderService;
@@ -75,5 +76,13 @@ class OrderController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function status(Order $order, UpdateStatusRequest $request)
+    {
+        $validated = $request->validated();
+        $order = $this->order_service->changeStatus($order, $validated['status'], $request->user(), $validated['note'] ?? null);
+
+        return $this->okNoPgs(new OrderResource($this->order_service->getOrder($order)), 'Order status updated.');
     }
 }

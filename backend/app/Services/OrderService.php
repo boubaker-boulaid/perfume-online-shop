@@ -7,6 +7,7 @@ use App\Jobs\SendOrderConfirmation;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Collection;
@@ -224,12 +225,7 @@ class OrderService
 
             $order = Order::with('items')->find($orderId);
 
-            foreach ($order->items as $item) {
-                // product_id is null when the product was deleted, nothing to give back
-                if ($item->product_id) {
-                    Product::where('id', $item->product_id)->increment('stock', $item->quantity);
-                }
-            }
+            $this->restoreStock($order);
 
             $order->history()->create([
                 'user_id' => null, // done by the system, not an admin
@@ -246,5 +242,52 @@ class OrderService
 
             return true;
         });
+    }
+
+    public function changeStatus(Order $order, string $to, ?User $user, ?string $note)
+    {
+        return DB::transaction(function () use ($order, $to, $user, $note) {
+            // re-read the order under the lock so we check the real current status,
+            // not the one loaded by route binding (another admin may have changed it)
+            $order = Order::whereKey($order->id)->lockForUpdate()->firstOrFail();
+            $from = $order->status;
+
+            if (! $order->canTransitionTo($to)) abort(422, "Cannot change order status from {$from} to {$to}.");
+
+            // restore the stock if the order is cancelled
+            if ($to === 'cancelled') {
+                $this->restoreStock($order->load('items'));
+            }
+
+            // save the new status
+            $order->update(['status' => $to]);
+
+            $order->history()->create([
+                'user_id' => $user?->id,
+                'from_status' => $from,
+                'to_status' => $to,
+                'note' => $note
+            ]);
+
+            Log::channel('orders')->info('Status Changed:', [
+                'order_number' => $order->order_number,
+                'from_status' => $from,
+                'to_status' => $to,
+                'by' => $user?->name ?? 'system'
+            ]);
+
+            return $order;
+        });
+    }
+
+    // give back the stock of every item of the order (items must be loaded)
+    private function restoreStock(Order $order): void
+    {
+        foreach ($order->items as $item) {
+            // product_id is null when the product was deleted, nothing to give back
+            if ($item->product_id) {
+                Product::where('id', $item->product_id)->increment('stock', $item->quantity);
+            }
+        }
     }
 }
