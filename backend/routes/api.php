@@ -12,7 +12,7 @@ Route::get('/status', function () {
     ], 200);
 });
 
-Route::prefix('v1')->group(function () {
+Route::prefix('v1')->middleware('throttle:api')->group(function () {
     // customers public routes
     Route::name('customer.')->group(base_path('routes/customer.php'));
 
