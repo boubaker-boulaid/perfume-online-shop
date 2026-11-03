@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\OrderController;
 use App\Http\Controllers\Api\V1\ProductController;
+use App\Http\Controllers\Api\V1\StatsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -21,3 +22,5 @@ Route::apiResource('categories', CategoryController::class)->parameters([
 Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
 Route::get('orders/{order:order_number}', [OrderController::class, 'show'])->name('orders.show');
 Route::patch('orders/{order:order_number}/status', [OrderController::class, 'status'])->name('orders.status');
+
+Route::get('stats', [StatsController::class, 'index'])->name('stats');
