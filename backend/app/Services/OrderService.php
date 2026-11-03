@@ -259,8 +259,12 @@ class OrderService
                 $this->restoreStock($order->load('items'));
             }
 
-            // save the new status
-            $order->update(['status' => $to]);
+            // save the new status (cash on delivery: delivered means the money was collected)
+            $changes = ['status' => $to];
+            if ($to === 'delivered') {
+                $changes['payment_status'] = 'paid';
+            }
+            $order->update($changes);
 
             $order->history()->create([
                 'user_id' => $user?->id,
@@ -273,6 +277,7 @@ class OrderService
                 'order_number' => $order->order_number,
                 'from_status' => $from,
                 'to_status' => $to,
+                'payment_status' => $order->payment_status,
                 'by' => $user?->name ?? 'system'
             ]);
 
