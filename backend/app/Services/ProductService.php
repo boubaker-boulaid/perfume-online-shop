@@ -3,14 +3,19 @@
 namespace App\Services;
 
 use App\Models\Product;
+use App\Services\Concerns\HandlesCache;
 use App\Services\Concerns\HandlesSlugsAndImages;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Pagination\Paginator;
 use Throwable;
 
 class ProductService
 {
-    use HandlesSlugsAndImages;
+    use HandlesSlugsAndImages, HandlesCache;
 
+    private const PRODUCTS_CACHE_SECONDS = 600;
+    private const PRODUCT_CACHE_SECONDS = 600;
+    private const FEATURED_CACHE_SECONDS = 900;
     /**
      * Create a new class instance.
      */
@@ -21,9 +26,12 @@ class ProductService
 
     public function getProducts(array $filters)
     {
-        $query = $this->filteredProducts($filters);
+        // every filter combination and page gets its own entry
+        ksort($filters);
+        $key = $this->versionedKey('catalog', 'products', md5(json_encode([$filters, Paginator::resolveCurrentPage()])));
 
-        return $query->with('category')->active()->paginate(10);
+        return $this->cached($key, self::PRODUCTS_CACHE_SECONDS,
+            fn() => $this->filteredProducts($filters)->with('category')->active()->paginate(10));
     }
 
     public function getAdminProducts(array $filters)
@@ -55,14 +63,18 @@ class ProductService
 
     public function getProduct(string $slug)
     {
-        return Product::with('category')->active()->where('slug', $slug)
-            ->firstOrFail();
+        // firstOrFail throws before anything is stored, so unknown slugs are never cached
+        return $this->cached($this->versionedKey('catalog', 'product', $slug), self::PRODUCT_CACHE_SECONDS,
+            fn() => Product::with('category')->active()->where('slug', $slug)->firstOrFail());
     }
 
     public function getFeatured()
     {
-        return Product::with('category')->active()->featured()
-            ->inRandomOrder()->take(5)->get();
+        // cache all featured products and pick 5 per request, so the homepage still changes on every visit
+        $featured = $this->cached($this->versionedKey('catalog', 'featured'), self::FEATURED_CACHE_SECONDS,
+            fn() => Product::with('category')->active()->featured()->get());
+
+        return $featured->shuffle()->take(5)->values();
     }
 
     public function createProduct(array $data, UploadedFile $image)

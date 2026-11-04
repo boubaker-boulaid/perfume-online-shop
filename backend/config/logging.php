@@ -142,12 +142,23 @@ return [
             'days' => 90 
         ],
 
-        'queues' => [
+        // logins, failed logins, lockouts, price changes
+        'admin' => [
             'driver' => 'daily',
-            'path' => storage_path('logs/queues/queue.log'),
+            'path' => storage_path('logs/admin/admin.log'),
+            'level' => 'info',
+            'days' => 90,
+            'replace_placeholders' => true,
+        ],
+
+        // failed background jobs
+        'queue' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/queue/queue.log'),
             'level' => env('LOG_LEVEL', 'debug'),
-            'days' => 30
-        ]
+            'days' => 30,
+            'replace_placeholders' => true,
+        ],
 
     ],
 

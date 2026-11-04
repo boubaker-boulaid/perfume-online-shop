@@ -10,9 +10,13 @@ class InsufficientStockException extends Exception
 {
     use ApiResponseTrait;
 
-    public function __construct(string $productName, int $stockRequested, int $stockAvaliable)
-    {
-        return parent::__construct("Insufficient stock for {$productName}. Stock requested: {$stockRequested}, Stock avaliable: {$stockAvaliable}.");
+    // kept as properties so the order log can record them as searchable fields
+    public function __construct(
+        public readonly string $productName,
+        public readonly int $stockRequested,
+        public readonly int $stockAvaliable,
+    ) {
+        parent::__construct("Insufficient stock for {$productName}. Stock requested: {$stockRequested}, Stock avaliable: {$stockAvaliable}.");
     }
 
     public function render(Request $request)

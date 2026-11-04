@@ -67,7 +67,9 @@ return Application::configure(basePath: dirname(__DIR__))
                 $e instanceof NotFoundHttpException => $res('The requested API endpoint does not exists.', 404),
 
                 // Rate Limiting
-                $e instanceof TooManyRequestsHttpException => $res('Too many requestes. Please slow down.', 429),
+                // keep the Retry-After header so the client knows how long to wait
+                $e instanceof TooManyRequestsHttpException => $res('Too many requests. Please slow down.', 429)
+                    ->withHeaders($e->getHeaders()),
 
                 // anything with its own status like abort(403)...
                 $e instanceof HttpExceptionInterface => $res($e->getMessage() ?: 'Request failed.', $e->getStatusCode()),
@@ -76,7 +78,7 @@ return Application::configure(basePath: dirname(__DIR__))
                     config('app.debug') ? $e->getMessage() : 'Unexpected error occurred. Please try again later.',
                     500,
                     config('app.debug') ? [
-                        'exeption' => $e::class,
+                        'exception' => $e::class,
                         'file' => $e->getFile(),
                         'line' => $e->getLine()
                     ] : null

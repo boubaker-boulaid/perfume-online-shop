@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\User;
+use App\Services\Concerns\HandlesCache;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Collection;
@@ -16,6 +17,8 @@ use Illuminate\Support\Facades\Log;
 
 class OrderService
 {
+    use HandlesCache;
+
     /**
      * Create a new class instance.
      */
@@ -38,6 +41,8 @@ class OrderService
                 }
 
                 $products = $this->lockAndValidateProduct($data['items']);
+                // stock changed: the cached catalog shows old stock (bumped only once the order commits)
+                $this->bumpCacheVersion('catalog');
                 // calculate the total
                 $total = collect($data['items'])->sum(function ($item) use ($products) {
                     $product = $products->get($item['product_id']);
@@ -64,9 +69,8 @@ class OrderService
 
                 SendOrderConfirmation::dispatch($order->id);
 
-                Log::channel('orders')->info("Order placed", [
+                Log::channel('orders')->info('order.placed', [
                     'order_number' => $order->order_number,
-                    'customer_name' => $order->customer_name,
                     'total' => $order->total,
                     'items' => $order->items->count()
                 ]);
@@ -74,13 +78,21 @@ class OrderService
                 return $order;
             });
         } catch (InsufficientStockException $e) {
+            // handled (the customer gets a clear error), but worth knowing what people try to buy
+            Log::channel('orders')->warning('order.insufficient_stock', [
+                'product' => $e->productName,
+                'requested' => $e->stockRequested,
+                'available' => $e->stockAvaliable,
+            ]);
             throw $e;
         } catch (UniqueConstraintViolationException $e) {
             return Order::where('idempotency_key', $data['idempotency_key'])->firstOrFail();
         } catch (\Exception $e) {
-            Log::channel('daily')->error("Failed to place order: {$e->getMessage()}", [
-                'payload' => $data,
-                'trace' => $e->getTraceAsString()
+            // no customer details in the log (name, phone, address): the key and items are enough to investigate
+            Log::channel('daily')->error('order.place_failed', [
+                'idempotency_key' => $data['idempotency_key'] ?? null,
+                'items' => collect($data['items'] ?? [])->map(fn($i) => ['product_id' => $i['product_id'] ?? null, 'quantity' => $i['quantity'] ?? null])->all(),
+                'exception' => $e,
             ]);
             throw $e;
         }
@@ -234,7 +246,7 @@ class OrderService
                 'note' => $note,
             ]);
 
-            Log::channel('orders')->info("Order auto-cancelled", [
+            Log::channel('orders')->info('order.auto_cancelled', [
                 'order_number' => $order->order_number,
                 'reason' => $note,
                 'items' => $order->items->count(),
@@ -273,7 +285,7 @@ class OrderService
                 'note' => $note
             ]);
 
-            Log::channel('orders')->info('Status Changed:', [
+            Log::channel('orders')->info('order.status_changed', [
                 'order_number' => $order->order_number,
                 'from_status' => $from,
                 'to_status' => $to,
@@ -294,5 +306,8 @@ class OrderService
                 Product::where('id', $item->product_id)->increment('stock', $item->quantity);
             }
         }
+
+        // query increments don't fire the observer, so make the cached catalog stale here
+        $this->bumpCacheVersion('catalog');
     }
 }
