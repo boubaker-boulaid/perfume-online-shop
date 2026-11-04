@@ -7,7 +7,6 @@ use App\Mail\CustomerOrderPlacedMail;
 use App\Models\Order;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class SendOrderConfirmation implements ShouldQueue
@@ -45,11 +44,5 @@ class SendOrderConfirmation implements ShouldQueue
         $order->update(['confirmation_sent_at' => now()]);
     }
 
-    public function failed(\Throwable $e)
-    {
-        Log::channel('queues')->error("SendOrderConfirmation failed:", [
-            'message' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
-        ]);
-    }
+    // failures are logged for every job in AppServiceProvider (Queue::failing)
 }

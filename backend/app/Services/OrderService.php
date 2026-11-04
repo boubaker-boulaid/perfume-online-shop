@@ -69,9 +69,8 @@ class OrderService
 
                 SendOrderConfirmation::dispatch($order->id);
 
-                Log::channel('orders')->info("Order placed", [
+                Log::channel('orders')->info('order.placed', [
                     'order_number' => $order->order_number,
-                    'customer_name' => $order->customer_name,
                     'total' => $order->total,
                     'items' => $order->items->count()
                 ]);
@@ -79,13 +78,21 @@ class OrderService
                 return $order;
             });
         } catch (InsufficientStockException $e) {
+            // handled (the customer gets a clear error), but worth knowing what people try to buy
+            Log::channel('orders')->warning('order.insufficient_stock', [
+                'product' => $e->productName,
+                'requested' => $e->stockRequested,
+                'available' => $e->stockAvaliable,
+            ]);
             throw $e;
         } catch (UniqueConstraintViolationException $e) {
             return Order::where('idempotency_key', $data['idempotency_key'])->firstOrFail();
         } catch (\Exception $e) {
-            Log::channel('daily')->error("Failed to place order: {$e->getMessage()}", [
-                'payload' => $data,
-                'trace' => $e->getTraceAsString()
+            // no customer details in the log (name, phone, address): the key and items are enough to investigate
+            Log::channel('daily')->error('order.place_failed', [
+                'idempotency_key' => $data['idempotency_key'] ?? null,
+                'items' => collect($data['items'] ?? [])->map(fn($i) => ['product_id' => $i['product_id'] ?? null, 'quantity' => $i['quantity'] ?? null])->all(),
+                'exception' => $e,
             ]);
             throw $e;
         }
@@ -239,7 +246,7 @@ class OrderService
                 'note' => $note,
             ]);
 
-            Log::channel('orders')->info("Order auto-cancelled", [
+            Log::channel('orders')->info('order.auto_cancelled', [
                 'order_number' => $order->order_number,
                 'reason' => $note,
                 'items' => $order->items->count(),
@@ -278,7 +285,7 @@ class OrderService
                 'note' => $note
             ]);
 
-            Log::channel('orders')->info('Status Changed:', [
+            Log::channel('orders')->info('order.status_changed', [
                 'order_number' => $order->order_number,
                 'from_status' => $from,
                 'to_status' => $to,
