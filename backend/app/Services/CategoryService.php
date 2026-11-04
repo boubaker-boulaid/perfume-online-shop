@@ -3,17 +3,24 @@
 namespace App\Services;
 
 use App\Models\Category;
+use App\Services\Concerns\HandlesCache;
 use App\Services\Concerns\HandlesSlugsAndImages;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Pagination\Paginator;
 use Throwable;
 
 class CategoryService
 {
-    use HandlesSlugsAndImages;
+    use HandlesSlugsAndImages, HandlesCache;
+
+    private const CATEGORIES_CACHE_SECONDS = 3600;
 
     public function getCategories()
     {
-        return Category::active()->withCount('products')->latest()->paginate(10);
+        $key = $this->versionedKey('catalog', 'categories', 'page', (string) Paginator::resolveCurrentPage());
+
+        return $this->cached($key, self::CATEGORIES_CACHE_SECONDS,
+            fn() => Category::active()->withCount('products')->latest()->paginate(10));
     }
 
     public function getAdminCategories()

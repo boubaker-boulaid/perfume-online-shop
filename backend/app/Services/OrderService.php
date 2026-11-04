@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\User;
+use App\Services\Concerns\HandlesCache;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Collection;
@@ -16,6 +17,8 @@ use Illuminate\Support\Facades\Log;
 
 class OrderService
 {
+    use HandlesCache;
+
     /**
      * Create a new class instance.
      */
@@ -38,6 +41,8 @@ class OrderService
                 }
 
                 $products = $this->lockAndValidateProduct($data['items']);
+                // stock changed: the cached catalog shows old stock (bumped only once the order commits)
+                $this->bumpCacheVersion('catalog');
                 // calculate the total
                 $total = collect($data['items'])->sum(function ($item) use ($products) {
                     $product = $products->get($item['product_id']);
@@ -294,5 +299,8 @@ class OrderService
                 Product::where('id', $item->product_id)->increment('stock', $item->quantity);
             }
         }
+
+        // query increments don't fire the observer, so make the cached catalog stale here
+        $this->bumpCacheVersion('catalog');
     }
 }

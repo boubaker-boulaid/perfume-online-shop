@@ -5,38 +5,39 @@ namespace App\Services;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Services\Concerns\HandlesCache;
 use Carbon\CarbonInterface;
 use Carbon\CarbonPeriod;
-use Date;
-use DateTime;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class StatsService
 {
+    use HandlesCache;
+
     private const CACHE_SECONDS = 300;
     private const LOW_STOCK_LIMIT = 5;
 
     public function dashboard(): array
     {
         return [
-            'revenue_this_month' => $this->cached('revenue_this_month', fn() => $this->getMonthRevenue()),
-            'orders_by_status' => $this->cached('orders_by_status', fn() => $this->getOrdersByStatus()),
-            'revenue_last_30_days' => $this->cached('revenue_last_30_days', fn() => $this->getRevenuePerDay()),
-            'top_products' => $this->cached('top_products', fn() => $this->getTopProducts()),
-            'low_stock' => $this->cached('low_stock', fn() => $this->getLowStock()),
-            'pending_over_24h' => $this->cached('pending_over_24h', fn() => $this->getPendingOver24h()),
+            'revenue_this_month' => $this->piece('revenue_this_month', fn() => $this->getMonthRevenue()),
+            'orders_by_status' => $this->piece('orders_by_status', fn() => $this->getOrdersByStatus()),
+            'revenue_last_30_days' => $this->piece('revenue_last_30_days', fn() => $this->getRevenuePerDay()),
+            'top_products' => $this->piece('top_products', fn() => $this->getTopProducts()),
+            'low_stock' => $this->piece('low_stock', fn() => $this->getLowStock()),
+            'pending_over_24h' => $this->piece('pending_over_24h', fn() => $this->getPendingOver24h()),
         ];
     }
 
-    // each piece is cached on its own: if one fails it comes back as null and is not cached,
-    // so the others still show and the failed one is retried on the next request
-    private function cached(string $key, callable $fn)
+    // a failing piece comes back as null and is not cached: the others still show,
+    // and the failed one is tried again on the next request
+    private function piece(string $key, callable $fn)
     {
         try {
-            return Cache::remember("stats.{$key}", self::CACHE_SECONDS, $fn);
-        } catch (\Throwable $e) {
-            Log::error("Stats piece failed: {$key}", ['error' => $e->getMessage()]);
+            return $this->cached("stats.{$key}", self::CACHE_SECONDS, $fn);
+        } catch (Throwable $e) {
+            Log::error("Stats piece failed: {$key}", ['exception' => $e]);
             return null;
         }
     }

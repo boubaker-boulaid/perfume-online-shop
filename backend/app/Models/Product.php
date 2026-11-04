@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Observers\CatalogObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Category;
 use App\Models\OrderItem;
 use Illuminate\Database\Eloquent\Builder;
 
+#[ObservedBy(CatalogObserver::class)]
 class Product extends Model
 {
     protected $fillable = [
