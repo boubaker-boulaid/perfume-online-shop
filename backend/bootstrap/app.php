@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureGuest;
 use App\Http\Middleware\IsAdmin;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
@@ -28,6 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
             'admin' => IsAdmin::class,
+            'guest' => EnsureGuest::class,
         ]);
 
         //

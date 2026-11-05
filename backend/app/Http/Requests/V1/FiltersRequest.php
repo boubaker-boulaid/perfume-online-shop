@@ -23,9 +23,15 @@ class FiltersRequest extends FormRequest
      */
     public function rules(): array
     {
+        // customers can only filter by active categories, admins by any
+        $category = Rule::exists('categories', 'slug');
+        if (! $this->routeIs('admin.*')) {
+            $category->where('is_active', true);
+        }
+
         return [
             'q' => 'nullable|string|max:100',
-            'category' => ['nullable', Rule::exists('categories', 'slug')->where('is_active', true)],
+            'category' => ['nullable', $category],
             'min_price' => 'nullable|numeric|min:0',
             'max_price' => 'nullable|numeric|min:0',
             'sort' => 'nullable|in:price_desc,price_asc,newest,oldest'

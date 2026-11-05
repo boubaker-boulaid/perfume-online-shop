@@ -38,14 +38,19 @@ class OrderController extends Controller
     {
         $order = $this->order_service->place($request->validated());
 
-        return $this->created([
+        $data = [
             'order_number' => $order->order_number,
             'total' => $order->total,
             'whatsapp_link' => $order->whatsappLink(),
             'whatsapp_opened_url' => URL::temporarySignedRoute('customer.orders.whatsapp-opened', now()->addMinutes(30), [
                 'orderNumber' => $order->order_number
             ]),
-        ], 'The order was created successfully.');
+        ];
+
+        // a retry with the same idempotency key gets the existing order back
+        return $order->wasRecentlyCreated
+            ? $this->created($data, 'The order was created successfully.')
+            : $this->okNoPgs($data, 'The order was already placed.');
     }
 
     public function whatsappOpened(string $orderNumber)

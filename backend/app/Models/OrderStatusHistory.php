@@ -2,12 +2,17 @@
 
 namespace App\Models;
 
+use Database\Factories\OrderStatusHistoryFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
 use App\Models\Order;
 
 class OrderStatusHistory extends Model
 {
+    /** @use HasFactory<OrderStatusHistoryFactory> */
+    use HasFactory;
+
     protected $table = 'order_status_history';
 
     protected $fillable = [
