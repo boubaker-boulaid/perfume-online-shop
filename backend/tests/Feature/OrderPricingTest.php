@@ -6,13 +6,13 @@ use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
-use Illuminate\Support\Str;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\Concerns\BuildsOrderPayload;
 use Tests\TestCase;
 
 class OrderPricingTest extends TestCase
 {
-    use RefreshDatabase;
+    use BuildsOrderPayload, RefreshDatabase;
 
     private const ENDPOINT = '/api/v1/orders';
 
@@ -29,7 +29,7 @@ class OrderPricingTest extends TestCase
         $oud = $this->product(price: '19.99');
         $musk = $this->product(price: '250.00');
 
-        $response = $this->postJson(self::ENDPOINT, $this->payload([
+        $response = $this->postJson(self::ENDPOINT, $this->orderPayload([
             ['product_id' => $oud->id, 'quantity' => 3],
             ['product_id' => $musk->id, 'quantity' => 1],
         ]));
@@ -50,7 +50,7 @@ class OrderPricingTest extends TestCase
     {
         $product = $this->product(price: '500.00');
 
-        $response = $this->postJson(self::ENDPOINT, $this->payload(
+        $response = $this->postJson(self::ENDPOINT, $this->orderPayload(
             [['product_id' => $product->id, 'quantity' => 1]],
             [
                 'total' => 1,
@@ -76,7 +76,7 @@ class OrderPricingTest extends TestCase
     {
         $product = $this->product(price: '500.00', stock: 10);
 
-        $response = $this->postJson(self::ENDPOINT, $this->payload([
+        $response = $this->postJson(self::ENDPOINT, $this->orderPayload([
             ['product_id' => $product->id, 'quantity' => 1, 'price' => 1],
         ]));
 
@@ -91,7 +91,7 @@ class OrderPricingTest extends TestCase
     {
         $product = $this->product(price: '500.00', stock: 10);
 
-        $response = $this->postJson(self::ENDPOINT, $this->payload([
+        $response = $this->postJson(self::ENDPOINT, $this->orderPayload([
             ['product_id' => $product->id, 'quantity' => $quantity],
         ]));
 
@@ -114,13 +114,13 @@ class OrderPricingTest extends TestCase
     {
         $product = $this->product(price: '100.00');
 
-        $this->postJson(self::ENDPOINT, $this->payload([
+        $this->postJson(self::ENDPOINT, $this->orderPayload([
             ['product_id' => $product->id, 'quantity' => 1],
         ]))->assertCreated();
 
         $product->update(['price' => '150.00']);
 
-        $this->postJson(self::ENDPOINT, $this->payload([
+        $this->postJson(self::ENDPOINT, $this->orderPayload([
             ['product_id' => $product->id, 'quantity' => 1],
         ]))->assertCreated()->assertJsonPath('data.total', '150.00');
 
@@ -130,19 +130,5 @@ class OrderPricingTest extends TestCase
     private function product(string $price, int $stock = 50): Product
     {
         return Product::factory()->create(['price' => $price, 'stock' => $stock]);
-    }
-
-    private function payload(array $items, array $extra = []): array
-    {
-        return [
-            'customer_name' => 'Test Customer',
-            'phone' => '+212600000000',
-            'email' => 'customer@example.com',
-            'city' => 'Agadir',
-            'address' => '1 Test Street',
-            'idempotency_key' => (string) Str::uuid(),
-            'items' => $items,
-            ...$extra,
-        ];
     }
 }
