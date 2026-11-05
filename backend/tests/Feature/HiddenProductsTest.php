@@ -1,0 +1,113 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\Category;
+use App\Models\Product;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Queue;
+use Laravel\Sanctum\Sanctum;
+use Tests\Concerns\BuildsOrderPayload;
+use Tests\TestCase;
+
+class HiddenProductsTest extends TestCase
+{
+    use BuildsOrderPayload, RefreshDatabase;
+
+    public function test_hidden_products_are_not_listed(): void
+    {
+        $visible = Product::factory()->create();
+        Product::factory()->inactive()->create();
+
+        $this->getJson('/api/v1/products')->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $visible->id)
+            ->assertJsonPath('meta.total', 1);
+    }
+
+    public function test_hidden_products_can_not_be_found_by_searching(): void
+    {
+        Product::factory()->inactive()->create(['name' => 'Secret Launch']);
+
+        $this->getJson('/api/v1/products?q=Secret')->assertOk()->assertJsonCount(0, 'data');
+    }
+
+    public function test_a_hidden_product_page_returns_not_found(): void
+    {
+        $hidden = Product::factory()->inactive()->create();
+
+        $this->getJson("/api/v1/products/{$hidden->slug}")->assertNotFound();
+    }
+
+    public function test_hidden_products_are_not_featured(): void
+    {
+        $visible = Product::factory()->featured()->create();
+        Product::factory()->featured()->inactive()->create();
+
+        $this->getJson('/api/v1/products/featured')->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $visible->id);
+    }
+
+    public function test_hidden_products_can_not_be_ordered(): void
+    {
+        Queue::fake();
+        $hidden = Product::factory()->inactive()->create(['stock' => 10]);
+
+        $this->postJson('/api/v1/orders', $this->orderPayload([
+            ['product_id' => $hidden->id, 'quantity' => 1],
+        ]))->assertUnprocessable()->assertJsonValidationErrors('items.0.product_id');
+
+        $this->assertDatabaseCount('orders', 0);
+        $this->assertSame(10, $hidden->fresh()->stock);
+    }
+
+    // the catalog is cached: hiding a product must take effect right away, not when the cache expires
+    public function test_hiding_a_product_removes_it_from_the_cached_catalog(): void
+    {
+        $product = Product::factory()->featured()->create();
+
+        $this->getJson('/api/v1/products')->assertJsonCount(1, 'data');
+        $this->getJson('/api/v1/products/featured')->assertJsonCount(1, 'data');
+        $this->getJson("/api/v1/products/{$product->slug}")->assertOk();
+
+        $product->update(['is_active' => false]);
+
+        $this->getJson('/api/v1/products')->assertJsonCount(0, 'data');
+        $this->getJson('/api/v1/products/featured')->assertJsonCount(0, 'data');
+        $this->getJson("/api/v1/products/{$product->slug}")->assertNotFound();
+    }
+
+    public function test_hidden_categories_are_not_listed(): void
+    {
+        $visible = Category::factory()->create();
+        Category::factory()->inactive()->create();
+
+        $this->getJson('/api/v1/categories')->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $visible->id);
+    }
+
+    public function test_hiding_a_category_removes_it_from_the_cached_list(): void
+    {
+        $category = Category::factory()->create();
+
+        $this->getJson('/api/v1/categories')->assertJsonCount(1, 'data');
+
+        $category->update(['is_active' => false]);
+
+        $this->getJson('/api/v1/categories')->assertJsonCount(0, 'data');
+    }
+
+    public function test_admins_can_still_see_hidden_products(): void
+    {
+        $hidden = Product::factory()->inactive()->create();
+
+        Sanctum::actingAs(User::factory()->admin()->create());
+
+        $this->getJson('/api/v1/admin/products')->assertOk()
+            ->assertJsonPath('data.0.id', $hidden->id);
+        $this->getJson("/api/v1/admin/products/{$hidden->slug}")->assertOk();
+    }
+}

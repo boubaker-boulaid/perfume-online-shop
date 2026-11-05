@@ -3,10 +3,14 @@
 namespace Tests\Feature;
 
 use App\Exceptions\InsufficientStockException;
+use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Queue;
+use Laravel\Sanctum\Sanctum;
 use Override;
 use Tests\Concerns\BuildsOrderPayload;
 use Tests\TestCase;
@@ -99,5 +103,90 @@ class OrderStockTest extends TestCase
 
         $this->assertDatabaseCount('orders', 0);
         $this->assertSame(50, $product->fresh()->stock);
+    }
+
+    // the first item is decremented before the second one fails, only the transaction gives it back
+    public function test_a_failing_item_rolls_back_the_items_before_it(): void
+    {
+        $enough = Product::factory()->create(['stock' => 40]);
+        $tooLittle = Product::factory()->create(['stock' => 10]);
+
+        $this->postJson(self::ENDPOINT, $this->orderPayload([
+            ['product_id' => $enough->id, 'quantity' => 20],
+            ['product_id' => $tooLittle->id, 'quantity' => 20],
+        ]))->assertBadRequest();
+
+        $this->assertDatabaseCount('orders', 0);
+        $this->assertDatabaseCount('order_items', 0);
+        $this->assertSame(40, $enough->fresh()->stock);
+        $this->assertSame(10, $tooLittle->fresh()->stock);
+    }
+
+    // stock is taken when the order is placed, the status changes after that must not touch it again
+    public function test_stock_is_reduced_exactly_once_over_the_life_of_an_order(): void
+    {
+        $product = Product::factory()->create(['stock' => 10]);
+
+        $orderNumber = $this->placeOrder($product, 3);
+        $this->assertSame(7, $product->fresh()->stock);
+
+        Sanctum::actingAs(User::factory()->admin()->create());
+
+        foreach (['confirmed', 'shipped', 'delivered'] as $status) {
+            $this->patchJson("/api/v1/admin/orders/{$orderNumber}/status", ['status' => $status])->assertOk();
+            $this->assertSame(7, $product->fresh()->stock);
+        }
+    }
+
+    public function test_cancelling_gives_the_stock_back_exactly_once(): void
+    {
+        $product = Product::factory()->create(['stock' => 10]);
+
+        $orderNumber = $this->placeOrder($product, 3);
+
+        Sanctum::actingAs(User::factory()->admin()->create());
+        $url = "/api/v1/admin/orders/{$orderNumber}/status";
+
+        $this->patchJson($url, ['status' => 'cancelled'])->assertOk();
+        $this->assertSame(10, $product->fresh()->stock);
+
+        $this->patchJson($url, ['status' => 'cancelled'])->assertUnprocessable();
+        $this->assertSame(10, $product->fresh()->stock);
+    }
+
+    // the scheduler runs this command every 5 minutes, so it runs again over orders it already cancelled
+    public function test_auto_cancelling_gives_the_stock_back_exactly_once(): void
+    {
+        $product = Product::factory()->create(['stock' => 7]);
+        $order = Order::factory()
+            ->has(OrderItem::factory()->for($product)->state(['quantity' => 3]), 'items')
+            ->create(['created_at' => now()->subHours(2)]);
+
+        $this->artisan('orders:cancel-unpaid', ['--hours' => 1])->assertSuccessful();
+        $this->artisan('orders:cancel-unpaid', ['--hours' => 1])->assertSuccessful();
+
+        $this->assertSame('cancelled', $order->fresh()->status);
+        $this->assertSame(10, $product->fresh()->stock);
+        $this->assertDatabaseCount('order_status_history', 1);
+    }
+
+    public function test_auto_cancelling_leaves_confirmed_orders_and_their_stock_alone(): void
+    {
+        $product = Product::factory()->create(['stock' => 7]);
+        $order = Order::factory()->confirmed()
+            ->has(OrderItem::factory()->for($product)->state(['quantity' => 3]), 'items')
+            ->create(['created_at' => now()->subHours(48)]);
+
+        $this->artisan('orders:cancel-unpaid', ['--hours' => 1])->assertSuccessful();
+
+        $this->assertSame('confirmed', $order->fresh()->status);
+        $this->assertSame(7, $product->fresh()->stock);
+    }
+
+    private function placeOrder(Product $product, int $quantity): string
+    {
+        return $this->postJson(self::ENDPOINT, $this->orderPayload([
+            ['product_id' => $product->id, 'quantity' => $quantity],
+        ]))->assertCreated()->json('data.order_number');
     }
 }
