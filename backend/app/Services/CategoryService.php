@@ -20,12 +20,12 @@ class CategoryService
         $key = $this->versionedKey('catalog', 'categories', 'page', (string) Paginator::resolveCurrentPage());
 
         return $this->cached($key, self::CATEGORIES_CACHE_SECONDS,
-            fn() => Category::active()->withCount('products')->latest()->paginate(10));
+            fn() => Category::active()->withCount(['products' => fn($q) => $q->active()])->orderBy('sort_order')->latest()->paginate(10));
     }
 
     public function getAdminCategories()
     {
-        return Category::withCount('products')->latest()->paginate(10);
+        return Category::withCount('products')->orderBy('sort_order')->latest()->paginate(10);
     }
 
     public function createCategory(array $data, ?UploadedFile $image)
@@ -45,7 +45,8 @@ class CategoryService
             throw $e;
         }
 
-        return $category->loadCount('products');
+        // re-read the row, so the defaults set by the database (is_active...) are in the response
+        return $category->refresh()->loadCount('products');
     }
 
     public function updateCategory(Category $category, array $data, ?UploadedFile $image)

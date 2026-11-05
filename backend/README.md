@@ -15,29 +15,24 @@ REST API for the Lume Perfums online shop, built with Laravel 13. It serves the 
 
 ```bash
 cd backend
-composer install
-cp .env.example .env
-php artisan key:generate
+composer setup
 ```
 
-Then set these values in `.env`:
+This installs the dependencies, creates `.env` from `.env.example`, generates the app key and creates the database tables. By default it uses SQLite. To use MySQL, first copy `.env.example` to `.env` and set `DB_CONNECTION=mysql` and the other `DB_*` values.
 
-| Variable | Why it's needed |
+Then check these values in `.env`:
+
+| Variable | What it's for |
 |---|---|
-| `SHOP_ADMIN_NAME`, `SHOP_ADMIN_EMAIL`, `SHOP_ADMIN_PASSWORD` | The admin account. Seeding stops with an error if any of them is empty. |
-| `SHOP_MAIL_ADDRESS` | Receives new order emails. **While it's empty, every order confirmation job fails.** |
-| `SHOP_WHATSAPP_NUMBER` | The number customers send their order to, digits only, for example `212600000000`. |
-| `FRONTEND_URL` | Add this line. It's your frontend's address, for example `http://127.0.0.1:5173`. CORS and password reset links use it. |
-
-The defaults use SQLite. To use MySQL, set `DB_CONNECTION=mysql` and the other `DB_*` values.
-
-> Don't use `composer setup`. It runs `npm install`, and this project has no `package.json`, so it stops with an error.
+| `SHOP_ADMIN_NAME`, `SHOP_ADMIN_EMAIL`, `SHOP_ADMIN_PASSWORD` | The admin account. **Required:** seeding stops with an error if any of them is empty. |
+| `SHOP_MAIL_ADDRESS` | Receives new order emails. Change the example value to your own address. |
+| `SHOP_WHATSAPP_NUMBER` | The number customers send their order to, digits only. Change the example value to your own number. |
+| `FRONTEND_URL` | Your frontend's address. CORS and password reset links use it. |
 
 ## Create and seed the database
 
 ```bash
-touch database/database.sqlite   # SQLite only
-php artisan migrate --seed
+php artisan db:seed
 php artisan storage:link
 ```
 

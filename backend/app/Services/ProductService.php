@@ -31,7 +31,7 @@ class ProductService
         $key = $this->versionedKey('catalog', 'products', md5(json_encode([$filters, Paginator::resolveCurrentPage()])));
 
         return $this->cached($key, self::PRODUCTS_CACHE_SECONDS,
-            fn() => $this->filteredProducts($filters)->with('category')->active()->paginate(10));
+            fn() => $this->filteredProducts($filters)->with('category')->visible()->paginate(10));
     }
 
     public function getAdminProducts(array $filters)
@@ -55,7 +55,7 @@ class ProductService
             'price_asc' => $query->orderBy('price'),
             'oldest' => $query->oldest(),
             'newest' => $query->latest(),
-            default => $query->latest(),
+            default => $query->orderBy('sort_order')->latest(),
         };
 
         return $query;
@@ -65,14 +65,14 @@ class ProductService
     {
         // firstOrFail throws before anything is stored, so unknown slugs are never cached
         return $this->cached($this->versionedKey('catalog', 'product', $slug), self::PRODUCT_CACHE_SECONDS,
-            fn() => Product::with('category')->active()->where('slug', $slug)->firstOrFail());
+            fn() => Product::with('category')->visible()->where('slug', $slug)->firstOrFail());
     }
 
     public function getFeatured()
     {
         // cache all featured products and pick 5 per request, so the homepage still changes on every visit
         $featured = $this->cached($this->versionedKey('catalog', 'featured'), self::FEATURED_CACHE_SECONDS,
-            fn() => Product::with('category')->active()->featured()->get());
+            fn() => Product::with('category')->visible()->featured()->get());
 
         return $featured->shuffle()->take(5)->values();
     }
@@ -91,7 +91,8 @@ class ProductService
             throw $e;
         }
 
-        return $product->load('category');
+        // re-read the row, so the defaults set by the database (is_active...) are in the response
+        return $product->refresh()->load('category');
     }
 
     public function updateProduct(Product $product, array $data, ?UploadedFile $image)

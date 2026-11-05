@@ -22,6 +22,9 @@ class UpdateProductRequest extends FormRequest
      */
     public function rules(): array
     {
+        // the old price is compared with the new price if one was sent, otherwise with the current one
+        $price = is_numeric($this->input('price')) ? $this->input('price') : $this->route('product')->price;
+
         return [
             'category_id' => ['sometimes', 'required', 'integer', 'exists:categories,id'],
             'name' => ['sometimes', 'required', 'string', 'max:255'],
@@ -29,7 +32,7 @@ class UpdateProductRequest extends FormRequest
             'notes' => ['nullable', 'string'],
             'sku' => ['nullable', 'string', 'max:100'],
             'price' => ['sometimes', 'required', 'numeric', 'min:0', 'decimal:0,2'],
-            'compare_at_price' => ['nullable', 'numeric', 'decimal:0,2', 'gt:price'],
+            'compare_at_price' => ['nullable', 'numeric', 'decimal:0,2', 'gt:'.$price],
             'stock' => ['sometimes', 'required', 'integer', 'min:0'],
             'sort_order' => ['sometimes', 'integer', 'min:0'],
             'image' => ['sometimes', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],

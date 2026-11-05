@@ -35,6 +35,12 @@ class Product extends Model
         $query->where('is_active', true);
     }
 
+    // scope a query to what customers can see: active products in an active category
+    public function scopeVisible(Builder $query)
+    {
+        $query->where('is_active', true)->whereRelation('category', 'is_active', true);
+    }
+
     // scope a query to include only featured products
     public function scopeFeatured(Builder $query)
     {

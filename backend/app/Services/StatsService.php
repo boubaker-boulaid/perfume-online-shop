@@ -115,7 +115,7 @@ class StatsService
     public function getPendingOver24h(): array
     {
         return Order::where('status', 'pending')
-            ->where('created_at', '<=', now()->subHours(23))
+            ->where('created_at', '<=', now()->subHours(24))
             ->oldest()
             ->get(['id', 'order_number', 'customer_name', 'phone', 'city', 'total', 'created_at'])
             ->toArray();

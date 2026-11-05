@@ -13,7 +13,6 @@ Everything needed to build a frontend against this API. To try the requests, imp
 - [Authentication](#authentication)
 - [Admin endpoints](#admin-endpoints)
 - [Data objects](#data-objects)
-- [Things to watch for](#things-to-watch-for)
 
 ## Conventions
 
@@ -79,7 +78,7 @@ Fields inside arrays use dotted names, such as `items.0.quantity`.
 | 401 | Not logged in, or the session expired | Send the user to the login page |
 | 403 | Logged in but not an admin, or a signed link that's invalid or expired | Show an error |
 | 404 | The record or endpoint doesn't exist, or the product is hidden | Show a not found page |
-| 409 | Can't delete a category that still has products | Show `message` |
+| 409 | Can't delete a category that still has products, or logging in while already logged in | Show `message` |
 | 419 | CSRF token missing or expired | Call `/sanctum/csrf-cookie` again, then retry |
 | 422 | Validation failed, or the status change isn't allowed | Show `errors`, or `message` when `errors` is null |
 | 429 | Too many requests | Wait for the number of seconds in the `Retry-After` header |
@@ -138,29 +137,29 @@ Checks that the API is running. It doesn't use the usual response shape.
 
 ### GET /api/v1/categories
 
-Lists active categories, newest first, paginated. Each one is a [Category](#category) with `products_count`.
+Lists active categories, by `sort_order` and then newest first, paginated. Each one is a [Category](#category) with `products_count`, which only counts active products.
 
 ### GET /api/v1/products
 
-Lists active products with their category, paginated. Each one is a [Product](#product).
+Lists active products in active categories, paginated. Each one is a [Product](#product).
 
 | Query parameter | Type | Notes |
 |---|---|---|
 | `q` | string, max 100 | Searches the product name |
 | `category` | string | The slug of an active category. Any other value returns 422. |
 | `min_price`, `max_price` | number | Inclusive |
-| `sort` | string | `newest` (default), `oldest`, `price_asc` or `price_desc` |
+| `sort` | string | `newest`, `oldest`, `price_asc` or `price_desc`. If left out, products are listed by `sort_order` and then newest first. |
 | `page` | integer | Page number |
 
 Example: `GET /api/v1/products?category=floral&max_price=1000&sort=price_asc`
 
 ### GET /api/v1/products/featured
 
-Returns up to 5 active featured products, in a random order that changes on each request. It's not paginated.
+Returns up to 5 featured products from the public catalog, in a random order that changes on each request. It's not paginated.
 
 ### GET /api/v1/products/{slug}
 
-Returns one active [Product](#product). A hidden or unknown product returns 404.
+Returns one [Product](#product). The response is 404 if the product is unknown or hidden, or if its category is hidden.
 
 ## Orders
 
@@ -178,7 +177,7 @@ Places an order. It's a public endpoint, so customers don't need an account. Sto
 | `note` | Optional, max 255 characters |
 | `idempotency_key` | Required, a UUID. [See below](#avoiding-duplicate-orders). |
 | `items` | Required, 1 to 99 lines |
-| `items[].product_id` | Required, an active product. A product can only appear once per order. |
+| `items[].product_id` | Required, an active product in an active category. A product can only appear once per order. |
 | `items[].quantity` | Required, whole number from 1 to 99 |
 
 Each item may only contain `product_id` and `quantity`. Sending anything else in an item, such as `price`, returns 422. Other unknown fields in the body, such as `total`, are ignored. The server always calculates the total itself.
@@ -229,7 +228,7 @@ If there isn't enough stock, the response is `400` and nothing is saved:
 
 Generate one UUID when the customer starts checkout, with `crypto.randomUUID()`, and keep it until the order succeeds. Reuse it on every retry, for example after a network error.
 
-If an order with that key already exists, the API returns that order with `201`, and doesn't create a second one or reduce the stock again. The rest of the request is ignored, so generate a new key if the customer changes their cart.
+If an order with that key already exists, the API returns that order with `200` instead of `201`, and doesn't create a second one or reduce the stock again. The rest of the request is ignored, so generate a new key if the customer changes their cart.
 
 #### After the order is placed
 
@@ -265,7 +264,7 @@ await api.post('/login', { email, password });
 const { data: admin } = await api.get('/api/v1/admin/me');
 ```
 
-Wrong credentials return `422` with the message under `errors.email`. Five failed attempts lock the login for a short time, and also return `422`.
+Wrong credentials return `422` with the message under `errors.email`. Five failed attempts lock the login for a short time, and also return `422`. Logging in while already logged in returns `409`, and so do the password routes.
 
 The reset email links to `{FRONTEND_URL}/password-reset/{token}?email={email}`, so the frontend needs a page at that path. It should send those values to `POST /reset-password`.
 
@@ -328,13 +327,14 @@ Returns the dashboard numbers, cached for 5 minutes.
 - `revenue_last_30_days` always has 30 entries, with 0 for days with no sales.
 - `top_products` leaves out cancelled orders and has at most 5 entries.
 - `low_stock` lists products with fewer than 5 units.
+- `pending_over_24h` lists orders that have been pending for at least 24 hours.
 - If one part of the stats fails, it comes back as `null` and the others still load, so handle `null` in each section.
 
 ### Products
 
 | Method and path | Purpose | Success |
 |---|---|---|
-| `GET /api/v1/admin/products` | List all products, including hidden ones. Takes the same filters as the [public list](#get-apiv1products). | `200`, paginated |
+| `GET /api/v1/admin/products` | List all products, including hidden ones. Takes the same filters as the [public list](#get-apiv1products), and `category` also accepts hidden categories. | `200`, paginated |
 | `POST /api/v1/admin/products` | Create | `201` |
 | `GET /api/v1/admin/products/{slug}` | Show one, even if hidden | `200` |
 | `PATCH /api/v1/admin/products/{slug}` | Update (`PUT` works the same way) | `200` |
@@ -349,10 +349,10 @@ Fields for create and update:
 | `price` | Required | Optional | At least 0, up to 2 decimals |
 | `stock` | Required | Optional | Whole number, at least 0 |
 | `image` | Required | Optional | jpg, jpeg, png or webp, max 2 MB |
-| `compare_at_price` | Optional | Optional | The old price, shown as a discount. Must be above `price`. |
+| `compare_at_price` | Optional | Optional | The old price, shown as a discount. Must be above `price`. On an update, that's the `price` in the same request, or the current price if none is sent. |
 | `description`, `notes` | Optional | Optional | Text |
 | `sku` | Optional | Optional | Max 100 characters |
-| `sort_order` | Optional | Optional | Whole number, at least 0 |
+| `sort_order` | Optional, default 0 | Optional | Whole number, at least 0. Lower numbers are listed first. |
 | `is_active` | Optional, default `true` | Optional | Boolean. `false` hides the product. |
 | `is_featured` | Optional, default `false` | Optional | Boolean |
 
@@ -384,8 +384,8 @@ await api.post(`/api/v1/admin/products/${slug}`, form);
 | `name` | Required | Optional | Max 255 characters, must be unique |
 | `description` | Optional | Optional | Text |
 | `image` | Optional | Optional | jpg, jpeg, png or webp, max 2 MB |
-| `is_active` | Optional, default `true` | Optional | Boolean |
-| `sort_order` | Optional | Optional | Whole number, at least 0 |
+| `is_active` | Optional, default `true` | Optional | Boolean. `false` hides the category and all its products from the public API. |
+| `sort_order` | Optional, default 0 | Optional | Whole number, at least 0. Lower numbers are listed first. |
 
 ### Orders
 
@@ -442,7 +442,7 @@ Anything else returns `422`, with a message like `Cannot change order status fro
 | `image_path` | string or null | Full image URL, despite the name |
 | `is_active` | boolean | |
 | `sort_order` | integer | |
-| `products_count` | integer | Only in category responses, not when nested in a product |
+| `products_count` | integer | Only in category responses, not when nested in a product. Public lists count active products only, and admin responses count all of them. |
 | `created_at`, `updated_at` | string | |
 
 ### Product
@@ -499,17 +499,3 @@ Each entry in `history`, oldest first:
 | `user_id` | integer or null | Null when the system made the change, such as an automatic cancellation |
 | `changed_by` | string or null | The admin's name |
 | `created_at` | string | |
-
-## Things to watch for
-
-These are how the API behaves today, and they can catch you out when building a frontend:
-
-- **Missing values after creating:** when you create a product or category without `is_active`, `is_featured` or `sort_order`, the create response shows them as `null`, although they're saved with their defaults. Fetch the record again if you need the real values.
-- **Changing only the old price:** `PATCH` with `compare_at_price` alone returns 422. Send `price` in the same request.
-- **Filtering by a hidden category:** `GET /api/v1/admin/products?category=...` returns 422 for a hidden category, even for admins.
-- **Hidden categories don't hide their products:** an active product in a hidden category still appears in the public list, and its `category.is_active` is `false`.
-- **`products_count` includes hidden products**, including in the public category list.
-- **`sort_order` isn't used for sorting yet:** it's saved and returned, but lists sort by `sort` or by newest first.
-- **Logging in twice:** `POST /login` while already logged in redirects with a `302` instead of returning JSON. The same applies to the password routes.
-- **Retries return `201`:** a repeated order with the same `idempotency_key` looks the same as a new one.
-- **`pending_over_24h` starts at 23 hours:** in the stats, it includes orders that are at least 23 hours old.

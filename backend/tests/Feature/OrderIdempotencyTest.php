@@ -30,7 +30,7 @@ class OrderIdempotencyTest extends TestCase
         $payload = $this->orderPayload([['product_id' => $product->id, 'quantity' => 3]]);
 
         $first = $this->postJson(self::ENDPOINT, $payload)->assertCreated();
-        $retry = $this->postJson(self::ENDPOINT, $payload)->assertCreated();
+        $retry = $this->postJson(self::ENDPOINT, $payload)->assertOk();
 
         $this->assertSame($first->json('data.order_number'), $retry->json('data.order_number'));
         $this->assertDatabaseCount('orders', 1);
@@ -52,7 +52,7 @@ class OrderIdempotencyTest extends TestCase
         $this->postJson(self::ENDPOINT, $this->orderPayload(
             [['product_id' => $other->id, 'quantity' => 5]],
             ['idempotency_key' => $key],
-        ))->assertCreated()->assertJsonPath('data.total', '100.00');
+        ))->assertOk()->assertJsonPath('data.total', '100.00');
 
         $this->assertDatabaseCount('orders', 1);
         $this->assertSame(10, $other->fresh()->stock);
@@ -65,7 +65,7 @@ class OrderIdempotencyTest extends TestCase
         $payload = $this->orderPayload([['product_id' => $product->id, 'quantity' => 1]]);
 
         $first = $this->postJson(self::ENDPOINT, $payload)->assertCreated();
-        $retry = $this->postJson(self::ENDPOINT, $payload)->assertCreated();
+        $retry = $this->postJson(self::ENDPOINT, $payload)->assertOk();
 
         $this->assertSame($first->json('data.order_number'), $retry->json('data.order_number'));
         $this->assertSame(0, $product->fresh()->stock);
@@ -94,7 +94,7 @@ class OrderIdempotencyTest extends TestCase
 
         Order::sole()->update(['confirmation_sent_at' => now()]);
 
-        $this->postJson(self::ENDPOINT, $payload)->assertCreated();
+        $this->postJson(self::ENDPOINT, $payload)->assertOk();
         Queue::assertPushed(SendOrderConfirmation::class, 1);
     }
 
@@ -104,7 +104,7 @@ class OrderIdempotencyTest extends TestCase
         $payload = $this->orderPayload([['product_id' => $product->id, 'quantity' => 1]]);
 
         $this->postJson(self::ENDPOINT, $payload)->assertCreated();
-        $this->postJson(self::ENDPOINT, $payload)->assertCreated();
+        $this->postJson(self::ENDPOINT, $payload)->assertOk();
 
         Queue::assertPushed(SendOrderConfirmation::class, 2);
     }
