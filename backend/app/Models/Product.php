@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Observers\CatalogObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Database\Factories\ProductFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Category;
 use App\Models\OrderItem;
@@ -12,6 +14,9 @@ use Illuminate\Database\Eloquent\Builder;
 #[ObservedBy(CatalogObserver::class)]
 class Product extends Model
 {
+    /** @use HasFactory<ProductFactory> */
+    use HasFactory;
+
     protected $fillable = [
         'category_id', 'name', 'slug', 'description', 'notes', 'sort_order', 'sku', 'price', 'compare_at_price', 'stock', 'image_path', 'is_active', 'is_featured'
     ];
