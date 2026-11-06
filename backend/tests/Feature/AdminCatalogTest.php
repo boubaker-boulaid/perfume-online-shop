@@ -149,4 +149,25 @@ class AdminCatalogTest extends TestCase
             ...$extra,
         ];
     }
+
+    public function test_the_price_cannot_reach_the_saved_old_price(): void
+    {
+        $product = Product::factory()->create(['price' => '100.00', 'compare_at_price' => '150.00']);
+
+        $this->patchJson("/api/v1/admin/products/{$product->slug}", ['price' => '150.00'])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['price'], 'errors');
+
+        $this->assertSame('100.00', $product->fresh()->price);
+    }
+
+    public function test_the_price_can_be_raised_when_the_old_price_changes_too(): void
+    {
+        $product = Product::factory()->create(['price' => '100.00', 'compare_at_price' => '150.00']);
+
+        $this->patchJson("/api/v1/admin/products/{$product->slug}", ['price' => '200.00', 'compare_at_price' => '250.00'])->assertOk();
+        $this->patchJson("/api/v1/admin/products/{$product->slug}", ['price' => '300.00', 'compare_at_price' => null])
+            ->assertOk()
+            ->assertJsonPath('data.compare_at_price', null);
+    }
 }

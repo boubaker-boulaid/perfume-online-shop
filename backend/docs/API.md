@@ -350,7 +350,7 @@ Fields for create and update:
 |---|---|---|---|
 | `category_id` | Required | Optional | An existing category ID |
 | `name` | Required | Optional | Max 255 characters |
-| `price` | Required | Optional | At least 0, up to 2 decimals |
+| `price` | Required | Optional | From 0 to 99999999.99, up to 2 decimals. On an update, it must stay below the saved `compare_at_price`, unless you change or clear that too. |
 | `stock` | Required | Optional | Whole number, at least 0 |
 | `image` | Required | Optional | jpg, jpeg, png or webp, max 2 MB |
 | `compare_at_price` | Optional | Optional | The old price, shown as a discount. Must be above `price`. On an update, that's the `price` in the same request, or the current price if none is sent. |
