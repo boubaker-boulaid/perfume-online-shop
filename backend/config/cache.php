@@ -1,5 +1,10 @@
 <?php
 
+use App\Models\Category;
+use App\Models\Product;
+use Carbon\Carbon;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 return [
@@ -129,8 +134,19 @@ return [
     | storage. By default, no PHP classes will be unserialized from your
     | cache to prevent gadget chain attacks if your APP_KEY is leaked.
     |
+    | The catalog services cache paginators and models, so those classes have
+    | to be listed here. A cached object of any other class comes back broken.
+    |
     */
 
-    'serializable_classes' => false,
+    'serializable_classes' => [
+        LengthAwarePaginator::class,
+        Illuminate\Database\Eloquent\Collection::class,
+        Collection::class,
+        Product::class,
+        Category::class,
+        Illuminate\Support\Carbon::class,
+        Carbon::class,
+    ],
 
 ];

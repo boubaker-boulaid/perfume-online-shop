@@ -4,7 +4,6 @@ namespace Tests\Concerns;
 
 use Illuminate\Support\Str;
 
-
 trait BuildsOrderPayload
 {
     private function orderPayload(array $items, array $extra = []): array

@@ -20,8 +20,8 @@ class OrderStatusHistoryResource extends JsonResource
             'to_status' => $this->to_status,
             'note' => $this->note,
             'user_id' => $this->user_id, // which admin made the change
-            'changed_by' => $this->whenLoaded('user', fn() => $this->user?->name),
-            'created_at' => $this->created_at?->toISOString()
+            'changed_by' => $this->whenLoaded('user', fn () => $this->user?->name),
+            'created_at' => $this->created_at?->toISOString(),
         ];
     }
 }

@@ -34,7 +34,7 @@ class OrderStockTest extends TestCase
     public function test_insufficient_stock_is_rejected_with_exception()
     {
         $product1 = Product::factory()->create([
-            'stock' => 10
+            'stock' => 10,
         ]);
         $product2 = Product::factory()->create([
             'stock' => 40,
@@ -43,12 +43,12 @@ class OrderStockTest extends TestCase
         $response = $this->postJson(self::ENDPOINT, $this->orderPayload([
             [
                 'product_id' => $product1->id,
-                'quantity' => 20
+                'quantity' => 20,
             ],
             [
                 'product_id' => $product2->id,
-                'quantity' => 20
-            ]
+                'quantity' => 20,
+            ],
         ]));
 
         $response->assertBadRequest();
@@ -70,8 +70,8 @@ class OrderStockTest extends TestCase
         $response = $this->postJson(self::ENDPOINT, $this->orderPayload([
             [
                 'product_id' => $product->id,
-                'quantity' => 10
-            ]
+                'quantity' => 10,
+            ],
         ]));
 
         $response->assertCreated();
@@ -90,12 +90,12 @@ class OrderStockTest extends TestCase
         $response = $this->postJson(self::ENDPOINT, $this->orderPayload([
             [
                 'product_id' => $product->id,
-                'quantity' => 2
+                'quantity' => 2,
             ],
             [
                 'product_id' => $product->id,
-                'quantity' => 3
-            ]
+                'quantity' => 3,
+            ],
         ]));
 
         // a product can only appear once in an order, even when there is enough stock for both lines
@@ -188,5 +188,16 @@ class OrderStockTest extends TestCase
         return $this->postJson(self::ENDPOINT, $this->orderPayload([
             ['product_id' => $product->id, 'quantity' => $quantity],
         ]))->assertCreated()->json('data.order_number');
+    }
+
+    public function test_the_stock_error_does_not_depend_on_the_accept_header(): void
+    {
+        $product = Product::factory()->create(['stock' => 1]);
+
+        $this->post(self::ENDPOINT, $this->orderPayload([
+            ['product_id' => $product->id, 'quantity' => 2],
+        ]), ['Accept' => '*/*'])
+            ->assertBadRequest()
+            ->assertJsonPath('success', false);
     }
 }

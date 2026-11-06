@@ -1,33 +1,41 @@
 <?php
 
+use App\Http\Middleware\AssignRequestId;
+use App\Http\Middleware\EnsureEmailIsVerified;
 use App\Http\Middleware\EnsureGuest;
 use App\Http\Middleware\IsAdmin;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\LostConnectionDetector;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Context;
 use Illuminate\Validation\ValidationException;
+use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__ . '/../routes/web.php',
-        api: __DIR__ . '/../routes/api.php',
-        commands: __DIR__ . '/../routes/console.php',
+        web: __DIR__.'/../routes/web.php',
+        api: __DIR__.'/../routes/api.php',
+        commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->prepend(AssignRequestId::class);
+
         $middleware->api(prepend: [
-            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+            EnsureFrontendRequestsAreStateful::class,
         ]);
 
         $middleware->alias([
-            'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
+            'verified' => EnsureEmailIsVerified::class,
             'admin' => IsAdmin::class,
             'guest' => EnsureGuest::class,
         ]);
@@ -35,17 +43,17 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        // local helper so every error response shares the same shape 
-        $res = fn(string $message, int $status, ?array $errors = null) =>
-        response()->json([
+        // local helper so every error response shares the same shape
+        $res = fn (string $message, int $status, ?array $errors = null) => response()->json([
             'success' => false,
             'message' => $message,
             'data' => null,
-            'errors' => $errors
+            'errors' => $errors,
+            'request_id' => Context::get('request_id'),
         ], $status);
 
         $exceptions->shouldRenderJsonWhen(
-            fn(Request $request) => $request->is('api/*') || $request->expectsJson(),
+            fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
 
         $exceptions->render(function (Throwable $e, Request $request) use ($res) {
@@ -63,8 +71,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 // ModelNotFoundException is wrapped into NotFoundHttpException by
                 // Handler::prepareException() before this callback runs, so the
                 // original is only reachable via getPrevious().
-                $e instanceof NotFoundHttpException && $e->getPrevious() instanceof ModelNotFoundException
-                => $res('The requested resource was not found.', 404),
+                $e instanceof NotFoundHttpException && $e->getPrevious() instanceof ModelNotFoundException => $res('The requested resource was not found.', 404),
 
                 $e instanceof NotFoundHttpException => $res('The requested API endpoint does not exists.', 404),
 
@@ -76,13 +83,17 @@ return Application::configure(basePath: dirname(__DIR__))
                 // anything with its own status like abort(403)...
                 $e instanceof HttpExceptionInterface => $res($e->getMessage() ?: 'Request failed.', $e->getStatusCode()),
 
+                // the database can't be reached: nothing the customer did wrong, and worth retrying soon
+                ($e instanceof QueryException || $e instanceof PDOException)
+                && (new LostConnectionDetector)->causedByLostConnection($e) => $res('The service is temporarily unavailable. Please try again shortly.', 503),
+
                 default => $res(
                     config('app.debug') ? $e->getMessage() : 'Unexpected error occurred. Please try again later.',
                     500,
                     config('app.debug') ? [
                         'exception' => $e::class,
                         'file' => $e->getFile(),
-                        'line' => $e->getLine()
+                        'line' => $e->getLine(),
                     ] : null
                 )
             };
@@ -90,6 +101,6 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $exceptions->dontReport([
             ModelNotFoundException::class,
-            ValidationException::class
+            ValidationException::class,
         ]);
     })->create();

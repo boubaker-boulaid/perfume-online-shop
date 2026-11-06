@@ -4,8 +4,6 @@ namespace App\Http\Resources\V1;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use App\Http\Resources\V1\OrderItemResource;
-use App\Http\Resources\V1\OrderStatusHistoryResource;
 
 class OrderResource extends JsonResource
 {
@@ -37,7 +35,7 @@ class OrderResource extends JsonResource
             'confirmation_sent_at' => $this->confirmation_sent_at?->toISOString(),
             'whatsapp_opened_at' => $this->whatsapp_opened_at?->toISOString(),
             'created_at' => $this->created_at?->toISOString(),
-            'updated_at' => $this->updated_at?->toISOString()
+            'updated_at' => $this->updated_at?->toISOString(),
         ];
     }
 }

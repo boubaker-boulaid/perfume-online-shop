@@ -5,8 +5,6 @@ namespace App\Models;
 use Database\Factories\OrderStatusHistoryFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\User;
-use App\Models\Order;
 
 class OrderStatusHistory extends Model
 {
@@ -20,7 +18,7 @@ class OrderStatusHistory extends Model
         'user_id',
         'from_status',
         'to_status',
-        'note'
+        'note',
     ];
 
     public function order()

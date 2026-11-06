@@ -54,24 +54,24 @@ class AppServiceProvider extends ServiceProvider
     // logins and failed logins go to the admin log. never log the password: Failed carries it in credentials
     private function logAuthEvents(): void
     {
-        Event::listen(Login::class, fn(Login $e) => Log::channel('admin')->info('auth.login', [
+        Event::listen(Login::class, fn (Login $e) => Log::channel('admin')->info('auth.login', [
             'user_id' => $e->user->getAuthIdentifier(),
             'email' => $e->user->email,
             'ip' => request()->ip(),
         ]));
 
-        Event::listen(Failed::class, fn(Failed $e) => Log::channel('admin')->warning('auth.login_failed', [
+        Event::listen(Failed::class, fn (Failed $e) => Log::channel('admin')->warning('auth.login_failed', [
             'email' => $e->credentials['email'] ?? null,
             'user_exists' => $e->user !== null,
             'ip' => request()->ip(),
         ]));
 
-        Event::listen(Lockout::class, fn(Lockout $e) => Log::channel('admin')->warning('auth.lockout', [
+        Event::listen(Lockout::class, fn (Lockout $e) => Log::channel('admin')->warning('auth.lockout', [
             'email' => $e->request->input('email'),
             'ip' => $e->request->ip(),
         ]));
 
-        Event::listen(Logout::class, fn(Logout $e) => Log::channel('admin')->info('auth.logout', [
+        Event::listen(Logout::class, fn (Logout $e) => Log::channel('admin')->info('auth.logout', [
             'user_id' => $e->user?->getAuthIdentifier(),
             'ip' => request()->ip(),
         ]));
@@ -80,7 +80,7 @@ class AppServiceProvider extends ServiceProvider
     // one place for every job that gives up after its last try (emails, reminders...)
     private function logFailedJobs(): void
     {
-        Queue::failing(fn(JobFailed $e) => Log::channel('queue')->error('job.failed', [
+        Queue::failing(fn (JobFailed $e) => Log::channel('queue')->error('job.failed', [
             'job' => $e->job->resolveName(),
             'job_id' => $e->job->getJobId(),
             'queue' => $e->job->getQueue(),

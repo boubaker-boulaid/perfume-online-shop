@@ -64,6 +64,8 @@ These run every 5 minutes:
 | `orders:cancel-unpaid --hours=1 --unopened` | Cancels pending orders whose WhatsApp link wasn't opened within 1 hour, and restores the stock |
 | `orders:cancel-unpaid --hours=24` | Cancels orders still pending after 24 hours, and restores the stock |
 
+`cache:prune-expired` also runs every hour and deletes expired rows from the database cache table.
+
 In production, run `php artisan schedule:run` from cron every minute, and keep `queue:work` running under a process manager such as Supervisor.
 
 ## Run the tests
@@ -72,7 +74,7 @@ In production, run `php artisan schedule:run` from cron every minute, and keep `
 composer test
 ```
 
-Tests run on an in-memory SQLite database set in `phpunit.xml`, so they don't need any setup.
+Tests run on an in-memory SQLite database set in `phpunit.xml`, so they don't need any setup. They also don't write to the real log files: `tests/TestCase.php` silences the log channels, so add any new channel to its list.
 
 > **Protect your data:** use `composer test` rather than `php artisan test`, because it clears the config cache first. If you ran `php artisan config:cache`, the tests can ignore `phpunit.xml` and connect to the database in your `.env`, and `RefreshDatabase` would then delete everything in it.
 
@@ -89,12 +91,24 @@ The tests focus on where a bug would cost money:
 
 Two customers buying the last unit at the same moment isn't covered. It relies on database row locks, which SQLite ignores, so test it by hand on MySQL.
 
+## Editor support
+
+[Laravel IDE Helper](https://github.com/barryvdh/laravel-ide-helper) tells your editor about Laravel's query methods and your model columns. The files it generates aren't committed, so create them after installing, and rerun the second command after changing the database tables:
+
+```bash
+php artisan ide-helper:generate
+php artisan ide-helper:models --nowrite
+php artisan ide-helper:meta
+```
+
+The second command reads the table structure from the database in your `.env`, and doesn't change any data.
+
 ## How orders work
 
 1. The customer places an order. The server calculates the total from database prices and reduces the stock straight away.
 2. The API returns a WhatsApp link with the order filled in, and the customer sends that message to the shop.
 3. An admin moves the order along: `pending` → `confirmed` → `shipped` → `delivered`. Delivery marks it as paid, because payment is cash on delivery.
-4. Orders can be cancelled while `pending` or `confirmed`, and cancelling restores the stock.
+4. Orders can be cancelled while `pending` or `confirmed`. Cancelling restores the stock and emails the customer.
 
 ## Logs
 

@@ -119,4 +119,79 @@ class AdminCatalogTest extends TestCase
             );
         }
     }
+
+    public function test_an_empty_sort_order_falls_back_to_the_default(): void
+    {
+        $this->postJson('/api/v1/admin/categories', ['name' => 'Woody', 'sort_order' => null])
+            ->assertCreated()
+            ->assertJsonPath('data.sort_order', 0);
+
+        $this->post('/api/v1/admin/products', $this->productFields(['sort_order' => null]), ['Accept' => 'application/json'])
+            ->assertCreated()
+            ->assertJsonPath('data.sort_order', 0);
+    }
+
+    public function test_numbers_too_big_for_the_database_are_refused(): void
+    {
+        $this->post('/api/v1/admin/products', $this->productFields(['price' => '100000000.00', 'stock' => 2147483648]), ['Accept' => 'application/json'])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['price', 'stock'], 'errors');
+    }
+
+    private function productFields(array $extra = []): array
+    {
+        return [
+            'category_id' => Category::factory()->create()->id,
+            'name' => 'Oud Royal',
+            'price' => '250.00',
+            'stock' => 5,
+            'image' => UploadedFile::fake()->image('oud.jpg'),
+            ...$extra,
+        ];
+    }
+
+    public function test_the_price_cannot_reach_the_saved_old_price(): void
+    {
+        $product = Product::factory()->create(['price' => '100.00', 'compare_at_price' => '150.00']);
+
+        $this->patchJson("/api/v1/admin/products/{$product->slug}", ['price' => '150.00'])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['price'], 'errors');
+
+        $this->assertSame('100.00', $product->fresh()->price);
+    }
+
+    public function test_the_price_can_be_raised_when_the_old_price_changes_too(): void
+    {
+        $product = Product::factory()->create(['price' => '100.00', 'compare_at_price' => '150.00']);
+
+        $this->patchJson("/api/v1/admin/products/{$product->slug}", ['price' => '200.00', 'compare_at_price' => '250.00'])->assertOk();
+        $this->patchJson("/api/v1/admin/products/{$product->slug}", ['price' => '300.00', 'compare_at_price' => null])
+            ->assertOk()
+            ->assertJsonPath('data.compare_at_price', null);
+    }
+
+    public function test_a_name_without_letters_still_gets_a_usable_slug(): void
+    {
+        $slug = $this->post('/api/v1/admin/products', $this->productFields(['name' => '!!!']), ['Accept' => 'application/json'])
+            ->assertCreated()
+            ->json('data.slug');
+
+        $this->assertSame('product', $slug);
+        $this->getJson("/api/v1/admin/products/{$slug}")->assertOk();
+    }
+
+    public function test_a_slug_stays_inside_its_column_with_a_suffix(): void
+    {
+        $name = str_repeat('a', 255);
+
+        foreach (['first.jpg', 'second.jpg'] as $file) {
+            $slug = $this->post('/api/v1/admin/products', $this->productFields([
+                'name' => $name,
+                'image' => UploadedFile::fake()->image($file),
+            ]), ['Accept' => 'application/json'])->assertCreated()->json('data.slug');
+        }
+
+        $this->assertSame(str_repeat('a', 240).'-2', $slug);
+    }
 }

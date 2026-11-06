@@ -10,16 +10,12 @@ use App\Http\Requests\V1\UpdateStatusRequest;
 use App\Http\Resources\V1\OrderResource;
 use App\Models\Order;
 use App\Services\OrderService;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\URL;
 
 class OrderController extends Controller
 {
     use ApiResponseTrait;
 
-    public function __construct(protected OrderService $order_service)
-    {
-    }
+    public function __construct(protected OrderService $order_service) {}
 
     /**
      * Display a listing of the resource.
@@ -42,9 +38,7 @@ class OrderController extends Controller
             'order_number' => $order->order_number,
             'total' => $order->total,
             'whatsapp_link' => $order->whatsappLink(),
-            'whatsapp_opened_url' => URL::temporarySignedRoute('customer.orders.whatsapp-opened', now()->addMinutes(30), [
-                'orderNumber' => $order->order_number
-            ]),
+            'whatsapp_opened_url' => $order->whatsappOpenedUrl(),
         ];
 
         // a retry with the same idempotency key gets the existing order back
@@ -56,7 +50,22 @@ class OrderController extends Controller
     public function whatsappOpened(string $orderNumber)
     {
         $this->order_service->updateWhatsappOpened($orderNumber);
+
         return $this->noContent();
+    }
+
+    // the link in the emails: a cancelled order has nothing left to send, so go back to the shop
+    public function whatsappRedirect(string $orderNumber)
+    {
+        $order = Order::where('order_number', $orderNumber)->firstOrFail();
+
+        if ($order->status === 'cancelled') {
+            return redirect()->away(config('app.frontend_url'));
+        }
+
+        $this->order_service->updateWhatsappOpened($orderNumber);
+
+        return redirect()->away($order->whatsappLink());
     }
 
     /**
@@ -65,22 +74,6 @@ class OrderController extends Controller
     public function show(Order $order)
     {
         return $this->okNoPgs(new OrderResource($this->order_service->getOrder($order)), 'Order retrieved.');
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 
     public function status(Order $order, UpdateStatusRequest $request)

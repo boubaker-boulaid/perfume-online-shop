@@ -57,6 +57,6 @@ class AuthenticationTest extends TestCase
 
     public function test_guests_can_still_reach_the_password_routes(): void
     {
-        $this->postJson('/forgot-password', ['email' => 'nobody@example.com'])->assertUnprocessable();
+        $this->postJson('/forgot-password', ['email' => 'nobody@example.com'])->assertOk();
     }
 }

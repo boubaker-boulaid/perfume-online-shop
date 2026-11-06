@@ -24,7 +24,7 @@ class UpdateStatusRequest extends FormRequest
     {
         return [
             'status' => ['required', 'in:pending,cancelled,shipped,confirmed,delivered'],
-            'note' => ['nullable', 'string', 'max:255']
+            'note' => ['nullable', 'string', 'max:255'],
         ];
     }
 }

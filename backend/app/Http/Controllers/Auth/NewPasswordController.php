@@ -43,8 +43,9 @@ class NewPasswordController extends Controller
         );
 
         if ($status != Password::PASSWORD_RESET) {
+            // an unknown email gets the same message as a bad token, so it doesn't reveal who has an account
             throw ValidationException::withMessages([
-                'email' => [__($status)],
+                'email' => [__(Password::INVALID_TOKEN)],
             ]);
         }
 

@@ -20,6 +20,7 @@ trait HandlesCache
             }
         } catch (Throwable $e) {
             Log::warning("Cache read failed for [{$key}].", ['exception' => $e]);
+
             return $fn();
         }
 
@@ -37,14 +38,14 @@ trait HandlesCache
     // e.g. versionedKey('catalog', 'product', 'oud-royal') => "catalog:v3:product:oud-royal"
     protected function versionedKey(string $name, string ...$parts): string
     {
-        return "{$name}:v{$this->cacheVersion($name)}:" . implode(':', $parts);
+        return "{$name}:v{$this->cacheVersion($name)}:".implode(':', $parts);
     }
 
     // the version is part of the cache keys, so bumping it makes every old entry unreachable at once
     protected function cacheVersion(string $name): int
     {
         try {
-            return (int) Cache::rememberForever("{$name}:version", fn() => 1);
+            return (int) Cache::rememberForever("{$name}:version", fn () => 1);
         } catch (Throwable $e) {
             return 1;
         }

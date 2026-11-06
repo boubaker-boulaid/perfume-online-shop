@@ -66,9 +66,12 @@ Errors have the same shape, with `success: false`. Validation errors list the me
   "data": null,
   "errors": {
     "sort": ["The selected sort is invalid."]
-  }
+  },
+  "request_id": "01JD8XQ7M3V9T2K5N6R4W8Y1ZB"
 }
 ```
+
+`request_id` identifies the request in the backend's logs, so show it with general errors. Every response also has it in the `X-Request-Id` header.
 
 Fields inside arrays use dotted names, such as `items.0.quantity`.
 
@@ -82,14 +85,15 @@ Fields inside arrays use dotted names, such as `items.0.quantity`.
 | 419 | CSRF token missing or expired | Call `/sanctum/csrf-cookie` again, then retry |
 | 422 | Validation failed, or the status change isn't allowed | Show `errors`, or `message` when `errors` is null |
 | 429 | Too many requests | Wait for the number of seconds in the `Retry-After` header |
-| 500 | Server error | Show a general error and let the user retry |
+| 500 | Server error | Show a general error with `request_id` and let the user retry |
+| 503 | The database can't be reached | Ask the user to try again shortly |
 
 ### Rate limits
 
 | Applies to | Limit | Counted per |
 |---|---|---|
 | All `/api/v1` routes | 60 per minute | User, or IP address for guests |
-| `POST /api/v1/orders` and `PATCH .../whatsapp-opened` | 10 per minute | IP address |
+| `POST /api/v1/orders`, `PATCH .../whatsapp-opened` and `GET .../whatsapp` | 10 per minute | IP address |
 | `/login`, `/forgot-password`, `/reset-password` | 6 per minute | IP address |
 
 ## Calling the API from a browser
@@ -170,7 +174,7 @@ Places an order. It's a public endpoint, so customers don't need an account. Sto
 | Field | Rules |
 |---|---|
 | `customer_name` | Required, max 50 characters |
-| `phone` | Required, max 13 characters including spaces. Digits, spaces and `+ ( ) . -` are allowed. |
+| `phone` | Required, a Moroccan number: `06...`, `+2126...` or `002126...`, starting with 5, 6 or 7 after the prefix. Spaces and `( ) . -` are removed before it's saved. |
 | `email` | Required, valid email address |
 | `city` | Required, max 50 characters |
 | `address` | Required, max 255 characters |
@@ -239,9 +243,13 @@ Without step 2, a pending order gets a reminder email after 30 minutes and is ca
 
 ### PATCH /api/v1/orders/{orderNumber}/whatsapp-opened
 
-Records that the customer opened WhatsApp. Don't build this URL yourself: use `whatsapp_opened_url` from the order response. It's signed and expires after 30 minutes.
+Records that the customer opened WhatsApp. Don't build this URL yourself: use `whatsapp_opened_url` from the order response. It's signed and expires after 2 hours. Calling it for a cancelled order does nothing.
 
 Returns `204`. An invalid or expired signature returns `403`.
+
+### GET /api/v1/orders/{orderNumber}/whatsapp
+
+The link used in emails, so the frontend doesn't call it. It's signed and expires after 24 hours. It records that the customer opened WhatsApp and redirects them there. If the order was cancelled, it redirects to `FRONTEND_URL` instead. An invalid or expired signature returns `403`.
 
 ## Authentication
 
@@ -252,7 +260,7 @@ Only admins have accounts, and there's no public sign-up. These routes are at th
 | `GET /sanctum/csrf-cookie` | None | `204`, sets the CSRF cookie |
 | `POST /login` | `email`, `password`, optional `remember` | `204`, starts the session |
 | `POST /logout` | None | `204` |
-| `POST /forgot-password` | `email` | `200`, `{ "status": "..." }`, emails a reset link |
+| `POST /forgot-password` | `email` | `200`, `{ "status": "..." }`, emails a reset link. The answer is the same if no account has that email. |
 | `POST /reset-password` | `token`, `email`, `password`, `password_confirmation` | `200`, `{ "status": "..." }` |
 
 Log in like this:
@@ -305,18 +313,7 @@ Returns the dashboard numbers, cached for 5 minutes.
     "top_products": [
       { "product_id": 1, "name": "Celestial Rose", "slug": "celestial-rose", "stock": 23, "sold": 2, "revenue": 1780 }
     ],
-    "low_stock": [{ "id": 4, "name": "Oud Royal", "slug": "oud-royal", "stock": 2, "is_active": true }],
-    "pending_over_24h": [
-      {
-        "id": 1,
-        "order_number": "ORD-2026-000001",
-        "customer_name": "Sara Alaoui",
-        "phone": "+212600000000",
-        "city": "Agadir",
-        "total": "1780.00",
-        "created_at": "2026-11-05T22:15:05.000000Z"
-      }
-    ]
+    "low_stock": [{ "id": 4, "name": "Oud Royal", "slug": "oud-royal", "stock": 2, "is_active": true }]
   },
   "errors": null
 }
@@ -327,7 +324,6 @@ Returns the dashboard numbers, cached for 5 minutes.
 - `revenue_last_30_days` always has 30 entries, with 0 for days with no sales.
 - `top_products` leaves out cancelled orders and has at most 5 entries.
 - `low_stock` lists products with fewer than 5 units.
-- `pending_over_24h` lists orders that have been pending for at least 24 hours.
 - If one part of the stats fails, it comes back as `null` and the others still load, so handle `null` in each section.
 
 ### Products
@@ -346,7 +342,7 @@ Fields for create and update:
 |---|---|---|---|
 | `category_id` | Required | Optional | An existing category ID |
 | `name` | Required | Optional | Max 255 characters |
-| `price` | Required | Optional | At least 0, up to 2 decimals |
+| `price` | Required | Optional | From 0 to 99999999.99, up to 2 decimals. On an update, it must stay below the saved `compare_at_price`, unless you change or clear that too. |
 | `stock` | Required | Optional | Whole number, at least 0 |
 | `image` | Required | Optional | jpg, jpeg, png or webp, max 2 MB |
 | `compare_at_price` | Optional | Optional | The old price, shown as a discount. Must be above `price`. On an update, that's the `price` in the same request, or the current price if none is sent. |

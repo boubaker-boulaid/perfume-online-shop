@@ -48,7 +48,7 @@
                             </h1>
                             <p style="margin:0 0 28px; font-size:14px; line-height:22px; color:#6d635a;">
                                 We have reserved your items, but we haven't received your order on WhatsApp yet.
-                                Send us the order message to confirm it and arrange payment.
+                                Send us the order message to confirm it. You pay when your order is delivered.
                             </p>
 
                             {{-- order summary box --}}
@@ -79,7 +79,7 @@
                             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
                                 <tr>
                                     <td align="center">
-                                        <a href="{{ $order->whatsappLink() }}" class="button" target="_blank"
+                                        <a href="{{ $order->whatsappRedirectUrl() }}" class="button" target="_blank"
                                            style="display:inline-block; background-color:#221a12; color:#ffffff; font-size:15px; font-weight:bold; text-decoration:none; padding:16px 36px; border-radius:999px;">
                                             Complete my order on WhatsApp
                                         </a>

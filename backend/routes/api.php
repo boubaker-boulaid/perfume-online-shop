@@ -8,7 +8,7 @@ Route::get('/status', function () {
         'success' => true,
         'message' => 'Shop API is running',
         'version' => '1.0.0',
-        'timestamp' => now()->toISOString()
+        'timestamp' => now()->toISOString(),
     ], 200);
 });
 

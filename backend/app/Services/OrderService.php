@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Exceptions\InsufficientStockException;
 use App\Jobs\SendOrderConfirmation;
+use App\Mail\CustomerOrderCancelledMail;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
@@ -14,10 +15,15 @@ use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Throwable;
 
 class OrderService
 {
     use HandlesCache;
+
+    // simultaneous orders can deadlock on the row locks: the database undoes one of them, so try it again
+    private const PLACE_ATTEMPTS = 5;
 
     /**
      * Create a new class instance.
@@ -37,6 +43,7 @@ class OrderService
                     if (is_null($orderExists->confirmation_sent_at)) {
                         SendOrderConfirmation::dispatch($orderExists->id);
                     }
+
                     return $orderExists;
                 }
 
@@ -46,6 +53,7 @@ class OrderService
                 // calculate the total
                 $total = collect($data['items'])->sum(function ($item) use ($products) {
                     $product = $products->get($item['product_id']);
+
                     return $product->price * $item['quantity'];
                 });
 
@@ -61,7 +69,7 @@ class OrderService
                     'address' => $data['address'],
                     'note' => $data['note'] ?? null,
                     'subtotal' => $total,
-                    'total' => $total
+                    'total' => $total,
                 ]);
 
                 $this->saveOrderItems($order, $products, $data['items']);
@@ -72,11 +80,11 @@ class OrderService
                 Log::channel('orders')->info('order.placed', [
                     'order_number' => $order->order_number,
                     'total' => $order->total,
-                    'items' => $order->items->count()
+                    'items' => $order->items->count(),
                 ]);
 
                 return $order;
-            });
+            }, self::PLACE_ATTEMPTS);
         } catch (InsufficientStockException $e) {
             // handled (the customer gets a clear error), but worth knowing what people try to buy
             Log::channel('orders')->warning('order.insufficient_stock', [
@@ -86,12 +94,14 @@ class OrderService
             ]);
             throw $e;
         } catch (UniqueConstraintViolationException $e) {
-            return Order::where('idempotency_key', $data['idempotency_key'])->firstOrFail();
+            // a simultaneous retry saved this key first, so send back its order.
+            // any other collision (the order number...) is a real error
+            return Order::where('idempotency_key', $data['idempotency_key'])->first() ?? throw $e;
         } catch (\Exception $e) {
             // no customer details in the log (name, phone, address): the key and items are enough to investigate
             Log::channel('daily')->error('order.place_failed', [
                 'idempotency_key' => $data['idempotency_key'] ?? null,
-                'items' => collect($data['items'] ?? [])->map(fn($i) => ['product_id' => $i['product_id'] ?? null, 'quantity' => $i['quantity'] ?? null])->all(),
+                'items' => collect($data['items'] ?? [])->map(fn ($i) => ['product_id' => $i['product_id'] ?? null, 'quantity' => $i['quantity'] ?? null])->all(),
                 'exception' => $e,
             ]);
             throw $e;
@@ -106,8 +116,8 @@ class OrderService
         foreach ($items as $item) {
             $product = $products->get($item['product_id']);
 
-            if (!$product) {
-                throw new ModelNotFoundException('Product with id ' . $item['product_id'] . ' not found.');
+            if (! $product) {
+                throw new ModelNotFoundException('Product with id '.$item['product_id'].' not found.');
             }
 
             if ($product->stock < $item['quantity']) {
@@ -123,21 +133,21 @@ class OrderService
     private function generateOrderNumber()
     {
         $year = now()->year;
-        // get the sequence of the current year and lock the table to prevant having the same name for several orders placed at the same time 
+        // get the sequence of the current year and lock the table to prevant having the same name for several orders placed at the same time
         $sequence = DB::table('order_sequences')->where('year', $year)->lockForUpdate()->first();
 
-        if (!$sequence) {
+        if (! $sequence) {
             // manualy create the first sequence
             DB::table('order_sequences')->insert([
                 'year' => $year,
-                'last_number' => 1
+                'last_number' => 1,
             ]);
             $number = 1;
         } else {
             $number = $sequence->last_number + 1;
             // increase the last_number of the last sequence by 1
             DB::table('order_sequences')->where('year', $year)->update([
-                'last_number' => $number
+                'last_number' => $number,
             ]);
         }
 
@@ -154,15 +164,15 @@ class OrderService
                 'product_name' => $p->name,
                 'unit_price' => $p->price,
                 'quantity' => $i['quantity'],
-                'line_total' => $i['quantity'] * $p->price
+                'line_total' => $i['quantity'] * $p->price,
             ]);
         });
     }
 
-
     public function updateWhatsappOpened(string $orderNumber)
     {
-        Order::where('order_number', $orderNumber)->whereNull('whatsapp_opened_at')->update([
+        // a late call can't bring a cancelled order back, so only pending orders are recorded
+        Order::where('order_number', $orderNumber)->where('status', 'pending')->whereNull('whatsapp_opened_at')->update([
             'whatsapp_opened_at' => now(),
         ]);
     }
@@ -171,19 +181,19 @@ class OrderService
     {
         $query = Order::query();
         $query->when($filters['q'] ?? null, function ($q, $search) {
-            $q->whereAny(['customer_name', 'phone', 'order_number'], 'like', '%'. $search .'%');
+            $q->whereAny(['customer_name', 'phone', 'order_number'], 'like', '%'.$search.'%');
         })->when($filters['status'] ?? null, function ($q, $status) {
             $q->where('status', $status);
         })->when($filters['payment_status'] ?? null, function ($q, $payment_status) {
             $q->where('payment_status', $payment_status);
         })->when($filters['city'] ?? null, function ($q, $city) {
-            $q->where('city', 'like', '%'. $city .'%');
+            $q->where('city', 'like', '%'.$city.'%');
         })->when($filters['date_from'] ?? null, function ($q, $from) {
             $q->whereDate('created_at', '>=', $from);
         })->when($filters['date_to'] ?? null, function ($q, $to) {
             $q->whereDate('created_at', '<=', $to);
         })->when($filters['older_than_hours'] ?? null, function ($q, $hours) {
-            // e.g. pending orders older than 24h whose customer never sent the whatsapp message
+            // e.g. pending orders older than 12h to follow up on, before they are cancelled at 24h
             $q->where('created_at', '<=', now()->subHours($hours));
         });
 
@@ -194,7 +204,7 @@ class OrderService
             default => $query->latest(),
         };
 
-        return $query->with('items')->withCount('items')->paginate(10);
+        return $query->with('items')->withCount('items')->paginate(10)->appends($filters);
     }
 
     public function getOrder(Order $order)
@@ -212,19 +222,19 @@ class OrderService
         $orderIds = $this->unpaidOrdersQuery($olderThanHours, $onlyUnopened)->pluck('id');
 
         // one transaction per order, so a failure on one doesn't undo the others
-        return $orderIds->filter(fn($id) => $this->cancelUnpaidOrder($id, $olderThanHours, $onlyUnopened, $note))->count();
+        return $orderIds->filter(fn ($id) => $this->cancelUnpaidOrder($id, $olderThanHours, $onlyUnopened, $note))->count();
     }
 
     private function unpaidOrdersQuery(int $olderThanHours, bool $onlyUnopened)
     {
         return Order::where('status', 'pending')
             ->where('created_at', '<=', now()->subHours($olderThanHours))
-            ->when($onlyUnopened, fn($q) => $q->whereNull('whatsapp_opened_at'));
+            ->when($onlyUnopened, fn ($q) => $q->whereNull('whatsapp_opened_at'));
     }
 
     private function cancelUnpaidOrder(int $orderId, int $olderThanHours, bool $onlyUnopened, string $note): bool
     {
-        return DB::transaction(function () use ($orderId, $olderThanHours, $onlyUnopened, $note) {
+        $order = DB::transaction(function () use ($orderId, $olderThanHours, $onlyUnopened, $note) {
             // re-check the conditions in the update itself: if the admin confirmed the order
             // (or the customer opened whatsapp) in the meantime, nothing is updated and the stock stays
             $cancelled = $this->unpaidOrdersQuery($olderThanHours, $onlyUnopened)
@@ -232,7 +242,7 @@ class OrderService
                 ->update(['status' => 'cancelled']);
 
             if (! $cancelled) {
-                return false;
+                return null;
             }
 
             $order = Order::with('items')->find($orderId);
@@ -252,19 +262,29 @@ class OrderService
                 'items' => $order->items->count(),
             ]);
 
-            return true;
+            return $order;
         });
+
+        if (! $order) {
+            return false;
+        }
+
+        $this->notifyCancelled($order);
+
+        return true;
     }
 
     public function changeStatus(Order $order, string $to, ?User $user, ?string $note)
     {
-        return DB::transaction(function () use ($order, $to, $user, $note) {
+        $order = DB::transaction(function () use ($order, $to, $user, $note) {
             // re-read the order under the lock so we check the real current status,
             // not the one loaded by route binding (another admin may have changed it)
             $order = Order::whereKey($order->id)->lockForUpdate()->firstOrFail();
             $from = $order->status;
 
-            if (! $order->canTransitionTo($to)) abort(422, "Cannot change order status from {$from} to {$to}.");
+            if (! $order->canTransitionTo($to)) {
+                abort(422, "Cannot change order status from {$from} to {$to}.");
+            }
 
             // restore the stock if the order is cancelled
             if ($to === 'cancelled') {
@@ -282,7 +302,7 @@ class OrderService
                 'user_id' => $user?->id,
                 'from_status' => $from,
                 'to_status' => $to,
-                'note' => $note
+                'note' => $note,
             ]);
 
             Log::channel('orders')->info('order.status_changed', [
@@ -290,11 +310,34 @@ class OrderService
                 'from_status' => $from,
                 'to_status' => $to,
                 'payment_status' => $order->payment_status,
-                'by' => $user?->name ?? 'system'
+                'by' => $user?->name ?? 'system',
             ]);
 
             return $order;
         });
+
+        if ($to === 'cancelled') {
+            $this->notifyCancelled($order);
+        }
+
+        return $order;
+    }
+
+    // runs after the transaction: an email problem must never undo the cancellation
+    private function notifyCancelled(Order $order): void
+    {
+        if (! $order->email) {
+            return;
+        }
+
+        try {
+            Mail::to($order->email)->send(new CustomerOrderCancelledMail($order));
+        } catch (Throwable $e) {
+            Log::channel('orders')->error('order.cancelled_email_failed', [
+                'order_number' => $order->order_number,
+                'exception' => $e,
+            ]);
+        }
     }
 
     // give back the stock of every item of the order (items must be loaded)

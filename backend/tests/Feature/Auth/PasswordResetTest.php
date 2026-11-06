@@ -46,4 +46,26 @@ class PasswordResetTest extends TestCase
             return true;
         });
     }
+
+    public function test_forgot_password_does_not_reveal_which_emails_have_an_account(): void
+    {
+        Notification::fake();
+        $user = User::factory()->create();
+
+        $known = $this->postJson('/forgot-password', ['email' => $user->email])->assertOk();
+        $unknown = $this->postJson('/forgot-password', ['email' => 'nobody@example.com'])->assertOk();
+
+        $this->assertSame($known->json(), $unknown->json());
+    }
+
+    public function test_reset_password_does_not_reveal_which_emails_have_an_account(): void
+    {
+        $user = User::factory()->create();
+        $fields = ['token' => 'wrong', 'password' => 'new-password', 'password_confirmation' => 'new-password'];
+
+        $known = $this->postJson('/reset-password', [...$fields, 'email' => $user->email])->assertUnprocessable();
+        $unknown = $this->postJson('/reset-password', [...$fields, 'email' => 'nobody@example.com'])->assertUnprocessable();
+
+        $this->assertSame($known->json('errors'), $unknown->json('errors'));
+    }
 }

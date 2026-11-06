@@ -21,7 +21,7 @@ class InsufficientStockException extends Exception
 
     public function render(Request $request)
     {
-        if ($request->expectsJson()) {
+        if ($request->is('api/*') || $request->expectsJson()) {
             return $this->fail($this->getMessage(), 400, null);
         }
     }

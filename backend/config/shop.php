@@ -2,7 +2,7 @@
 
 return [
     'whatsapp' => [
-        'number' => env('SHOP_WHATSAPP_NUMBER') ?: '212693303131'
+        'number' => env('SHOP_WHATSAPP_NUMBER') ?: '212693303131',
     ],
 
     'admin' => [
@@ -12,6 +12,6 @@ return [
     ],
 
     'mail' => [
-        'address' => env('SHOP_MAIL_ADDRESS') ?: 'lume-perfums@gmail.com'
-    ]
+        'address' => env('SHOP_MAIL_ADDRESS') ?: 'lume-perfums@gmail.com',
+    ],
 ];
