@@ -64,6 +64,8 @@ These run every 5 minutes:
 | `orders:cancel-unpaid --hours=1 --unopened` | Cancels pending orders whose WhatsApp link wasn't opened within 1 hour, and restores the stock |
 | `orders:cancel-unpaid --hours=24` | Cancels orders still pending after 24 hours, and restores the stock |
 
+`cache:prune-expired` also runs every hour and deletes expired rows from the database cache table.
+
 In production, run `php artisan schedule:run` from cron every minute, and keep `queue:work` running under a process manager such as Supervisor.
 
 ## Run the tests
