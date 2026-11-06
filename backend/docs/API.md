@@ -256,7 +256,7 @@ Only admins have accounts, and there's no public sign-up. These routes are at th
 | `GET /sanctum/csrf-cookie` | None | `204`, sets the CSRF cookie |
 | `POST /login` | `email`, `password`, optional `remember` | `204`, starts the session |
 | `POST /logout` | None | `204` |
-| `POST /forgot-password` | `email` | `200`, `{ "status": "..." }`, emails a reset link |
+| `POST /forgot-password` | `email` | `200`, `{ "status": "..." }`, emails a reset link. The answer is the same if no account has that email. |
 | `POST /reset-password` | `token`, `email`, `password`, `password_confirmation` | `200`, `{ "status": "..." }` |
 
 Log in like this:
