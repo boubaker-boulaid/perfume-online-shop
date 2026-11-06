@@ -27,7 +27,6 @@ class StatsService
             'revenue_last_30_days' => $this->piece('revenue_last_30_days', fn () => $this->getRevenuePerDay()),
             'top_products' => $this->piece('top_products', fn () => $this->getTopProducts()),
             'low_stock' => $this->piece('low_stock', fn () => $this->getLowStock()),
-            'pending_over_24h' => $this->piece('pending_over_24h', fn () => $this->getPendingOver24h()),
         ];
     }
 
@@ -110,16 +109,6 @@ class StatsService
         return Product::where('stock', '<', self::LOW_STOCK_LIMIT)
             ->orderBy('stock')
             ->get(['id', 'name', 'slug', 'stock', 'is_active'])
-            ->toArray();
-    }
-
-    // pending orders waiting more than a day: the customers to phone
-    public function getPendingOver24h(): array
-    {
-        return Order::where('status', 'pending')
-            ->where('created_at', '<=', now()->subHours(24))
-            ->oldest()
-            ->get(['id', 'order_number', 'customer_name', 'phone', 'city', 'total', 'created_at'])
             ->toArray();
     }
 }

@@ -29,7 +29,7 @@ class OrderFiltersRequest extends FormRequest
             'city' => 'nullable|string|max:50',
             'date_from' => 'nullable|date',
             'date_to' => 'nullable|date|after_or_equal:date_from',
-            'older_than_hours' => 'nullable|integer|min:1', // e.g. pending orders older than 24h to follow up on
+            'older_than_hours' => 'nullable|integer|min:1', // e.g. pending orders older than 12h to follow up on, before they are cancelled at 24h
             'sort' => 'nullable|in:newest,oldest,total_desc,total_asc',
         ];
     }

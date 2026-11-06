@@ -313,18 +313,7 @@ Returns the dashboard numbers, cached for 5 minutes.
     "top_products": [
       { "product_id": 1, "name": "Celestial Rose", "slug": "celestial-rose", "stock": 23, "sold": 2, "revenue": 1780 }
     ],
-    "low_stock": [{ "id": 4, "name": "Oud Royal", "slug": "oud-royal", "stock": 2, "is_active": true }],
-    "pending_over_24h": [
-      {
-        "id": 1,
-        "order_number": "ORD-2026-000001",
-        "customer_name": "Sara Alaoui",
-        "phone": "+212600000000",
-        "city": "Agadir",
-        "total": "1780.00",
-        "created_at": "2026-11-05T22:15:05.000000Z"
-      }
-    ]
+    "low_stock": [{ "id": 4, "name": "Oud Royal", "slug": "oud-royal", "stock": 2, "is_active": true }]
   },
   "errors": null
 }
@@ -335,7 +324,6 @@ Returns the dashboard numbers, cached for 5 minutes.
 - `revenue_last_30_days` always has 30 entries, with 0 for days with no sales.
 - `top_products` leaves out cancelled orders and has at most 5 entries.
 - `low_stock` lists products with fewer than 5 units.
-- `pending_over_24h` lists orders that have been pending for at least 24 hours.
 - If one part of the stats fails, it comes back as `null` and the others still load, so handle `null` in each section.
 
 ### Products

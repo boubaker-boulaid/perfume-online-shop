@@ -12,20 +12,26 @@ class StatsTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_pending_over_24h_only_lists_orders_older_than_24_hours(): void
+    public function test_the_dashboard_returns_each_of_its_numbers(): void
     {
-        $tooRecent = Order::factory()->create(['created_at' => now()->subHours(23)->subMinutes(30)]);
-        $overdue = Order::factory()->create(['created_at' => now()->subHours(25)]);
-        Order::factory()->confirmed()->create(['created_at' => now()->subHours(48)]);
+        Order::factory()->confirmed()->create();
 
         Sanctum::actingAs(User::factory()->admin()->create());
 
-        $response = $this->getJson('/api/v1/admin/stats')->assertOk();
+        $this->getJson('/api/v1/admin/stats')
+            ->assertOk()
+            ->assertJsonPath('data.orders_by_status.confirmed', 1)
+            ->assertJsonMissingPath('data.pending_over_24h')
+            ->assertJsonStructure(['data' => ['revenue_this_month', 'orders_by_status', 'revenue_last_30_days', 'top_products', 'low_stock']]);
+    }
 
-        $this->assertSame(
-            [$overdue->order_number],
-            array_column($response->json('data.pending_over_24h'), 'order_number'),
-        );
-        $this->assertNotContains($tooRecent->order_number, array_column($response->json('data.pending_over_24h'), 'order_number'));
+    // the dashboard can't list orders pending for over 24h, because the scheduler cancels them at that point
+    public function test_an_order_pending_for_24_hours_is_cancelled(): void
+    {
+        $order = Order::factory()->create(['status' => 'pending', 'whatsapp_opened_at' => now()->subHours(25), 'created_at' => now()->subHours(25)]);
+
+        $this->artisan('orders:cancel-unpaid', ['--hours' => 24]);
+
+        $this->assertSame('cancelled', $order->fresh()->status);
     }
 }

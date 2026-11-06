@@ -193,7 +193,7 @@ class OrderService
         })->when($filters['date_to'] ?? null, function ($q, $to) {
             $q->whereDate('created_at', '<=', $to);
         })->when($filters['older_than_hours'] ?? null, function ($q, $hours) {
-            // e.g. pending orders older than 24h whose customer never sent the whatsapp message
+            // e.g. pending orders older than 12h to follow up on, before they are cancelled at 24h
             $q->where('created_at', '<=', now()->subHours($hours));
         });
 
