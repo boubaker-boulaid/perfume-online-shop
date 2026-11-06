@@ -80,6 +80,7 @@ class ProductService
     public function createProduct(array $data, UploadedFile $image)
     {
         $data['slug'] = $this->uniqueSlug(Product::class, $data['name']);
+        $data['sort_order'] ??= 0; // an empty form field arrives as null, and the column can't be null
         $data['image_path'] = $this->storeImage($image, 'products');
         unset($data['image']);
 

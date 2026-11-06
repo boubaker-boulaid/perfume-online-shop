@@ -31,6 +31,7 @@ class CategoryService
     public function createCategory(array $data, ?UploadedFile $image)
     {
         $data['slug'] = $this->uniqueSlug(Category::class, $data['name']);
+        $data['sort_order'] ??= 0; // an empty form field arrives as null, and the column can't be null
         unset($data['image']);
 
         if ($image) {
