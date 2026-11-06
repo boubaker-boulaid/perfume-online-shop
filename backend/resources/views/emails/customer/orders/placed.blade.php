@@ -7,7 +7,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="x-apple-disable-message-reformatting">
-    <title>Order Confirmation</title>
+    <title>We received your order</title>
     <style>
         @media screen and (max-width: 620px) {
             .container { width: 100% !important; }
@@ -24,7 +24,7 @@
 <body style="margin:0; padding:0; background-color:#f6f4ef; font-family:Helvetica, Arial, sans-serif;">
     {{-- preheader, invisible but picked up by mail clients --}}
     <div style="display:none; max-height:0; overflow:hidden;">
-        Order {{ $order->order_number }} confirmed — thank you for shopping with Lume-Perfums.
+        Order {{ $order->order_number }} received — send it to us on WhatsApp to confirm it.
     </div>
 
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f6f4ef; padding:24px 12px;">
@@ -48,8 +48,8 @@
                                 Thank you, {{ $order->customer_name }}!
                             </h1>
                             <p style="margin:0 0 28px; font-size:14px; line-height:22px; color:#6d635a;">
-                                Your order has been received and is being prepared. We will confirm the
-                                delivery details with you by phone or WhatsApp shortly.
+                                We have received your order and reserved your items. To confirm it, send us
+                                the order message on WhatsApp. We will then arrange the delivery with you.
                             </p>
 
                             {{-- order summary box --}}
@@ -65,6 +65,21 @@
                                     </td>
                                 </tr>
                             </table>
+
+                            {{-- call to action --}}
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:12px;">
+                                <tr>
+                                    <td align="center">
+                                        <a href="{{ $order->whatsappRedirectUrl() }}" target="_blank"
+                                           style="display:inline-block; background-color:#221a12; color:#ffffff; font-size:15px; font-weight:bold; text-decoration:none; padding:16px 36px; border-radius:30px;">
+                                            Confirm my order on WhatsApp
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                            <p style="margin:0 0 32px; font-size:13px; line-height:20px; color:#6d635a; text-align:center;">
+                                Orders not sent within 1 hour are cancelled automatically. Already sent it? You have nothing else to do.
+                            </p>
 
                             {{-- items — the unit price column hides on small screens --}}
                             <h2 style="margin:0 0 12px; font-family:Georgia, 'Times New Roman', serif; font-size:16px; color:#221a12;">Your items</h2>
@@ -146,7 +161,7 @@
                             <p class="brand" style="margin:0 0 6px; font-family:Georgia, 'Times New Roman', serif; font-size:13px; letter-spacing:4px; color:#c8a24a;">LUME PERFUMS</p>
                             <p style="margin:0; font-size:12px; line-height:18px; color:#8a7f72;">
                                 You are receiving this email because you placed an order on our online store.<br>
-                                This is an automatic confirmation — no reply is required.
+                                This is an automatic email.
                             </p>
                         </td>
                     </tr>

@@ -48,7 +48,7 @@
                             </h1>
                             <p style="margin:0 0 28px; font-size:14px; line-height:22px; color:#6d635a;">
                                 We have reserved your items, but we haven't received your order on WhatsApp yet.
-                                Send us the order message to confirm it and arrange payment.
+                                Send us the order message to confirm it. You pay when your order is delivered.
                             </p>
 
                             {{-- order summary box --}}

@@ -29,7 +29,7 @@ class CustomerOrderPlacedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Order Confirmation',
+            subject: 'We received your order',
         );
     }
 
