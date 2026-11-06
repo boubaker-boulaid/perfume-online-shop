@@ -85,7 +85,8 @@ Fields inside arrays use dotted names, such as `items.0.quantity`.
 | 419 | CSRF token missing or expired | Call `/sanctum/csrf-cookie` again, then retry |
 | 422 | Validation failed, or the status change isn't allowed | Show `errors`, or `message` when `errors` is null |
 | 429 | Too many requests | Wait for the number of seconds in the `Retry-After` header |
-| 500 | Server error | Show a general error and let the user retry |
+| 500 | Server error | Show a general error with `request_id` and let the user retry |
+| 503 | The database can't be reached | Ask the user to try again shortly |
 
 ### Rate limits
 

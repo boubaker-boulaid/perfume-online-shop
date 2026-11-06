@@ -6,6 +6,8 @@ use App\Http\Middleware\IsAdmin;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\LostConnectionDetector;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -80,6 +82,11 @@ return Application::configure(basePath: dirname(__DIR__))
 
                 // anything with its own status like abort(403)...
                 $e instanceof HttpExceptionInterface => $res($e->getMessage() ?: 'Request failed.', $e->getStatusCode()),
+
+                // the database can't be reached: nothing the customer did wrong, and worth retrying soon
+                ($e instanceof QueryException || $e instanceof PDOException)
+                && (new LostConnectionDetector)->causedByLostConnection($e)
+                => $res('The service is temporarily unavailable. Please try again shortly.', 503),
 
                 default => $res(
                     config('app.debug') ? $e->getMessage() : 'Unexpected error occurred. Please try again later.',

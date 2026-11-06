@@ -58,6 +58,19 @@ class ErrorResponsesTest extends TestCase
         $this->assertSame($response->headers->get('X-Request-Id'), Context::get('request_id'));
     }
 
+    public function test_an_unreachable_database_returns_503_without_details(): void
+    {
+        $this->mock(ProductService::class)->shouldReceive('getProducts')->andThrow(new QueryException(
+            'mysql', 'select 1', [], new PDOException('SQLSTATE[HY000] [2002] Connection refused'),
+        ));
+
+        $response = $this->getJson('/api/v1/products');
+
+        $response->assertServiceUnavailable()->assertJsonPath('success', false);
+        $this->assertStringNotContainsString('SQLSTATE', $response->getContent());
+        $this->assertNotEmpty($response->json('request_id'));
+    }
+
     public function test_any_other_query_error_is_still_a_500(): void
     {
         config(['app.debug' => false]);
