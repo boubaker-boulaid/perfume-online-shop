@@ -170,7 +170,7 @@ Places an order. It's a public endpoint, so customers don't need an account. Sto
 | Field | Rules |
 |---|---|
 | `customer_name` | Required, max 50 characters |
-| `phone` | Required, max 13 characters including spaces. Digits, spaces and `+ ( ) . -` are allowed. |
+| `phone` | Required, a Moroccan number: `06...`, `+2126...` or `002126...`, starting with 5, 6 or 7 after the prefix. Spaces and `( ) . -` are removed before it's saved. |
 | `email` | Required, valid email address |
 | `city` | Required, max 50 characters |
 | `address` | Required, max 255 characters |
