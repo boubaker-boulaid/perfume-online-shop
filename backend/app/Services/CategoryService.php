@@ -11,7 +11,7 @@ use Throwable;
 
 class CategoryService
 {
-    use HandlesSlugsAndImages, HandlesCache;
+    use HandlesCache, HandlesSlugsAndImages;
 
     private const CATEGORIES_CACHE_SECONDS = 3600;
 
@@ -20,7 +20,7 @@ class CategoryService
         $key = $this->versionedKey('catalog', 'categories', 'page', (string) Paginator::resolveCurrentPage());
 
         return $this->cached($key, self::CATEGORIES_CACHE_SECONDS,
-            fn() => Category::active()->withCount(['products' => fn($q) => $q->active()])->orderBy('sort_order')->latest()->paginate(10));
+            fn () => Category::active()->withCount(['products' => fn ($q) => $q->active()])->orderBy('sort_order')->latest()->paginate(10));
     }
 
     public function getAdminCategories()

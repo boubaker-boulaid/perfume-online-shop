@@ -42,8 +42,8 @@ class StoreOrderRequest extends FormRequest
             'items' => ['required', 'array', 'min:1', 'max:99'],
             'items.*' => ['required', 'array:product_id,quantity'],
             'items.*.product_id' => ['required', 'distinct', Rule::exists('products', 'id')->where('is_active', true)
-                ->where(fn($q) => $q->whereIn('category_id', fn($categories) => $categories->select('id')->from('categories')->where('is_active', true)))],
-            'items.*.quantity' => ['required', 'integer', 'min:1', 'max:99']
+                ->where(fn ($q) => $q->whereIn('category_id', fn ($categories) => $categories->select('id')->from('categories')->where('is_active', true)))],
+            'items.*.quantity' => ['required', 'integer', 'min:1', 'max:99'],
         ];
     }
 

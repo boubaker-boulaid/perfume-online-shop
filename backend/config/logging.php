@@ -139,7 +139,7 @@ return [
             'driver' => 'daily',
             'path' => storage_path('logs/orders/order.log'),
             'level' => 'info',
-            'days' => 90 
+            'days' => 90,
         ],
 
         // logins, failed logins, lockouts, price changes

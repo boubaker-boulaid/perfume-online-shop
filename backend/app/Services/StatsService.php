@@ -16,17 +16,18 @@ class StatsService
     use HandlesCache;
 
     private const CACHE_SECONDS = 300;
+
     private const LOW_STOCK_LIMIT = 5;
 
     public function dashboard(): array
     {
         return [
-            'revenue_this_month' => $this->piece('revenue_this_month', fn() => $this->getMonthRevenue()),
-            'orders_by_status' => $this->piece('orders_by_status', fn() => $this->getOrdersByStatus()),
-            'revenue_last_30_days' => $this->piece('revenue_last_30_days', fn() => $this->getRevenuePerDay()),
-            'top_products' => $this->piece('top_products', fn() => $this->getTopProducts()),
-            'low_stock' => $this->piece('low_stock', fn() => $this->getLowStock()),
-            'pending_over_24h' => $this->piece('pending_over_24h', fn() => $this->getPendingOver24h()),
+            'revenue_this_month' => $this->piece('revenue_this_month', fn () => $this->getMonthRevenue()),
+            'orders_by_status' => $this->piece('orders_by_status', fn () => $this->getOrdersByStatus()),
+            'revenue_last_30_days' => $this->piece('revenue_last_30_days', fn () => $this->getRevenuePerDay()),
+            'top_products' => $this->piece('top_products', fn () => $this->getTopProducts()),
+            'low_stock' => $this->piece('low_stock', fn () => $this->getLowStock()),
+            'pending_over_24h' => $this->piece('pending_over_24h', fn () => $this->getPendingOver24h()),
         ];
     }
 
@@ -38,6 +39,7 @@ class StatsService
             return $this->cached("stats.{$key}", self::CACHE_SECONDS, $fn);
         } catch (Throwable $e) {
             Log::error("Stats piece failed: {$key}", ['exception' => $e]);
+
             return null;
         }
     }
@@ -57,7 +59,7 @@ class StatsService
 
         // statuses with no orders come back as 0 instead of missing
         return collect(array_keys(Order::TRANSITIONS))
-            ->mapWithKeys(fn($status) => [$status => (int) ($counts[$status] ?? 0)])
+            ->mapWithKeys(fn ($status) => [$status => (int) ($counts[$status] ?? 0)])
             ->all();
     }
 
@@ -73,7 +75,7 @@ class StatsService
 
         // days without paid orders are missing from the query, fill them with 0
         return collect(CarbonPeriod::create($from, now()->startOfDay()))
-            ->map(fn(CarbonInterface $date) => [
+            ->map(fn (CarbonInterface $date) => [
                 'date' => $date->toDateString(),
                 'revenue' => (float) ($totals[$date->toDateString()] ?? 0),
             ])
@@ -92,7 +94,7 @@ class StatsService
             ->limit($limit)
             ->with('product:id,name,slug,stock')
             ->get()
-            ->map(fn($item) => [
+            ->map(fn ($item) => [
                 'product_id' => $item->product_id,
                 'name' => $item->product?->name,
                 'slug' => $item->product?->slug,

@@ -12,14 +12,15 @@ use Illuminate\Console\Command;
 class CancelUnpaidOrders extends Command
 {
     /**
-    * Execute the console command.
-    */
+     * Execute the console command.
+     */
     public function handle(OrderService $order_service)
     {
         $hours = filter_var($this->option('hours'), FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
 
         if ($hours === false) {
             $this->error('The --hours option must be a whole number of at least 1.');
+
             return self::FAILURE;
         }
 

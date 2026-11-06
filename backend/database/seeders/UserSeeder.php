@@ -24,7 +24,7 @@ class UserSeeder extends Seeder
             'password' => Hash::make($password),
             'is_admin' => true,
             'email_verified_at' => now(),
-            'remember_token' => Str::random(10)
+            'remember_token' => Str::random(10),
         ]);
     }
 }

@@ -14,10 +14,8 @@ class CategoryController extends Controller
 {
     use ApiResponseTrait;
 
-    public function __construct(protected CategoryService $category_service)
-    {
+    public function __construct(protected CategoryService $category_service) {}
 
-    }
     /**
      * Display a listing of the resource.
      */

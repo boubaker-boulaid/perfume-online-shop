@@ -15,10 +15,8 @@ class ProductController extends Controller
 {
     use ApiResponseTrait;
 
-    public function __construct(protected ProductService $product_service)
-    {
-        
-    }
+    public function __construct(protected ProductService $product_service) {}
+
     /**
      * Display a listing of the resource.
      */
@@ -60,6 +58,7 @@ class ProductController extends Controller
         return $this->okNoPgs(new ProductResource($this->product_service->getProduct($slug)),
             'Product Retrieved');
     }
+
     /**
      * Update the specified resource in storage.
      */
@@ -76,12 +75,14 @@ class ProductController extends Controller
     public function destroy(Product $product)
     {
         $this->product_service->deleteProduct($product);
+
         return $this->noContent();
     }
 
     public function featured()
     {
         $products = $this->product_service->getFeatured();
+
         return $this->okNoPgs(ProductResource::collection($products), 'Featured products retrieved');
     }
 }

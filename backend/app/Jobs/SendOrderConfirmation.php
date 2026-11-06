@@ -14,6 +14,7 @@ class SendOrderConfirmation implements ShouldQueue
     use Queueable;
 
     public $tries = 3;
+
     public array $backoff = [10, 60, 300];
 
     /**
@@ -32,7 +33,9 @@ class SendOrderConfirmation implements ShouldQueue
         $order = Order::findOrFail($this->orderId);
 
         // stop if the email already sent
-        if ($order->confirmation_sent_at) return;
+        if ($order->confirmation_sent_at) {
+            return;
+        }
 
         // send an email to the company email
         Mail::to(config('shop.mail.address'))->send(new AdminOrderPlacedMail($order));

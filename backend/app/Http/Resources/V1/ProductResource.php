@@ -5,7 +5,6 @@ namespace App\Http\Resources\V1;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
-use App\Http\Resources\V1\CategoryResource;
 
 class ProductResource extends JsonResource
 {
@@ -33,7 +32,7 @@ class ProductResource extends JsonResource
             'is_active' => $this->is_active,
             'is_featured' => $this->is_featured,
             'created_at' => $this->created_at?->toISOString(),
-            'updated_at' => $this->updated_at?->toISOString()
+            'updated_at' => $this->updated_at?->toISOString(),
         ];
     }
 }

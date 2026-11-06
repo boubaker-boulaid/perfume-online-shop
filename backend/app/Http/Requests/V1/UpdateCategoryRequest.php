@@ -28,7 +28,7 @@ class UpdateCategoryRequest extends FormRequest
             'description' => ['nullable', 'string'],
             'image' => ['sometimes', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'is_active' => ['sometimes', 'boolean'],
-            'sort_order' => ['sometimes', 'integer', 'min:0', 'max:2147483647']
+            'sort_order' => ['sometimes', 'integer', 'min:0', 'max:2147483647'],
         ];
     }
 }

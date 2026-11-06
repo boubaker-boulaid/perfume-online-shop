@@ -34,7 +34,7 @@ class StoreProductRequest extends FormRequest
             'sort_order' => ['nullable', 'integer', 'min:0', 'max:2147483647'],
             'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'is_active' => ['boolean'],
-            'is_featured' => ['boolean']
+            'is_featured' => ['boolean'],
         ];
     }
 }

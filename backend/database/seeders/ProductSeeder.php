@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\Category;
 use App\Models\Product;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
@@ -78,8 +77,8 @@ class ProductSeeder extends Seeder
                 'image' => 'ether_solace.jpg',
             ],
         ];
-        
-        $categoryIds = Category::pluck('id', 'slug');  //pluck returns an array like this [slug1 => id1, ...]
+
+        $categoryIds = Category::pluck('id', 'slug');  // pluck returns an array like this [slug1 => id1, ...]
 
         foreach ($products as $product) {
             $imagePath = $this->copyImage($product['image']);
@@ -97,19 +96,19 @@ class ProductSeeder extends Seeder
                     'sort_order' => $product['sort_order'],
                     'image_path' => $imagePath,
                     'is_active' => $product['is_active'],
-                    'is_featured' => $product['is_featured'],                   
+                    'is_featured' => $product['is_featured'],
                 ]
             );
         }
     }
 
-    private function copyImage(string $imageName):string
+    private function copyImage(string $imageName): string
     {
-        $newPath = 'products/'. $imageName; // storage/app/public/products/imageName.jpg
-        $imageSource = database_path('seeders/assets/pr-images/'. $imageName);
+        $newPath = 'products/'.$imageName; // storage/app/public/products/imageName.jpg
+        $imageSource = database_path('seeders/assets/pr-images/'.$imageName);
 
-        if (! is_file($imageSource)){
-            throw new RuntimeException('seed image missing: '. $imageName);
+        if (! is_file($imageSource)) {
+            throw new RuntimeException('seed image missing: '.$imageName);
         }
 
         Storage::disk('public')->put($newPath, file_get_contents($imageSource));

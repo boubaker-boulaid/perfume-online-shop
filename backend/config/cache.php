@@ -1,5 +1,10 @@
 <?php
 
+use App\Models\Category;
+use App\Models\Product;
+use Carbon\Carbon;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 return [
@@ -135,13 +140,13 @@ return [
     */
 
     'serializable_classes' => [
-        \Illuminate\Pagination\LengthAwarePaginator::class,
-        \Illuminate\Database\Eloquent\Collection::class,
-        \Illuminate\Support\Collection::class,
-        \App\Models\Product::class,
-        \App\Models\Category::class,
-        \Illuminate\Support\Carbon::class,
-        \Carbon\Carbon::class,
+        LengthAwarePaginator::class,
+        Illuminate\Database\Eloquent\Collection::class,
+        Collection::class,
+        Product::class,
+        Category::class,
+        Illuminate\Support\Carbon::class,
+        Carbon::class,
     ],
 
 ];

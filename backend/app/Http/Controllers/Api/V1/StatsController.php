@@ -10,9 +10,7 @@ class StatsController extends Controller
 {
     use ApiResponseTrait;
 
-    public function __construct(protected StatsService $stats_service)
-    {
-    }
+    public function __construct(protected StatsService $stats_service) {}
 
     public function index()
     {

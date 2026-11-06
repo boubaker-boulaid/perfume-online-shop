@@ -30,7 +30,7 @@ class OrderFiltersRequest extends FormRequest
             'date_from' => 'nullable|date',
             'date_to' => 'nullable|date|after_or_equal:date_from',
             'older_than_hours' => 'nullable|integer|min:1', // e.g. pending orders older than 24h to follow up on
-            'sort' => 'nullable|in:newest,oldest,total_desc,total_asc'
+            'sort' => 'nullable|in:newest,oldest,total_desc,total_asc',
         ];
     }
 }

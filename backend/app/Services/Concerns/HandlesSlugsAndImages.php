@@ -30,7 +30,7 @@ trait HandlesSlugsAndImages
         $i = 2;
 
         while ($model::where('slug', $slug)->exists()) {
-            $slug = $base . '-' . $i++;
+            $slug = $base.'-'.$i++;
         }
 
         return $slug;

@@ -14,17 +14,17 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->string('order_number')->unique();
-            $table->string('idempotency_key')->unique(); //stops the same order being saved twice 
+            $table->string('idempotency_key')->unique(); // stops the same order being saved twice
             $table->string('customer_name');
             $table->string('phone');
-            $table->string('email')->nullable(); //used to send the confirmation
+            $table->string('email')->nullable(); // used to send the confirmation
             $table->string('city')->nullable();
             $table->text('address')->nullable();
-            $table->text('note')->nullable(); // anything the customer wants to add 
-            $table->decimal('subtotal',10,2);
-            $table->decimal('shipping_cost',10,2)->default(0);
-            $table->dateTime('confirmation_sent_at')->nullable(); //prevent the confirmation email being sent twice 
-            $table->decimal('total',10,2); //subtotal + shipping_cost
+            $table->text('note')->nullable(); // anything the customer wants to add
+            $table->decimal('subtotal', 10, 2);
+            $table->decimal('shipping_cost', 10, 2)->default(0);
+            $table->dateTime('confirmation_sent_at')->nullable(); // prevent the confirmation email being sent twice
+            $table->decimal('total', 10, 2); // subtotal + shipping_cost
             $table->string('status')->index()->default('pending');
             $table->string('payment_status')->default('unpaid');
             $table->dateTime('whatsapp_opened_at')->nullable();

@@ -34,7 +34,7 @@ class FiltersRequest extends FormRequest
             'category' => ['nullable', $category],
             'min_price' => 'nullable|numeric|min:0',
             'max_price' => 'nullable|numeric|min:0',
-            'sort' => 'nullable|in:price_desc,price_asc,newest,oldest'
+            'sort' => 'nullable|in:price_desc,price_asc,newest,oldest',
         ];
     }
 }

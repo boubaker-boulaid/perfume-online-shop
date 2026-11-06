@@ -43,6 +43,7 @@ class OrderService
                     if (is_null($orderExists->confirmation_sent_at)) {
                         SendOrderConfirmation::dispatch($orderExists->id);
                     }
+
                     return $orderExists;
                 }
 
@@ -52,6 +53,7 @@ class OrderService
                 // calculate the total
                 $total = collect($data['items'])->sum(function ($item) use ($products) {
                     $product = $products->get($item['product_id']);
+
                     return $product->price * $item['quantity'];
                 });
 
@@ -67,7 +69,7 @@ class OrderService
                     'address' => $data['address'],
                     'note' => $data['note'] ?? null,
                     'subtotal' => $total,
-                    'total' => $total
+                    'total' => $total,
                 ]);
 
                 $this->saveOrderItems($order, $products, $data['items']);
@@ -78,7 +80,7 @@ class OrderService
                 Log::channel('orders')->info('order.placed', [
                     'order_number' => $order->order_number,
                     'total' => $order->total,
-                    'items' => $order->items->count()
+                    'items' => $order->items->count(),
                 ]);
 
                 return $order;
@@ -99,7 +101,7 @@ class OrderService
             // no customer details in the log (name, phone, address): the key and items are enough to investigate
             Log::channel('daily')->error('order.place_failed', [
                 'idempotency_key' => $data['idempotency_key'] ?? null,
-                'items' => collect($data['items'] ?? [])->map(fn($i) => ['product_id' => $i['product_id'] ?? null, 'quantity' => $i['quantity'] ?? null])->all(),
+                'items' => collect($data['items'] ?? [])->map(fn ($i) => ['product_id' => $i['product_id'] ?? null, 'quantity' => $i['quantity'] ?? null])->all(),
                 'exception' => $e,
             ]);
             throw $e;
@@ -114,8 +116,8 @@ class OrderService
         foreach ($items as $item) {
             $product = $products->get($item['product_id']);
 
-            if (!$product) {
-                throw new ModelNotFoundException('Product with id ' . $item['product_id'] . ' not found.');
+            if (! $product) {
+                throw new ModelNotFoundException('Product with id '.$item['product_id'].' not found.');
             }
 
             if ($product->stock < $item['quantity']) {
@@ -131,21 +133,21 @@ class OrderService
     private function generateOrderNumber()
     {
         $year = now()->year;
-        // get the sequence of the current year and lock the table to prevant having the same name for several orders placed at the same time 
+        // get the sequence of the current year and lock the table to prevant having the same name for several orders placed at the same time
         $sequence = DB::table('order_sequences')->where('year', $year)->lockForUpdate()->first();
 
-        if (!$sequence) {
+        if (! $sequence) {
             // manualy create the first sequence
             DB::table('order_sequences')->insert([
                 'year' => $year,
-                'last_number' => 1
+                'last_number' => 1,
             ]);
             $number = 1;
         } else {
             $number = $sequence->last_number + 1;
             // increase the last_number of the last sequence by 1
             DB::table('order_sequences')->where('year', $year)->update([
-                'last_number' => $number
+                'last_number' => $number,
             ]);
         }
 
@@ -162,11 +164,10 @@ class OrderService
                 'product_name' => $p->name,
                 'unit_price' => $p->price,
                 'quantity' => $i['quantity'],
-                'line_total' => $i['quantity'] * $p->price
+                'line_total' => $i['quantity'] * $p->price,
             ]);
         });
     }
-
 
     public function updateWhatsappOpened(string $orderNumber)
     {
@@ -180,13 +181,13 @@ class OrderService
     {
         $query = Order::query();
         $query->when($filters['q'] ?? null, function ($q, $search) {
-            $q->whereAny(['customer_name', 'phone', 'order_number'], 'like', '%'. $search .'%');
+            $q->whereAny(['customer_name', 'phone', 'order_number'], 'like', '%'.$search.'%');
         })->when($filters['status'] ?? null, function ($q, $status) {
             $q->where('status', $status);
         })->when($filters['payment_status'] ?? null, function ($q, $payment_status) {
             $q->where('payment_status', $payment_status);
         })->when($filters['city'] ?? null, function ($q, $city) {
-            $q->where('city', 'like', '%'. $city .'%');
+            $q->where('city', 'like', '%'.$city.'%');
         })->when($filters['date_from'] ?? null, function ($q, $from) {
             $q->whereDate('created_at', '>=', $from);
         })->when($filters['date_to'] ?? null, function ($q, $to) {
@@ -221,14 +222,14 @@ class OrderService
         $orderIds = $this->unpaidOrdersQuery($olderThanHours, $onlyUnopened)->pluck('id');
 
         // one transaction per order, so a failure on one doesn't undo the others
-        return $orderIds->filter(fn($id) => $this->cancelUnpaidOrder($id, $olderThanHours, $onlyUnopened, $note))->count();
+        return $orderIds->filter(fn ($id) => $this->cancelUnpaidOrder($id, $olderThanHours, $onlyUnopened, $note))->count();
     }
 
     private function unpaidOrdersQuery(int $olderThanHours, bool $onlyUnopened)
     {
         return Order::where('status', 'pending')
             ->where('created_at', '<=', now()->subHours($olderThanHours))
-            ->when($onlyUnopened, fn($q) => $q->whereNull('whatsapp_opened_at'));
+            ->when($onlyUnopened, fn ($q) => $q->whereNull('whatsapp_opened_at'));
     }
 
     private function cancelUnpaidOrder(int $orderId, int $olderThanHours, bool $onlyUnopened, string $note): bool
@@ -281,7 +282,9 @@ class OrderService
             $order = Order::whereKey($order->id)->lockForUpdate()->firstOrFail();
             $from = $order->status;
 
-            if (! $order->canTransitionTo($to)) abort(422, "Cannot change order status from {$from} to {$to}.");
+            if (! $order->canTransitionTo($to)) {
+                abort(422, "Cannot change order status from {$from} to {$to}.");
+            }
 
             // restore the stock if the order is cancelled
             if ($to === 'cancelled') {
@@ -299,7 +302,7 @@ class OrderService
                 'user_id' => $user?->id,
                 'from_status' => $from,
                 'to_status' => $to,
-                'note' => $note
+                'note' => $note,
             ]);
 
             Log::channel('orders')->info('order.status_changed', [
@@ -307,7 +310,7 @@ class OrderService
                 'from_status' => $from,
                 'to_status' => $to,
                 'payment_status' => $order->payment_status,
-                'by' => $user?->name ?? 'system'
+                'by' => $user?->name ?? 'system',
             ]);
 
             return $order;

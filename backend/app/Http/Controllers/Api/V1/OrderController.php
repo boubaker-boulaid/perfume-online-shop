@@ -15,9 +15,7 @@ class OrderController extends Controller
 {
     use ApiResponseTrait;
 
-    public function __construct(protected OrderService $order_service)
-    {
-    }
+    public function __construct(protected OrderService $order_service) {}
 
     /**
      * Display a listing of the resource.
@@ -52,6 +50,7 @@ class OrderController extends Controller
     public function whatsappOpened(string $orderNumber)
     {
         $this->order_service->updateWhatsappOpened($orderNumber);
+
         return $this->noContent();
     }
 
