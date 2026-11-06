@@ -91,6 +91,18 @@ The tests focus on where a bug would cost money:
 
 Two customers buying the last unit at the same moment isn't covered. It relies on database row locks, which SQLite ignores, so test it by hand on MySQL.
 
+## Editor support
+
+[Laravel IDE Helper](https://github.com/barryvdh/laravel-ide-helper) tells your editor about Laravel's query methods and your model columns. The files it generates aren't committed, so create them after installing, and rerun the second command after changing the database tables:
+
+```bash
+php artisan ide-helper:generate
+php artisan ide-helper:models --nowrite
+php artisan ide-helper:meta
+```
+
+The second command reads the table structure from the database in your `.env`, and doesn't change any data.
+
 ## How orders work
 
 1. The customer places an order. The server calculates the total from database prices and reduces the stock straight away.
