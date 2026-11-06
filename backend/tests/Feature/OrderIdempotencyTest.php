@@ -121,4 +121,16 @@ class OrderIdempotencyTest extends TestCase
         $this->assertDatabaseCount('orders', 0);
         $this->assertSame(10, $product->fresh()->stock);
     }
+
+    public function test_an_order_number_collision_is_an_error_and_not_a_missing_order(): void
+    {
+        $product = Product::factory()->create(['stock' => 5]);
+        Order::factory()->create(['order_number' => sprintf('ORD-%d-%06d', now()->year, 1)]);
+
+        $this->postJson(self::ENDPOINT, $this->orderPayload([
+            ['product_id' => $product->id, 'quantity' => 1],
+        ]))->assertServerError();
+
+        $this->assertSame(5, $product->fresh()->stock);
+    }
 }

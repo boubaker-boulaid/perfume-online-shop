@@ -19,6 +19,9 @@ class OrderService
 {
     use HandlesCache;
 
+    // simultaneous orders can deadlock on the row locks: the database undoes one of them, so try it again
+    private const PLACE_ATTEMPTS = 5;
+
     /**
      * Create a new class instance.
      */
@@ -76,7 +79,7 @@ class OrderService
                 ]);
 
                 return $order;
-            });
+            }, self::PLACE_ATTEMPTS);
         } catch (InsufficientStockException $e) {
             // handled (the customer gets a clear error), but worth knowing what people try to buy
             Log::channel('orders')->warning('order.insufficient_stock', [
@@ -86,7 +89,9 @@ class OrderService
             ]);
             throw $e;
         } catch (UniqueConstraintViolationException $e) {
-            return Order::where('idempotency_key', $data['idempotency_key'])->firstOrFail();
+            // a simultaneous retry saved this key first, so send back its order.
+            // any other collision (the order number...) is a real error
+            return Order::where('idempotency_key', $data['idempotency_key'])->first() ?? throw $e;
         } catch (\Exception $e) {
             // no customer details in the log (name, phone, address): the key and items are enough to investigate
             Log::channel('daily')->error('order.place_failed', [
