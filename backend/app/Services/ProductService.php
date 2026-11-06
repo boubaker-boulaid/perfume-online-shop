@@ -31,14 +31,15 @@ class ProductService
         $key = $this->versionedKey('catalog', 'products', md5(json_encode([$filters, Paginator::resolveCurrentPage()])));
 
         return $this->cached($key, self::PRODUCTS_CACHE_SECONDS,
-            fn() => $this->filteredProducts($filters)->with('category')->visible()->paginate(10));
+            // only validated filters go in the links: this page is cached and shared between visitors
+            fn() => $this->filteredProducts($filters)->with('category')->visible()->paginate(10)->appends($filters));
     }
 
     public function getAdminProducts(array $filters)
     {
         $query = $this->filteredProducts($filters);
 
-        return $query->with('category')->paginate(10);
+        return $query->with('category')->paginate(10)->appends($filters);
     }
 
     private function filteredProducts(array $filters)
@@ -46,8 +47,9 @@ class ProductService
         $query = Product::query();
         $query->when($filters['q'] ?? null, fn($q, $search) => $q->where('name', 'like', '%' . $search . '%'))
             ->when($filters['category'] ?? null, fn($q, $cat) => $q->whereRelation('category', 'slug', $cat))
-            ->when($filters['min_price'] ?? null, fn($q, $min) => $q->where('price', '>=', $min))
-            ->when($filters['max_price'] ?? null, fn($q, $max) => $q->where('price', '<=', $max))
+            // isset, because a price of 0 is a real filter
+            ->when(isset($filters['min_price']), fn($q) => $q->where('price', '>=', $filters['min_price']))
+            ->when(isset($filters['max_price']), fn($q) => $q->where('price', '<=', $filters['max_price']))
         ;
 
         match ($filters['sort'] ?? null) {

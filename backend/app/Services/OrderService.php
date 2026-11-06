@@ -200,7 +200,7 @@ class OrderService
             default => $query->latest(),
         };
 
-        return $query->with('items')->withCount('items')->paginate(10);
+        return $query->with('items')->withCount('items')->paginate(10)->appends($filters);
     }
 
     public function getOrder(Order $order)
