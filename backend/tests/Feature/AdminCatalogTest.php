@@ -170,4 +170,28 @@ class AdminCatalogTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.compare_at_price', null);
     }
+
+    public function test_a_name_without_letters_still_gets_a_usable_slug(): void
+    {
+        $slug = $this->post('/api/v1/admin/products', $this->productFields(['name' => '!!!']), ['Accept' => 'application/json'])
+            ->assertCreated()
+            ->json('data.slug');
+
+        $this->assertSame('product', $slug);
+        $this->getJson("/api/v1/admin/products/{$slug}")->assertOk();
+    }
+
+    public function test_a_slug_stays_inside_its_column_with_a_suffix(): void
+    {
+        $name = str_repeat('a', 255);
+
+        foreach (['first.jpg', 'second.jpg'] as $file) {
+            $slug = $this->post('/api/v1/admin/products', $this->productFields([
+                'name' => $name,
+                'image' => UploadedFile::fake()->image($file),
+            ]), ['Accept' => 'application/json'])->assertCreated()->json('data.slug');
+        }
+
+        $this->assertSame(str_repeat('a', 240).'-2', $slug);
+    }
 }
