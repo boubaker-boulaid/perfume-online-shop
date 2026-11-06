@@ -96,7 +96,7 @@ Two customers buying the last unit at the same moment isn't covered. It relies o
 1. The customer places an order. The server calculates the total from database prices and reduces the stock straight away.
 2. The API returns a WhatsApp link with the order filled in, and the customer sends that message to the shop.
 3. An admin moves the order along: `pending` → `confirmed` → `shipped` → `delivered`. Delivery marks it as paid, because payment is cash on delivery.
-4. Orders can be cancelled while `pending` or `confirmed`, and cancelling restores the stock.
+4. Orders can be cancelled while `pending` or `confirmed`. Cancelling restores the stock and emails the customer.
 
 ## Logs
 

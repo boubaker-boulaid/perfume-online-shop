@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Exceptions\InsufficientStockException;
 use App\Jobs\SendOrderConfirmation;
+use App\Mail\CustomerOrderCancelledMail;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
@@ -14,6 +15,8 @@ use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Throwable;
 
 class OrderService
 {
@@ -230,7 +233,7 @@ class OrderService
 
     private function cancelUnpaidOrder(int $orderId, int $olderThanHours, bool $onlyUnopened, string $note): bool
     {
-        return DB::transaction(function () use ($orderId, $olderThanHours, $onlyUnopened, $note) {
+        $order = DB::transaction(function () use ($orderId, $olderThanHours, $onlyUnopened, $note) {
             // re-check the conditions in the update itself: if the admin confirmed the order
             // (or the customer opened whatsapp) in the meantime, nothing is updated and the stock stays
             $cancelled = $this->unpaidOrdersQuery($olderThanHours, $onlyUnopened)
@@ -238,7 +241,7 @@ class OrderService
                 ->update(['status' => 'cancelled']);
 
             if (! $cancelled) {
-                return false;
+                return null;
             }
 
             $order = Order::with('items')->find($orderId);
@@ -258,13 +261,21 @@ class OrderService
                 'items' => $order->items->count(),
             ]);
 
-            return true;
+            return $order;
         });
+
+        if (! $order) {
+            return false;
+        }
+
+        $this->notifyCancelled($order);
+
+        return true;
     }
 
     public function changeStatus(Order $order, string $to, ?User $user, ?string $note)
     {
-        return DB::transaction(function () use ($order, $to, $user, $note) {
+        $order = DB::transaction(function () use ($order, $to, $user, $note) {
             // re-read the order under the lock so we check the real current status,
             // not the one loaded by route binding (another admin may have changed it)
             $order = Order::whereKey($order->id)->lockForUpdate()->firstOrFail();
@@ -301,6 +312,29 @@ class OrderService
 
             return $order;
         });
+
+        if ($to === 'cancelled') {
+            $this->notifyCancelled($order);
+        }
+
+        return $order;
+    }
+
+    // runs after the transaction: an email problem must never undo the cancellation
+    private function notifyCancelled(Order $order): void
+    {
+        if (! $order->email) {
+            return;
+        }
+
+        try {
+            Mail::to($order->email)->send(new CustomerOrderCancelledMail($order));
+        } catch (Throwable $e) {
+            Log::channel('orders')->error('order.cancelled_email_failed', [
+                'order_number' => $order->order_number,
+                'exception' => $e,
+            ]);
+        }
     }
 
     // give back the stock of every item of the order (items must be loaded)
