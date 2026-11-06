@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Context;
 
 trait ApiResponseTrait
 {
@@ -72,7 +73,8 @@ trait ApiResponseTrait
             'success' => false,
             'message' => $message,
             'data' => null,
-            'errors' => $errors
+            'errors' => $errors,
+            'request_id' => Context::get('request_id'),
         ], $status);
     }
 }

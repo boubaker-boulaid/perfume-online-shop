@@ -66,9 +66,12 @@ Errors have the same shape, with `success: false`. Validation errors list the me
   "data": null,
   "errors": {
     "sort": ["The selected sort is invalid."]
-  }
+  },
+  "request_id": "01JD8XQ7M3V9T2K5N6R4W8Y1ZB"
 }
 ```
+
+`request_id` identifies the request in the backend's logs, so show it with general errors. Every response also has it in the `X-Request-Id` header.
 
 Fields inside arrays use dotted names, such as `items.0.quantity`.
 
