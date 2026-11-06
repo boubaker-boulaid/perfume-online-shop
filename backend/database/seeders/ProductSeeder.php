@@ -27,7 +27,7 @@ class ProductSeeder extends Seeder
                 'price' => 890.00,
                 'compare_at_price' => 1100.00,
                 'stock' => 25,
-                'is_active' => false,
+                'is_active' => true,
                 'is_featured' => true,
                 'sort_order' => 1,
                 'image' => 'celestial_rose.jpg',

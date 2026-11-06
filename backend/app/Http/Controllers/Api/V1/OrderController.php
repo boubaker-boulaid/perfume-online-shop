@@ -10,7 +10,6 @@ use App\Http\Requests\V1\UpdateStatusRequest;
 use App\Http\Resources\V1\OrderResource;
 use App\Models\Order;
 use App\Services\OrderService;
-use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
@@ -76,22 +75,6 @@ class OrderController extends Controller
     public function show(Order $order)
     {
         return $this->okNoPgs(new OrderResource($this->order_service->getOrder($order)), 'Order retrieved.');
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 
     public function status(Order $order, UpdateStatusRequest $request)
