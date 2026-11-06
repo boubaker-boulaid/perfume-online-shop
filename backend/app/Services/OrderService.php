@@ -162,7 +162,8 @@ class OrderService
 
     public function updateWhatsappOpened(string $orderNumber)
     {
-        Order::where('order_number', $orderNumber)->whereNull('whatsapp_opened_at')->update([
+        // a late call can't bring a cancelled order back, so only pending orders are recorded
+        Order::where('order_number', $orderNumber)->where('status', 'pending')->whereNull('whatsapp_opened_at')->update([
             'whatsapp_opened_at' => now(),
         ]);
     }

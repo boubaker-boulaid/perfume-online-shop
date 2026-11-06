@@ -14,4 +14,5 @@ Route::get('products/{slug}', [ProductController::class, 'showActive'])->name('p
 Route::middleware('throttle:orders')->group(function () {
     Route::post('orders', [OrderController::class, 'store'])->name('orders.store');
     Route::patch('orders/{orderNumber}/whatsapp-opened', [OrderController::class, 'whatsappOpened'])->middleware('signed')->name('orders.whatsapp-opened');
+    Route::get('orders/{orderNumber}/whatsapp', [OrderController::class, 'whatsappRedirect'])->middleware('signed')->name('orders.whatsapp-redirect');
 });

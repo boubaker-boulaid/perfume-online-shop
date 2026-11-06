@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\OrderItem;
 use App\Models\OrderStatusHistory;
+use Illuminate\Support\Facades\URL;
 
 class Order extends Model
 {
@@ -78,6 +79,23 @@ class Order extends Model
     public function whatsappLink():string
     {
         return 'https://wa.me/'. config('shop.whatsapp.number') . '?text='. rawurlencode($this->whatsappMessage());
+    }
+
+    // for the frontend to call when the customer opens whatsapp. it must outlive the 1 hour cancel window
+    public function whatsappOpenedUrl(): string
+    {
+        return URL::temporarySignedRoute('customer.orders.whatsapp-opened', now()->addHours(2), [
+            'orderNumber' => $this->order_number,
+        ]);
+    }
+
+    // for emails: records that whatsapp was opened, then redirects to it.
+    // a plain wa.me link can't tell us it was used, and the order would be cancelled after 1 hour
+    public function whatsappRedirectUrl(): string
+    {
+        return URL::temporarySignedRoute('customer.orders.whatsapp-redirect', now()->addDay(), [
+            'orderNumber' => $this->order_number,
+        ]);
     }
 
     // status allowed transitions the key is the current status and the value is statuses it can move to 

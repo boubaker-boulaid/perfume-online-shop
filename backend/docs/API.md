@@ -89,7 +89,7 @@ Fields inside arrays use dotted names, such as `items.0.quantity`.
 | Applies to | Limit | Counted per |
 |---|---|---|
 | All `/api/v1` routes | 60 per minute | User, or IP address for guests |
-| `POST /api/v1/orders` and `PATCH .../whatsapp-opened` | 10 per minute | IP address |
+| `POST /api/v1/orders`, `PATCH .../whatsapp-opened` and `GET .../whatsapp` | 10 per minute | IP address |
 | `/login`, `/forgot-password`, `/reset-password` | 6 per minute | IP address |
 
 ## Calling the API from a browser
@@ -239,9 +239,13 @@ Without step 2, a pending order gets a reminder email after 30 minutes and is ca
 
 ### PATCH /api/v1/orders/{orderNumber}/whatsapp-opened
 
-Records that the customer opened WhatsApp. Don't build this URL yourself: use `whatsapp_opened_url` from the order response. It's signed and expires after 30 minutes.
+Records that the customer opened WhatsApp. Don't build this URL yourself: use `whatsapp_opened_url` from the order response. It's signed and expires after 2 hours. Calling it for a cancelled order does nothing.
 
 Returns `204`. An invalid or expired signature returns `403`.
+
+### GET /api/v1/orders/{orderNumber}/whatsapp
+
+The link used in emails, so the frontend doesn't call it. It's signed and expires after 24 hours. It records that the customer opened WhatsApp and redirects them there. If the order was cancelled, it redirects to `FRONTEND_URL` instead. An invalid or expired signature returns `403`.
 
 ## Authentication
 
