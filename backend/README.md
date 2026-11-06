@@ -74,7 +74,7 @@ In production, run `php artisan schedule:run` from cron every minute, and keep `
 composer test
 ```
 
-Tests run on an in-memory SQLite database set in `phpunit.xml`, so they don't need any setup.
+Tests run on an in-memory SQLite database set in `phpunit.xml`, so they don't need any setup. They also don't write to the real log files: `tests/TestCase.php` silences the log channels, so add any new channel to its list.
 
 > **Protect your data:** use `composer test` rather than `php artisan test`, because it clears the config cache first. If you ran `php artisan config:cache`, the tests can ignore `phpunit.xml` and connect to the database in your `.env`, and `RefreshDatabase` would then delete everything in it.
 
