@@ -6,6 +6,7 @@ import './styles/layout.css'
 import './styles/home.css'
 import './styles/shop.css'
 import './styles/checkout.css'
+import './styles/motion.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

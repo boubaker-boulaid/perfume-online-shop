@@ -1,0 +1,388 @@
+/* All the site's animation. Only transform and opacity move, which stays smooth on phones.
+   Visitors who ask for reduced motion get none of it, see the end of this file. */
+
+:root {
+  --ease-out: cubic-bezier(0.25, 0.6, 0.3, 1);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(0.75);
+  }
+  55% {
+    transform: scale(1.14);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes hero-drift {
+  from {
+    transform: scale(1.07);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+/* "backwards" means the animation leaves nothing behind when it ends,
+   so hover effects still work and fixed elements stay fixed. */
+
+/* New page */
+.page-fade {
+  animation: fade-in 0.9s ease-out backwards;
+}
+
+/* Scrolling into view */
+.reveal {
+  opacity: 0;
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  animation: rise 1.3s var(--ease-out) var(--reveal-delay, 0ms) backwards;
+}
+
+/* Hero: the words arrive one by one and the photo drifts slowly */
+.hero__image img {
+  transform-origin: center 70%;
+  animation:
+    fade-in 2s ease-out backwards,
+    hero-drift 28s ease-in-out infinite alternate;
+}
+
+.hero__content > * {
+  animation: rise 1.5s var(--ease-out) backwards;
+}
+
+.hero__content > :nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.hero__content > :nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+.hero__content > :nth-child(4) {
+  animation-delay: 0.6s;
+}
+
+.hero__content > :nth-child(5) {
+  animation-delay: 0.8s;
+}
+
+.hero__content > :nth-child(6) {
+  animation-delay: 1s;
+}
+
+/* Carousel */
+.slide img {
+  transition:
+    transform 1.2s var(--ease-out),
+    width 0.8s ease;
+}
+
+.slide:not(.is-active) img {
+  transform: scale(1.05);
+}
+
+.slide__details > * {
+  animation: fade-in 1s ease-out 0.2s backwards;
+}
+
+/* Product cards */
+.product-card {
+  transition:
+    transform 0.6s var(--ease-out),
+    background 0.4s ease,
+    box-shadow 0.6s ease;
+}
+
+.product-card__image img {
+  transition: transform 1s var(--ease-out);
+}
+
+.product-card__like {
+  transition:
+    color 0.2s ease,
+    background 0.2s ease;
+}
+
+.product-card__like.is-liked svg {
+  animation: pop 0.6s var(--ease-out);
+}
+
+/* room for the hover lift inside the scrolling row */
+.best-sellers {
+  margin-block: -6px;
+  padding-block: 6px;
+}
+
+/* Things that respond to touch and clicks */
+.button,
+.pill-link,
+.ghost-link,
+.icon-button,
+.chip,
+.stepper button {
+  transition:
+    transform 0.3s var(--ease-out),
+    background 0.35s ease,
+    color 0.35s ease;
+}
+
+.button:active:not(:disabled),
+.pill-link:active,
+.ghost-link:active,
+.icon-button:active:not(:disabled),
+.chip:active,
+.stepper button:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.product-card:active {
+  transform: scale(0.985);
+}
+
+.pill-link__arrow {
+  transition: transform 0.5s var(--ease-out);
+}
+
+.ghost-link svg,
+.view-all svg {
+  transition: transform 0.5s var(--ease-out);
+}
+
+.site-nav__link,
+.site-footer__links a,
+.site-footer__legal a,
+.back-link {
+  transition:
+    color 0.2s ease,
+    background 0.2s ease;
+}
+
+/* Bag count and "Added to bag" */
+.cart-count,
+.buy-bar__button svg,
+.confirmation__icon svg {
+  animation: pop 0.65s var(--ease-out);
+}
+
+.confirmation__icon {
+  animation: fade-in 0.9s ease-out backwards;
+}
+
+/* Menu */
+.menu-panel[open] {
+  animation: slide-in 0.75s var(--ease-out);
+}
+
+.menu-panel[open]::backdrop {
+  animation: fade-in 0.6s ease-out;
+}
+
+.menu-panel[open] .menu-panel__links a {
+  animation: rise 1s var(--ease-out) backwards;
+}
+
+.menu-panel[open] .menu-panel__links a:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.menu-panel[open] .menu-panel__links a:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.menu-panel[open] .menu-panel__links a:nth-child(4) {
+  animation-delay: 0.3s;
+}
+
+.menu-panel[open] .menu-panel__links a:nth-child(5) {
+  animation-delay: 0.4s;
+}
+
+.menu-panel[open] .menu-panel__links a:nth-child(6) {
+  animation-delay: 0.5s;
+}
+
+/* Forms and messages */
+.field__error,
+.form-error,
+.confirmation__note,
+.price-filter[open] form {
+  animation: rise 0.7s var(--ease-out) backwards;
+}
+
+.field input,
+.field textarea,
+.field select,
+.sort select {
+  transition: border-color 0.2s ease;
+}
+
+/* Product page. Each piece animates on its own: a parent of the buy bar must never
+   have a transform, or the bar stops staying fixed on phones. */
+@keyframes photo-settle {
+  from {
+    scale: 1.08;
+  }
+  to {
+    scale: 1;
+  }
+}
+
+@keyframes bottle-float {
+  from {
+    translate: 0 3px;
+  }
+  to {
+    translate: 0 -5px;
+  }
+}
+
+@keyframes bar-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+.product__image {
+  animation: fade-in 1.2s ease-out backwards;
+}
+
+.product__image img {
+  animation:
+    photo-settle 1.8s var(--ease-out) backwards,
+    bottle-float 6s ease-in-out 1.8s infinite alternate;
+}
+
+.product__info > * {
+  animation: rise 1.2s var(--ease-out) 0.15s backwards;
+}
+
+.product__info > :nth-child(2) {
+  animation-delay: 0.27s;
+}
+
+.product__info > :nth-child(3) {
+  animation-delay: 0.39s;
+}
+
+.product__info > :nth-child(4) {
+  animation-delay: 0.51s;
+}
+
+.product__info > :nth-child(5) {
+  animation-delay: 0.63s;
+}
+
+.product__info > :nth-child(6) {
+  animation-delay: 0.75s;
+}
+
+.product__info > :nth-child(n + 7) {
+  animation-delay: 0.87s;
+}
+
+.product__note-list span {
+  animation: rise 0.9s var(--ease-out) 0.85s backwards;
+}
+
+.product__note-list span:nth-child(2) {
+  animation-delay: 0.97s;
+}
+
+.product__note-list span:nth-child(3) {
+  animation-delay: 1.09s;
+}
+
+.stepper span {
+  display: inline-block;
+  animation: pop 0.45s var(--ease-out);
+}
+
+/* The bar comes up from the bottom of the screen on phones */
+@media (max-width: 767px) {
+  .product__info > .buy-bar {
+    animation: bar-up 0.9s var(--ease-out) 0.5s backwards;
+  }
+}
+
+/* Only on devices with a real pointer: a hover effect sticks after a tap on a phone */
+@media (hover: hover) {
+  .product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 14px 30px rgba(6, 12, 24, 0.35);
+  }
+
+  .product-card:hover .product-card__image img {
+    transform: scale(1.05);
+  }
+
+  .pill-link:hover .pill-link__arrow,
+  .ghost-link:hover svg,
+  .view-all:hover svg {
+    transform: translateX(4px);
+  }
+
+  .slide:hover img {
+    transform: scale(1.03);
+  }
+
+  .product__image:hover img {
+    scale: 1.04;
+  }
+
+  .product__image img {
+    transition: scale 1s var(--ease-out);
+  }
+}
+
+/* Reduced motion: everything is simply there, with nothing moving */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .reveal {
+    opacity: 1;
+  }
+}
