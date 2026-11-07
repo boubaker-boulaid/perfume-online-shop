@@ -29,7 +29,7 @@ class CustomerPaymentReminderMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Complete your order',
+            subject: 'Finalisez votre commande',
         );
     }
 

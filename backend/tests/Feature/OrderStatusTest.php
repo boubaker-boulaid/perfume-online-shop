@@ -30,7 +30,7 @@ class OrderStatusTest extends TestCase
 
         $this->patchJson($this->url($order), ['status' => $to])
             ->assertUnprocessable()
-            ->assertJsonPath('message', "Cannot change order status from {$from} to {$to}.");
+            ->assertJsonPath('message', "Impossible de passer le statut de la commande de {$from} à {$to}.");
 
         $this->assertSame($from, $order->fresh()->status);
         $this->assertDatabaseCount('order_status_history', 0);

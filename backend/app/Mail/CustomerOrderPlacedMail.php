@@ -28,7 +28,7 @@ class CustomerOrderPlacedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'We received your order',
+            subject: 'Nous avons bien reçu votre commande',
         );
     }
 

@@ -29,7 +29,7 @@ class CustomerOrderCancelledMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Your order was cancelled',
+            subject: 'Votre commande a été annulée',
         );
     }
 

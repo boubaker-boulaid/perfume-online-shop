@@ -117,7 +117,7 @@ class OrderService
             $product = $products->get($item['product_id']);
 
             if (! $product) {
-                throw new ModelNotFoundException('Product with id '.$item['product_id'].' not found.');
+                throw new ModelNotFoundException('Le produit n° '.$item['product_id'].' est introuvable.');
             }
 
             if ($product->stock < $item['quantity']) {
@@ -169,10 +169,10 @@ class OrderService
         });
     }
 
-    public function updateWhatsappOpened(string $orderNumber)
+    public function updateWhatsappOpened(string $orderKey)
     {
         // a late call can't bring a cancelled order back, so only pending orders are recorded
-        Order::where('order_number', $orderNumber)->where('status', 'pending')->whereNull('whatsapp_opened_at')->update([
+        Order::where('idempotency_key', $orderKey)->where('status', 'pending')->whereNull('whatsapp_opened_at')->update([
             'whatsapp_opened_at' => now(),
         ]);
     }
@@ -216,8 +216,8 @@ class OrderService
     public function cancelUnpaidOrders(int $olderThanHours, bool $onlyUnopened = false): int
     {
         $note = $onlyUnopened
-            ? "Auto-cancelled: WhatsApp not opened within {$olderThanHours}h."
-            : "Auto-cancelled: not confirmed within {$olderThanHours}h.";
+            ? "Annulation automatique : WhatsApp non ouvert sous {$olderThanHours} h."
+            : "Annulation automatique : commande non confirmée sous {$olderThanHours} h.";
 
         $orderIds = $this->unpaidOrdersQuery($olderThanHours, $onlyUnopened)->pluck('id');
 
@@ -283,7 +283,7 @@ class OrderService
             $from = $order->status;
 
             if (! $order->canTransitionTo($to)) {
-                abort(422, "Cannot change order status from {$from} to {$to}.");
+                abort(422, "Impossible de passer le statut de la commande de {$from} à {$to}.");
             }
 
             // restore the stock if the order is cancelled

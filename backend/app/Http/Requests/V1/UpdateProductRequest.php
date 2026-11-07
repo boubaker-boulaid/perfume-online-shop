@@ -50,7 +50,7 @@ class UpdateProductRequest extends FormRequest
             $oldPrice = $this->route('product')->compare_at_price;
 
             if (! $this->exists('compare_at_price') && $oldPrice !== null && is_numeric($value) && $value >= $oldPrice) {
-                $fail("The price must be below the old price ({$oldPrice}). Change or clear compare_at_price too.");
+                $fail("Le prix doit être inférieur à l’ancien prix ({$oldPrice}). Modifiez ou supprimez aussi l’ancien prix.");
             }
         };
     }

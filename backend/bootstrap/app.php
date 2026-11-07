@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Context;
 use Illuminate\Validation\ValidationException;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 
@@ -62,33 +63,36 @@ return Application::configure(basePath: dirname(__DIR__))
             }
 
             return match (true) {
-                $e instanceof ValidationException => $res('The given data was invalid', 422, $e->errors()),
+                $e instanceof ValidationException => $res('Les données saisies ne sont pas valides.', 422, $e->errors()),
 
-                $e instanceof AuthenticationException => $res('Unauthenticated. Please provide a valid API token.', 401),
+                $e instanceof AuthenticationException => $res('Vous devez être connecté pour effectuer cette action.', 401),
 
-                $e instanceof AuthorizationException => $res($e->getMessage() ?: 'This action is unauthorized.', 403),
+                $e instanceof AuthorizationException => $res($e->getMessage() ?: 'Cette action n’est pas autorisée.', 403),
 
                 // ModelNotFoundException is wrapped into NotFoundHttpException by
                 // Handler::prepareException() before this callback runs, so the
                 // original is only reachable via getPrevious().
-                $e instanceof NotFoundHttpException && $e->getPrevious() instanceof ModelNotFoundException => $res('The requested resource was not found.', 404),
+                $e instanceof NotFoundHttpException && $e->getPrevious() instanceof ModelNotFoundException => $res('La ressource demandée est introuvable.', 404),
 
-                $e instanceof NotFoundHttpException => $res('The requested API endpoint does not exists.', 404),
+                $e instanceof NotFoundHttpException => $res('Cette adresse d’API n’existe pas.', 404),
 
                 // Rate Limiting
                 // keep the Retry-After header so the client knows how long to wait
-                $e instanceof TooManyRequestsHttpException => $res('Too many requests. Please slow down.', 429)
+                $e instanceof TooManyRequestsHttpException => $res('Trop de requêtes. Veuillez patienter un instant.', 429)
                     ->withHeaders($e->getHeaders()),
 
                 // anything with its own status like abort(403)...
-                $e instanceof HttpExceptionInterface => $res($e->getMessage() ?: 'Request failed.', $e->getStatusCode()),
+                // __() translates the framework's own English messages, from lang/fr.json
+                $e instanceof MethodNotAllowedHttpException => $res('Cette méthode n’est pas autorisée pour cette adresse.', 405),
+
+                $e instanceof HttpExceptionInterface => $res(__($e->getMessage()) ?: 'La requête a échoué.', $e->getStatusCode()),
 
                 // the database can't be reached: nothing the customer did wrong, and worth retrying soon
                 ($e instanceof QueryException || $e instanceof PDOException)
-                && (new LostConnectionDetector)->causedByLostConnection($e) => $res('The service is temporarily unavailable. Please try again shortly.', 503),
+                && (new LostConnectionDetector)->causedByLostConnection($e) => $res('Le service est temporairement indisponible. Veuillez réessayer dans quelques instants.', 503),
 
                 default => $res(
-                    config('app.debug') ? $e->getMessage() : 'Unexpected error occurred. Please try again later.',
+                    config('app.debug') ? $e->getMessage() : 'Une erreur inattendue s’est produite. Veuillez réessayer plus tard.',
                     500,
                     config('app.debug') ? [
                         'exception' => $e::class,

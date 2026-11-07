@@ -24,7 +24,7 @@ class OrderController extends Controller
     {
         $orders = $this->order_service->getOrders($request->validated());
 
-        return $this->ok(OrderResource::collection($orders), 'Orders retrieved.');
+        return $this->ok(OrderResource::collection($orders), 'Commandes récupérées.');
     }
 
     /**
@@ -35,7 +35,6 @@ class OrderController extends Controller
         $order = $this->order_service->place($request->validated());
 
         $data = [
-            'order_number' => $order->order_number,
             'total' => $order->total,
             'whatsapp_link' => $order->whatsappLink(),
             'whatsapp_opened_url' => $order->whatsappOpenedUrl(),
@@ -43,27 +42,27 @@ class OrderController extends Controller
 
         // a retry with the same idempotency key gets the existing order back
         return $order->wasRecentlyCreated
-            ? $this->created($data, 'The order was created successfully.')
-            : $this->okNoPgs($data, 'The order was already placed.');
+            ? $this->created($data, 'La commande a bien été créée.')
+            : $this->okNoPgs($data, 'Cette commande a déjà été passée.');
     }
 
-    public function whatsappOpened(string $orderNumber)
+    public function whatsappOpened(string $orderKey)
     {
-        $this->order_service->updateWhatsappOpened($orderNumber);
+        $this->order_service->updateWhatsappOpened($orderKey);
 
         return $this->noContent();
     }
 
     // the link in the emails: a cancelled order has nothing left to send, so go back to the shop
-    public function whatsappRedirect(string $orderNumber)
+    public function whatsappRedirect(string $orderKey)
     {
-        $order = Order::where('order_number', $orderNumber)->firstOrFail();
+        $order = Order::where('idempotency_key', $orderKey)->firstOrFail();
 
         if ($order->status === 'cancelled') {
             return redirect()->away(config('app.frontend_url'));
         }
 
-        $this->order_service->updateWhatsappOpened($orderNumber);
+        $this->order_service->updateWhatsappOpened($orderKey);
 
         return redirect()->away($order->whatsappLink());
     }
@@ -73,7 +72,7 @@ class OrderController extends Controller
      */
     public function show(Order $order)
     {
-        return $this->okNoPgs(new OrderResource($this->order_service->getOrder($order)), 'Order retrieved.');
+        return $this->okNoPgs(new OrderResource($this->order_service->getOrder($order)), 'Commande récupérée.');
     }
 
     public function status(Order $order, UpdateStatusRequest $request)
@@ -81,6 +80,6 @@ class OrderController extends Controller
         $validated = $request->validated();
         $order = $this->order_service->changeStatus($order, $validated['status'], $request->user(), $validated['note'] ?? null);
 
-        return $this->okNoPgs(new OrderResource($this->order_service->getOrder($order)), 'Order status updated.');
+        return $this->okNoPgs(new OrderResource($this->order_service->getOrder($order)), 'Statut de la commande mis à jour.');
     }
 }

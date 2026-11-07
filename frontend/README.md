@@ -1,16 +1,57 @@
-# React + Vite
+# Lumé Parfums frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The customer shop, built with React, TypeScript and Vite. It's designed for phones first.
 
-Currently, two official plugins are available:
+**It isn't connected to the backend yet.** All data is fake, and orders aren't saved anywhere.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Run it
 
-## React Compiler
+```bash
+npm install
+npm run dev
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+To open it on your phone, run `npm run dev -- --host` and visit the Network address it prints. Your phone must be on the same Wi-Fi.
 
-## Expanding the ESLint configuration
+| Command | What it does |
+|---|---|
+| `npm run build` | Checks the types and builds for production |
+| `npm run typecheck` | Checks the types only |
+| `npm run lint` | Runs ESLint |
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Pages
+
+| Address | Page | Backend endpoint it will use |
+|---|---|---|
+| `/` | Home | `GET /api/v1/products/featured`, `GET /api/v1/categories` |
+| `/shop` | Catalog, with search, filters and sorting | `GET /api/v1/products`, `GET /api/v1/categories` |
+| `/shop/:slug` | One product | `GET /api/v1/products/{slug}` |
+| `/offers` | Current special offers | `GET /api/v1/offers` (not in the backend yet) |
+| `/offers/:slug` | One offer and its perfumes | `GET /api/v1/offers/{slug}` (not in the backend yet) |
+| `/cart` | Shopping bag | None, it's kept in the browser |
+| `/checkout` | Customer details | `POST /api/v1/orders` |
+| `/order-confirmation` | Send the order on WhatsApp | `PATCH .../whatsapp-opened` |
+
+## Folders
+
+```
+src/
+  components/     Shared pieces, plus layout/ and home/ sections
+  pages/          One file per page
+  services/api.ts The fake API
+  data/           The fake products and categories
+  context/        The shopping bag
+  hooks/          useApi, which loads data for a page
+  styles/         CSS, written for phones first
+  types.ts        The shapes of the API's data
+```
+
+## Styling
+
+Base styles are for phones. Larger screens add to them with `min-width` media queries at 768px (tablet) and 1024px (desktop). Colors and spacing are variables at the top of `styles/global.css`.
+
+## Connecting the backend
+
+Replace the insides of `src/services/api.ts`. Its functions already have the same inputs, outputs and errors as the real endpoints, so pages and components shouldn't need to change. Read `backend/docs/API.md` for the CSRF step.
+
+Prices are in DH, in `formatPrice` in `utils/format.ts`, like the backend's emails. The design's star ratings have no backend field yet, and the home carousel shows each category's `image_path`, so categories need images in the backend.

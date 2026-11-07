@@ -50,7 +50,7 @@ trait ApiResponseTrait
 
     protected function created(
         mixed $data,
-        string $message = 'Created successfully'
+        string $message = 'Créé avec succès.'
     ): JsonResponse {
         return $this->okNoPgs($data, $message, 201);
     }
@@ -61,7 +61,7 @@ trait ApiResponseTrait
     }
 
     protected function fail(
-        string $message = 'Something went wrong.',
+        string $message = 'Une erreur est survenue.',
         int $status = 400,
         ?array $errors = null
     ) {
