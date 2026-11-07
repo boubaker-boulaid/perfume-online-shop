@@ -185,9 +185,13 @@ class OrderStockTest extends TestCase
 
     private function placeOrder(Product $product, int $quantity): string
     {
-        return $this->postJson(self::ENDPOINT, $this->orderPayload([
+        $payload = $this->orderPayload([
             ['product_id' => $product->id, 'quantity' => $quantity],
-        ]))->assertCreated()->json('data.order_number');
+        ]);
+
+        $this->postJson(self::ENDPOINT, $payload)->assertCreated();
+
+        return Order::where('idempotency_key', $payload['idempotency_key'])->value('order_number');
     }
 
     public function test_the_stock_error_does_not_depend_on_the_accept_header(): void

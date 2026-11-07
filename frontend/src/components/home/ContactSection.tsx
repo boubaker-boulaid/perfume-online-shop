@@ -43,7 +43,7 @@ export function ContactSection() {
 
       <div className="contact">
         <Reveal className="panel">
-          <p className="contact__intro">Notre équipe répond à chaque message sous un jour ouvré. Pour une commande déjà passée, indiquez votre numéro de commande.</p>
+          <p className="contact__intro">Notre équipe répond à chaque message sous un jour ouvré. Pour une commande déjà passée, indiquez le numéro de téléphone utilisé pour la commande.</p>
           <div className="contact__details">
             {details.map((detail) => (
               <div key={detail.label} className="contact__detail">

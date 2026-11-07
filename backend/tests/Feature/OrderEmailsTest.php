@@ -24,7 +24,7 @@ class OrderEmailsTest extends TestCase
         $mail = new CustomerOrderPlacedMail($order);
 
         $mail->assertHasSubject('Nous avons bien reçu votre commande');
-        $mail->assertSeeInHtml("/api/v1/orders/{$order->order_number}/whatsapp?", false);
+        $mail->assertSeeInHtml("/api/v1/orders/{$order->idempotency_key}/whatsapp?", false);
         $mail->assertDontSeeInHtml('is being prepared');
         $mail->assertDontSeeInHtml("{$order->order_number} confirmed");
     }

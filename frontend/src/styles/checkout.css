@@ -28,6 +28,14 @@
   border-radius: 11px;
 }
 
+.cart-item__contents {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-50);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
 .cart-item__top {
   display: flex;
   align-items: flex-start;

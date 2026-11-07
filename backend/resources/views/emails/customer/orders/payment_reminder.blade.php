@@ -23,7 +23,7 @@
 <body style="margin:0; padding:0; background-color:#f6f4ef; font-family:Helvetica, Arial, sans-serif;">
     {{-- preheader, invisible but picked up by mail clients --}}
     <div style="display:none; max-height:0; overflow:hidden;">
-        Votre commande {{ $order->order_number }} vous attend : envoyez-la sur WhatsApp pour la confirmer.
+        Votre commande vous attend : envoyez-la sur WhatsApp pour la confirmer.
     </div>
 
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f6f4ef; padding:24px 12px;">
@@ -55,10 +55,6 @@
                             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#fbf9f5; border:1px solid #e8e1d6; border-radius:12px; margin-bottom:28px;">
                                 <tr>
                                     <td class="summary-cell" style="padding:16px 20px;">
-                                        <span style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#a2957f;">Numéro de commande</span><br>
-                                        <span style="font-family:Georgia, 'Times New Roman', serif; font-size:18px; color:#221a12;">{{ $order->order_number }}</span>
-                                    </td>
-                                    <td align="right" class="summary-cell" style="padding:16px 20px;">
                                         <span style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#a2957f;">Total</span><br>
                                         <span style="font-family:Georgia, 'Times New Roman', serif; font-size:18px; color:#c8a24a;">{{ $money($order->total) }}</span>
                                     </td>

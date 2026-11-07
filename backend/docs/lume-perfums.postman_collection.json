@@ -85,6 +85,10 @@
       "value": ""
     },
     {
+      "key": "whatsapp_link",
+      "value": ""
+    },
+    {
       "key": "whatsapp_opened_url",
       "value": ""
     }
@@ -626,7 +630,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('returns 201', () => pm.response.to.have.status(201));",
-                  "pm.collectionVariables.set('order_number', pm.response.json().data.order_number);",
+                  "pm.collectionVariables.set('whatsapp_link', pm.response.json().data.whatsapp_link);",
                   "pm.collectionVariables.set('whatsapp_opened_url', pm.response.json().data.whatsapp_opened_url);",
                   "pm.collectionVariables.set('order_total', pm.response.json().data.total);"
                 ]
@@ -714,7 +718,7 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{\n    \"success\": true,\n    \"message\": \"La commande a bien été créée.\",\n    \"data\": {\n        \"order_number\": \"ORD-2026-000001\",\n        \"total\": \"1780.00\",\n        \"whatsapp_link\": \"https://wa.me/212693303131?text=New%20Order%20ORD-2026-000001%0A%0ACelestial%20Rose%3A%20quantity%202%20%2F%20cost%201780%2C00%20DH%20%0A%0AShipping%3A%20free%0ATotal%3A%201780%2C00%20DH%0AName%3A%20Test%20Customer%0ACity%3A%20Agadir%0AAddress%3A%201%20Test%20Street%0ACall%20before%20delivery\",\n        \"whatsapp_opened_url\": \"http://127.0.0.1:8000/api/v1/orders/ORD-2026-000001/whatsapp-opened?expires=1793918705&signature=abc123\"\n    },\n    \"errors\": null\n}"
+              "body": "{\n    \"success\": true,\n    \"message\": \"La commande a bien été créée.\",\n    \"data\": {\n        \"total\": \"1780.00\",\n        \"whatsapp_link\": \"https://wa.me/212693303131?text=Nouvelle%20commande%0A%0ACelestial%20Rose%3A%20quantity%202%20%2F%20cost%201780%2C00%20DH%20%0A%0AShipping%3A%20free%0ATotal%3A%201780%2C00%20DH%0AName%3A%20Test%20Customer%0ACity%3A%20Agadir%0AAddress%3A%201%20Test%20Street%0ACall%20before%20delivery\",\n        \"whatsapp_opened_url\": \"http://127.0.0.1:8000/api/v1/orders/8f14e45f-ceea-4e7a-9c1d-2b6f0a3d7e11/whatsapp-opened?expires=1793918705&signature=abc123\"\n    },\n    \"errors\": null\n}"
             }
           ]
         },
@@ -727,7 +731,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('returns 200', () => pm.response.to.have.status(200));",
-                  "pm.test('returns the same order', () => pm.expect(pm.response.json().data.order_number).to.eql(pm.collectionVariables.get('order_number')));"
+                  "pm.test('returns the same order', () => pm.expect(pm.response.json().data.whatsapp_link).to.eql(pm.collectionVariables.get('whatsapp_link')));"
                 ]
               }
             }
@@ -2461,7 +2465,8 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('returns 200', () => pm.response.to.have.status(200));"
+                  "pm.test('returns 200', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('order_number', pm.response.json().data[0].order_number);"
                 ]
               }
             }

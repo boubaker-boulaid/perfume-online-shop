@@ -32,7 +32,7 @@ class OrderIdempotencyTest extends TestCase
         $first = $this->postJson(self::ENDPOINT, $payload)->assertCreated();
         $retry = $this->postJson(self::ENDPOINT, $payload)->assertOk();
 
-        $this->assertSame($first->json('data.order_number'), $retry->json('data.order_number'));
+        $this->assertSame($first->json('data.whatsapp_link'), $retry->json('data.whatsapp_link'));
         $this->assertDatabaseCount('orders', 1);
         $this->assertDatabaseCount('order_items', 1);
         $this->assertSame(7, $product->fresh()->stock);
@@ -67,7 +67,7 @@ class OrderIdempotencyTest extends TestCase
         $first = $this->postJson(self::ENDPOINT, $payload)->assertCreated();
         $retry = $this->postJson(self::ENDPOINT, $payload)->assertOk();
 
-        $this->assertSame($first->json('data.order_number'), $retry->json('data.order_number'));
+        $this->assertSame($first->json('data.whatsapp_link'), $retry->json('data.whatsapp_link'));
         $this->assertSame(0, $product->fresh()->stock);
     }
 
@@ -79,7 +79,10 @@ class OrderIdempotencyTest extends TestCase
         $first = $this->postJson(self::ENDPOINT, $this->orderPayload($items))->assertCreated();
         $second = $this->postJson(self::ENDPOINT, $this->orderPayload($items))->assertCreated();
 
-        $this->assertNotSame($first->json('data.order_number'), $second->json('data.order_number'));
+        $this->assertNotSame(
+            strtok($first->json('data.whatsapp_opened_url'), '?'),
+            strtok($second->json('data.whatsapp_opened_url'), '?'),
+        );
         $this->assertDatabaseCount('orders', 2);
         $this->assertSame(6, $product->fresh()->stock);
     }

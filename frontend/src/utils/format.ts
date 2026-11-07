@@ -10,7 +10,7 @@ export function discountPercent(price: string, compareAtPrice: string): number {
 }
 
 export function formatDiscount(percent: number): string {
-  return `Jusqu’à -${percent}\u00a0%`
+  return `-${percent}\u00a0%`
 }
 
 export function formatDate(iso: string): string {

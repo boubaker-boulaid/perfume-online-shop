@@ -33,7 +33,7 @@ function ProductDetails({ product }: { product: Product }) {
   return (
     <div className="product">
       <div className="product__image">
-        <img src={product.image_path} alt={product.name} width={630} height={840} />
+        <img src={product.image_path} alt={product.name} width={600} height={600} />
       </div>
 
       <div className="product__info">

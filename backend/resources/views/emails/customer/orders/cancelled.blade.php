@@ -23,7 +23,7 @@
 <body style="margin:0; padding:0; background-color:#f6f4ef; font-family:Helvetica, Arial, sans-serif;">
     {{-- preheader, invisible but picked up by mail clients --}}
     <div style="display:none; max-height:0; overflow:hidden;">
-        Votre commande {{ $order->order_number }} a été annulée et les articles ont été libérés.
+        Votre commande a été annulée et les articles ont été libérés.
     </div>
 
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f6f4ef; padding:24px 12px;">
@@ -47,7 +47,7 @@
                                 {{ $order->customer_name }}, votre commande a été annulée
                             </h1>
                             <p style="margin:0 0 28px; font-size:14px; line-height:22px; color:#6d635a;">
-                                La commande {{ $order->order_number }} a été annulée et les articles ont été libérés.
+                                La commande a été annulée et les articles ont été libérés.
                                 Vous n’avez rien payé. Vous pouvez passer une nouvelle commande à tout moment.
                             </p>
 
@@ -55,10 +55,6 @@
                             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#fbf9f5; border:1px solid #e8e1d6; border-radius:12px; margin-bottom:28px;">
                                 <tr>
                                     <td class="summary-cell" style="padding:16px 20px;">
-                                        <span style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#a2957f;">Numéro de commande</span><br>
-                                        <span style="font-family:Georgia, 'Times New Roman', serif; font-size:18px; color:#221a12;">{{ $order->order_number }}</span>
-                                    </td>
-                                    <td align="right" class="summary-cell" style="padding:16px 20px;">
                                         <span style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#a2957f;">Total</span><br>
                                         <span style="font-family:Georgia, 'Times New Roman', serif; font-size:18px; color:#c8a24a;">{{ $money($order->total) }}</span>
                                     </td>

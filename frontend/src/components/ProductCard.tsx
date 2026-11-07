@@ -25,7 +25,7 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
 
       <Link to={`/shop/${product.slug}`} className="product-card__link">
         <div className="product-card__image">
-          <img src={product.image_path} alt={product.name} width={630} height={840} loading="lazy" />
+          <img src={product.image_path} alt={product.name} width={600} height={600} loading="lazy" />
           {soldOut && <span className="product-card__badge">Épuisé</span>}
         </div>
         <h3 className="product-card__name">{product.name}</h3>

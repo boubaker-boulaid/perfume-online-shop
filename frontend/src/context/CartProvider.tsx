@@ -53,6 +53,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
               image_path: product.image_path,
               stock: product.stock,
               quantity: limit(quantity, product.stock),
+              ...(product.is_offer && { offer_contents: product.description ?? '' }),
             },
           ]
         }),

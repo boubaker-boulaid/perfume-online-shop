@@ -36,7 +36,9 @@ const respond = <T>(value: () => T): Promise<T> =>
     }, 150)
   })
 
-const visibleProducts = () => products.filter((product) => product.is_active && product.category.is_active)
+const activeProducts = () => products.filter((product) => product.is_active && product.category.is_active)
+// An offer's set is only sold from the offer's page, so the shop doesn't list it.
+const visibleProducts = () => activeProducts().filter((product) => !product.is_offer)
 
 // GET /api/v1/categories
 export function getCategories(): Promise<Category[]> {
@@ -106,21 +108,22 @@ export function getProduct(slug: string): Promise<Product> {
   })
 }
 
-function toOffer({ product_slugs, ...offer }: OfferSeed): Offer {
-  const onSale = visibleProducts().filter((product) => product_slugs.includes(product.slug) && product.compare_at_price)
-  // Only what can still be bought sets the advertised discount. If nothing can, the
-  // page says the offer is sold out, and the badge still describes the offer.
-  const inStock = onSale.filter((product) => product.stock > 0)
-  const reductions = (inStock.length > 0 ? inStock : onSale).map((product) => ({
-    percent: discountPercent(product.price, product.compare_at_price!),
-    saving: Number(product.compare_at_price) - Number(product.price),
-  }))
+function toOffer({ product_slugs, free_product_slug, ...offer }: OfferSeed): Offer {
+  const set = activeProducts().find((product) => product.is_offer && product.slug === offer.slug)
+  if (!set) throw new Error(`The offer ${offer.slug} has no set`)
+
+  const offerProducts = visibleProducts().filter((product) => product_slugs.includes(product.slug))
+  const freeProduct = visibleProducts().find((product) => product.slug === free_product_slug) ?? null
+  const regularPrice = [...offerProducts, ...(freeProduct ? [freeProduct] : [])].reduce((sum, product) => sum + Number(product.price), 0)
 
   return {
     ...offer,
-    products: onSale,
-    max_discount_percent: Math.max(0, ...reductions.map((reduction) => reduction.percent)),
-    max_saving: Math.max(0, ...reductions.map((reduction) => reduction.saving)).toFixed(2),
+    set,
+    products: offerProducts,
+    free_product: freeProduct,
+    regular_price: regularPrice.toFixed(2),
+    saving: (regularPrice - Number(set.price)).toFixed(2),
+    discount_percent: discountPercent(set.price, regularPrice.toFixed(2)),
   }
 }
 
@@ -179,7 +182,7 @@ export function placeOrder(payload: OrderPayload): Promise<PlacedOrder> {
 
     // like the backend, prices come from the catalog and never from the browser
     const lines = payload.items.map((item) => {
-      const product = visibleProducts().find((candidate) => candidate.id === item.product_id)
+      const product = activeProducts().find((candidate) => candidate.id === item.product_id)
 
       if (!product) throw new ApiError('Un produit de votre panier n’est plus disponible.', 422)
       if (product.stock < item.quantity) {
@@ -190,12 +193,11 @@ export function placeOrder(payload: OrderPayload): Promise<PlacedOrder> {
     })
 
     const total = lines.reduce((sum, line) => sum + line.total, 0)
-    const orderNumber = `ORD-${new Date().getFullYear()}-${String(placedOrders.size + 1).padStart(6, '0')}`
 
     const message = [
-      `Nouvelle commande ${orderNumber}`,
+      'Nouvelle commande',
       '',
-      ...lines.map((line) => `${line.product.name} : quantité ${line.quantity} / prix ${formatPrice(line.total)}`),
+      ...lines.map((line) => `${line.product.name}${line.product.is_offer ? ` (${line.product.description})` : ''} : quantité ${line.quantity} / prix ${formatPrice(line.total)}`),
       '',
       'Livraison : offerte',
       `Total : ${formatPrice(total)}`,
@@ -206,10 +208,9 @@ export function placeOrder(payload: OrderPayload): Promise<PlacedOrder> {
     ].join('\n')
 
     const order: PlacedOrder = {
-      order_number: orderNumber,
       total: total.toFixed(2),
       whatsapp_link: `https://wa.me/${FAKE_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`,
-      whatsapp_opened_url: `/api/v1/orders/${orderNumber}/whatsapp-opened`,
+      whatsapp_opened_url: `/api/v1/orders/${payload.idempotency_key}/whatsapp-opened`,
     }
 
     placedOrders.set(payload.idempotency_key, order)
@@ -218,7 +219,7 @@ export function placeOrder(payload: OrderPayload): Promise<PlacedOrder> {
   })
 }
 
-// PATCH /api/v1/orders/{orderNumber}/whatsapp-opened
+// PATCH /api/v1/orders/{orderKey}/whatsapp-opened
 export function markWhatsappOpened(url: string): Promise<void> {
   void url // the real version sends a PATCH to this signed url
 

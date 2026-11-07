@@ -35,7 +35,6 @@ class OrderController extends Controller
         $order = $this->order_service->place($request->validated());
 
         $data = [
-            'order_number' => $order->order_number,
             'total' => $order->total,
             'whatsapp_link' => $order->whatsappLink(),
             'whatsapp_opened_url' => $order->whatsappOpenedUrl(),
@@ -47,23 +46,23 @@ class OrderController extends Controller
             : $this->okNoPgs($data, 'Cette commande a déjà été passée.');
     }
 
-    public function whatsappOpened(string $orderNumber)
+    public function whatsappOpened(string $orderKey)
     {
-        $this->order_service->updateWhatsappOpened($orderNumber);
+        $this->order_service->updateWhatsappOpened($orderKey);
 
         return $this->noContent();
     }
 
     // the link in the emails: a cancelled order has nothing left to send, so go back to the shop
-    public function whatsappRedirect(string $orderNumber)
+    public function whatsappRedirect(string $orderKey)
     {
-        $order = Order::where('order_number', $orderNumber)->firstOrFail();
+        $order = Order::where('idempotency_key', $orderKey)->firstOrFail();
 
         if ($order->status === 'cancelled') {
             return redirect()->away(config('app.frontend_url'));
         }
 
-        $this->order_service->updateWhatsappOpened($orderNumber);
+        $this->order_service->updateWhatsappOpened($orderKey);
 
         return redirect()->away($order->whatsappLink());
     }

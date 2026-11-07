@@ -8,22 +8,21 @@ import type { Offer } from '../types'
 import { formatDate, formatDiscount, formatPrice, formatTimeLeft } from '../utils/format'
 import { NotFoundPage } from './NotFoundPage'
 
-const sum = (values: number[]) => values.reduce((total, value) => total + value, 0)
-
 function OfferDetails({ offer }: { offer: Offer }) {
   const { items, addItem } = useCart()
   const navigate = useNavigate()
 
-  // A sold-out perfume stays on the page, but isn't part of the order or its total.
-  const available = offer.products.filter((product) => product.stock > 0)
-  const soldOut = offer.products.filter((product) => product.stock === 0)
-  const missing = available.filter((product) => !items.some((item) => item.product_id === product.id))
-  const inCart = available.length > 0 && missing.length === 0
-  const total = sum(available.map((product) => Number(product.price)))
-  const oldTotal = sum(available.map((product) => Number(product.compare_at_price)))
+  // A set is sold whole: if one perfume runs out, the set can't be ordered.
+  const included = [...offer.products, ...(offer.free_product ? [offer.free_product] : [])]
+  const soldOut = included.filter((product) => product.stock === 0)
+  const available = offer.set.stock > 0 && soldOut.length === 0
+  const inCart = items.some((item) => item.product_id === offer.set.id)
+  const price = formatPrice(offer.set.price)
 
-  // Only adds what isn't in the bag yet, so ordering again never doubles a bottle.
-  const addOffer = () => missing.forEach((product) => addItem(product, 1))
+  // Ordering again never adds a second set.
+  const addOffer = () => {
+    if (!inCart) addItem(offer.set, 1)
+  }
 
   const orderOffer = () => {
     addOffer()
@@ -34,14 +33,14 @@ function OfferDetails({ offer }: { offer: Offer }) {
     <>
       <div className="offer">
         <div className="offer__image">
-          <img src={offer.image_path} alt={`Parfums de l’offre ${offer.title}`} width={1200} height={750} />
-          <span className="offer-badge">{formatDiscount(offer.max_discount_percent)}</span>
+          <img src={offer.image_path} alt={`Parfums de l’offre ${offer.title}`} width={900} height={1200} />
+          <span className="offer-badge">{formatDiscount(offer.discount_percent)}</span>
         </div>
 
         <div className="offer__info">
           <div className="eyebrow">Offre spéciale</div>
           <h1 className="display-title">{offer.title}</h1>
-          <p className="offer__saving">Économisez jusqu’à {formatPrice(offer.max_saving)}</p>
+          <p className="offer__saving">Économisez {formatPrice(offer.saving)}</p>
           <p className="offer__description">{offer.description}</p>
           <ul className="offer__dates">
             <li>
@@ -52,19 +51,15 @@ function OfferDetails({ offer }: { offer: Offer }) {
             </li>
           </ul>
 
-          {available.length > 0 && (
-            <div className="offer__total">
-              <span>
-                Prix de l’offre, {available.length} parfum{available.length > 1 ? 's' : ''}
-              </span>
-              <strong>
-                {formatPrice(total)} <s>{formatPrice(oldTotal)}</s>
-              </strong>
-              {soldOut.length > 0 && (
-                <p className="offer__note">Épuisé, non inclus : {soldOut.map((product) => product.name).join(', ')}</p>
-              )}
-            </div>
-          )}
+          <div className="offer__total">
+            <span>
+              Prix de l’offre, {offer.products.length} parfums{offer.free_product && ' + 1 offert'}
+            </span>
+            <strong>
+              {price} <s>{formatPrice(offer.regular_price)}</s>
+            </strong>
+            {soldOut.length > 0 && <p className="offer__note">Épuisé : {soldOut.map((product) => product.name).join(', ')}</p>}
+          </div>
 
           {/* Fixed to the bottom of the screen on phones, like on the product page. */}
           <div className="buy-bar">
@@ -73,14 +68,14 @@ function OfferDetails({ offer }: { offer: Offer }) {
                 <CheckIcon size={16} /> <span>Voir le panier</span>
               </Link>
             ) : (
-              available.length > 0 && (
+              available && (
                 <button type="button" className="button button--ghost offer__add" aria-label="Ajouter l’offre au panier" onClick={addOffer}>
                   <BagIcon size={17} /> <span>Ajouter au panier</span>
                 </button>
               )
             )}
-            <button type="button" className="button button--accent buy-bar__button" disabled={available.length === 0} aria-label={available.length > 0 ? `Commander l’offre, ${formatPrice(total)}` : undefined} onClick={orderOffer}>
-              {available.length > 0 ? `Commander · ${formatPrice(total)}` : 'Offre épuisée'}
+            <button type="button" className="button button--accent buy-bar__button" disabled={!available} aria-label={available ? `Commander l’offre, ${price}` : undefined} onClick={orderOffer}>
+              {available ? `Commander · ${price}` : 'Offre épuisée'}
             </button>
           </div>
         </div>
@@ -94,6 +89,17 @@ function OfferDetails({ offer }: { offer: Offer }) {
           {offer.products.map((product, index) => <ProductCard key={product.id} product={product} index={index} />)}
         </div>
       </section>
+
+      {offer.free_product && (
+        <section className="section">
+          <div className="section-bar">
+            <h2>Votre parfum offert</h2>
+          </div>
+          <div className="product-grid">
+            <ProductCard product={offer.free_product} />
+          </div>
+        </section>
+      )}
 
       <section className="section">
         <div className="panel offer__terms">

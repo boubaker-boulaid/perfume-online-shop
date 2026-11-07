@@ -12,10 +12,10 @@ export function OfferCard({ offer, index = 0 }: { offer: Offer; index?: number }
     <article ref={ref} className="offer-card reveal" style={{ '--reveal-delay': `${(index % 2) * 130}ms` } as CSSProperties}>
       <Link to={`/offers/${offer.slug}`} className="offer-card__link">
         <div className="offer-card__image">
-          <img src={offer.image_path} alt="" width={1200} height={750} loading="lazy" />
-          <span className="offer-badge">{formatDiscount(offer.max_discount_percent)}</span>
+          <img src={offer.image_path} alt="" width={900} height={1200} loading="lazy" />
         </div>
         <div className="offer-card__body">
+          <span className="offer-badge">{formatDiscount(offer.discount_percent)}</span>
           <h2 className="offer-card__title">{offer.title}</h2>
           <p className="offer-card__tagline">{offer.tagline}</p>
           <div className="offer-card__footer">

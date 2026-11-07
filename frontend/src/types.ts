@@ -27,6 +27,7 @@ export type Product = {
   image_path: string
   is_active: boolean
   is_featured: boolean
+  is_offer: boolean
   created_at: string
   // Shown in the design, but the backend doesn't have these yet.
   rating?: number
@@ -44,9 +45,12 @@ export type Offer = {
   starts_at: string
   ends_at: string
   terms: string[]
+  set: Product // what goes in the bag, at the offer's fixed price
   products: Product[]
-  max_discount_percent: number
-  max_saving: string
+  free_product: Product | null
+  regular_price: string
+  saving: string
+  discount_percent: number
 }
 
 export type Paginated<T> = {
@@ -82,7 +86,6 @@ export type OrderPayload = {
 }
 
 export type PlacedOrder = {
-  order_number: string
   total: string
   whatsapp_link: string
   whatsapp_opened_url: string
@@ -96,4 +99,5 @@ export type CartItem = {
   image_path: string
   stock: number
   quantity: number
+  offer_contents?: string // only on an offer's set: the perfumes inside it
 }

@@ -4,7 +4,10 @@ import { PageHeading } from '../components/PageHeading'
 import { PillLink } from '../components/PillLink'
 import { QuantityStepper } from '../components/QuantityStepper'
 import { useCart } from '../context/cartContext'
+import type { CartItem } from '../types'
 import { formatPrice } from '../utils/format'
+
+const itemPath = (item: CartItem) => (item.offer_contents ? `/offers/${item.slug}` : `/shop/${item.slug}`)
 
 export function CartPage() {
   const { items, subtotal, setQuantity, removeItem } = useCart()
@@ -28,14 +31,17 @@ export function CartPage() {
         <ul className="cart-list">
           {items.map((item) => (
             <li key={item.product_id} className="cart-item">
-              <Link to={`/shop/${item.slug}`} className="cart-item__image">
-                <img src={item.image_path} alt="" width={630} height={840} />
+              <Link to={itemPath(item)} className="cart-item__image">
+                <img src={item.image_path} alt="" width={600} height={600} />
               </Link>
               <div className="cart-item__body">
                 <div className="cart-item__top">
-                  <Link to={`/shop/${item.slug}`} className="cart-item__name">
-                    {item.name}
-                  </Link>
+                  <div>
+                    <Link to={itemPath(item)} className="cart-item__name">
+                      {item.name}
+                    </Link>
+                    {item.offer_contents && <small className="cart-item__contents">{item.offer_contents}</small>}
+                  </div>
                   <button type="button" className="icon-button" aria-label={`Retirer ${item.name}`} onClick={() => removeItem(item.product_id)}>
                     <TrashIcon size={16} />
                   </button>

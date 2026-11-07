@@ -169,10 +169,10 @@ class OrderService
         });
     }
 
-    public function updateWhatsappOpened(string $orderNumber)
+    public function updateWhatsappOpened(string $orderKey)
     {
         // a late call can't bring a cancelled order back, so only pending orders are recorded
-        Order::where('order_number', $orderNumber)->where('status', 'pending')->whereNull('whatsapp_opened_at')->update([
+        Order::where('idempotency_key', $orderKey)->where('status', 'pending')->whereNull('whatsapp_opened_at')->update([
             'whatsapp_opened_at' => now(),
         ]);
     }

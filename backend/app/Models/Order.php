@@ -56,7 +56,7 @@ class Order extends Model
         $money = fn ($v) => number_format((float) $v, 2, ',', '').' DH';
 
         $lines = collect([
-            "Nouvelle commande {$this->order_number}",
+            'Nouvelle commande',
             '',
         ])->concat($this->items->map(
             fn ($i) => "{$i->product_name} : quantité {$i->quantity} / prix {$money($i->line_total)}"
@@ -85,7 +85,7 @@ class Order extends Model
     public function whatsappOpenedUrl(): string
     {
         return URL::temporarySignedRoute('customer.orders.whatsapp-opened', now()->addHours(2), [
-            'orderNumber' => $this->order_number,
+            'orderKey' => $this->idempotency_key,
         ]);
     }
 
@@ -94,9 +94,11 @@ class Order extends Model
     public function whatsappRedirectUrl(): string
     {
         return URL::temporarySignedRoute('customer.orders.whatsapp-redirect', now()->addDay(), [
-            'orderNumber' => $this->order_number,
+            'orderKey' => $this->idempotency_key,
         ]);
     }
+
+    // the customer links use idempotency_key because customers must never see the order number
 
     // status allowed transitions the key is the current status and the value is statuses it can move to
     public const TRANSITIONS = [

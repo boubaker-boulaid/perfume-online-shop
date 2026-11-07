@@ -53,7 +53,7 @@ class FrenchAndMoroccoTest extends TestCase
         $this->getJson('/api/v1/products/nothing-here')->assertStatus(404)->assertJsonPath('message', 'La ressource demandée est introuvable.');
 
         $order = Order::factory()->create();
-        $this->getJson("/api/v1/orders/{$order->order_number}/whatsapp?signature=wrong")
+        $this->getJson("/api/v1/orders/{$order->idempotency_key}/whatsapp?signature=wrong")
             ->assertStatus(403)
             ->assertJsonPath('message', 'Ce lien n’est plus valide.');
     }
@@ -82,7 +82,7 @@ class FrenchAndMoroccoTest extends TestCase
 
         $message = $order->fresh()->whatsappMessage();
 
-        $this->assertStringContainsString("Nouvelle commande {$order->order_number}", $message);
+        $this->assertStringContainsString('Nouvelle commande', $message);
         $this->assertStringContainsString('Livraison : offerte', $message);
         $this->assertStringContainsString('Nom : Sara', $message);
         $this->assertStringContainsString('Ville : Agadir', $message);

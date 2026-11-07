@@ -24,10 +24,6 @@ export function OrderConfirmationPage() {
 
       <div className="panel confirmation__summary">
         <div className="summary__row">
-          <span>Numéro de commande</span>
-          <strong>{order.order_number}</strong>
-        </div>
-        <div className="summary__row">
           <span>Total, à payer à la livraison</span>
           <strong>{formatPrice(order.total)}</strong>
         </div>

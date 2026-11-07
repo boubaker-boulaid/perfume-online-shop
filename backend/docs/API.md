@@ -208,10 +208,9 @@ Response, `201 Created`:
   "success": true,
   "message": "La commande a bien été créée.",
   "data": {
-    "order_number": "ORD-2026-000001",
     "total": "1780.00",
-    "whatsapp_link": "https://wa.me/212600000000?text=New%20Order%20ORD-2026-000001...",
-    "whatsapp_opened_url": "http://127.0.0.1:8000/api/v1/orders/ORD-2026-000001/whatsapp-opened?expires=1793918705&signature=..."
+    "whatsapp_link": "https://wa.me/212600000000?text=Nouvelle%20commande...",
+    "whatsapp_opened_url": "http://127.0.0.1:8000/api/v1/orders/8f14e45f-ceea-4e7a-9c1d-2b6f0a3d7e11/whatsapp-opened?expires=1793918705&signature=..."
   },
   "errors": null
 }
@@ -241,13 +240,15 @@ If an order with that key already exists, the API returns that order with `200` 
 
 Without step 2, a pending order gets a reminder email after 30 minutes and is cancelled after 1 hour, even if the customer did send the message.
 
-### PATCH /api/v1/orders/{orderNumber}/whatsapp-opened
+Customers never see the order number: it only appears in the admin routes and the admin email. The customer links use the order's `idempotency_key` instead.
+
+### PATCH /api/v1/orders/{orderKey}/whatsapp-opened
 
 Records that the customer opened WhatsApp. Don't build this URL yourself: use `whatsapp_opened_url` from the order response. It's signed and expires after 2 hours. Calling it for a cancelled order does nothing.
 
 Returns `204`. An invalid or expired signature returns `403`.
 
-### GET /api/v1/orders/{orderNumber}/whatsapp
+### GET /api/v1/orders/{orderKey}/whatsapp
 
 The link used in emails, so the frontend doesn't call it. It's signed and expires after 24 hours. It records that the customer opened WhatsApp and redirects them there. If the order was cancelled, it redirects to `FRONTEND_URL` instead. An invalid or expired signature returns `403`.
 

@@ -118,9 +118,10 @@ export function CheckoutPage() {
           <ul className="summary__items">
             {items.map((item) => (
               <li key={item.product_id}>
-                <img src={item.image_path} alt="" width={630} height={840} />
+                <img src={item.image_path} alt="" width={600} height={600} />
                 <span>
                   {item.name}
+                  {item.offer_contents && <small>{item.offer_contents}</small>}
                   <small>Quantité {item.quantity}</small>
                 </span>
                 <span>{formatPrice(Number(item.price) * item.quantity)}</span>

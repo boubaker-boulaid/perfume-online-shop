@@ -26,7 +26,7 @@ class WhatsappLinkTest extends TestCase
 
         $html = (new CustomerPaymentReminderMail($order))->render();
 
-        $this->assertStringContainsString("/api/v1/orders/{$order->order_number}/whatsapp?", $html);
+        $this->assertStringContainsString("/api/v1/orders/{$order->idempotency_key}/whatsapp?", $html);
         $this->assertStringNotContainsString('https://wa.me/', $html);
     }
 
@@ -47,7 +47,7 @@ class WhatsappLinkTest extends TestCase
     {
         $order = $this->pendingOrder();
 
-        $this->getJson("/api/v1/orders/{$order->order_number}/whatsapp")->assertForbidden();
+        $this->getJson("/api/v1/orders/{$order->idempotency_key}/whatsapp")->assertForbidden();
         $this->assertNull($order->fresh()->whatsapp_opened_at);
     }
 

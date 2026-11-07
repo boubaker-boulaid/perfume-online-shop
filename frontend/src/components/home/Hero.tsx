@@ -23,7 +23,7 @@ export function Hero() {
           <div>Livraison offerte.</div>
           <div>Paiement à la livraison.</div>
         </div>
-        <div className="hero__people">
+        {/* <div className="hero__people">
           <div className="hero__avatars" aria-hidden="true">
             <span />
             <span />
@@ -32,7 +32,7 @@ export function Hero() {
             <span className="hero__avatar-count">+28</span>
           </div>
           <span>Prêt à trouver le vôtre&nbsp;?</span>
-        </div>
+        </div> */}
         <p className="hero__text">Commandez en quelques clics, confirmez sur WhatsApp et payez en espèces à la réception.</p>
         <PillLink to="/shop">Découvrir la boutique</PillLink>
       </div>
