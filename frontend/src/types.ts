@@ -33,6 +33,22 @@ export type Product = {
   reviews_count?: number
 }
 
+// The backend has no offers yet: this is what its endpoints would need to return.
+export type Offer = {
+  id: number
+  slug: string
+  title: string
+  tagline: string
+  description: string
+  image_path: string
+  starts_at: string
+  ends_at: string
+  terms: string[]
+  products: Product[]
+  max_discount_percent: number
+  max_saving: string
+}
+
 export type Paginated<T> = {
   data: T[]
   meta: {

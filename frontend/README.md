@@ -26,6 +26,8 @@ To open it on your phone, run `npm run dev -- --host` and visit the Network addr
 | `/` | Home | `GET /api/v1/products/featured`, `GET /api/v1/categories` |
 | `/shop` | Catalog, with search, filters and sorting | `GET /api/v1/products`, `GET /api/v1/categories` |
 | `/shop/:slug` | One product | `GET /api/v1/products/{slug}` |
+| `/offers` | Current special offers | `GET /api/v1/offers` (not in the backend yet) |
+| `/offers/:slug` | One offer and its perfumes | `GET /api/v1/offers/{slug}` (not in the backend yet) |
 | `/cart` | Shopping bag | None, it's kept in the browser |
 | `/checkout` | Customer details | `POST /api/v1/orders` |
 | `/order-confirmation` | Send the order on WhatsApp | `PATCH .../whatsapp-opened` |

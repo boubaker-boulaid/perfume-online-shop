@@ -5,6 +5,8 @@ import { CartPage } from './pages/CartPage'
 import { CheckoutPage } from './pages/CheckoutPage'
 import { HomePage } from './pages/HomePage'
 import { NotFoundPage } from './pages/NotFoundPage'
+import { OfferPage } from './pages/OfferPage'
+import { OffersPage } from './pages/OffersPage'
 import { OrderConfirmationPage } from './pages/OrderConfirmationPage'
 import { ProductPage } from './pages/ProductPage'
 import { ShopPage } from './pages/ShopPage'
@@ -18,6 +20,8 @@ export default function App() {
             <Route index element={<HomePage />} />
             <Route path="shop" element={<ShopPage />} />
             <Route path="shop/:slug" element={<ProductPage />} />
+            <Route path="offers" element={<OffersPage />} />
+            <Route path="offers/:slug" element={<OfferPage />} />
             <Route path="cart" element={<CartPage />} />
             <Route path="checkout" element={<CheckoutPage />} />
             <Route path="order-confirmation" element={<OrderConfirmationPage />} />

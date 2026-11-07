@@ -7,6 +7,7 @@ const columns = [
     title: 'Boutique',
     links: [
       { label: 'Tous les parfums', to: '/shop' },
+      { label: 'Offres spéciales', to: '/offers' },
       { label: 'Pour elle', to: '/shop' },
       { label: 'Pour lui', to: '/shop' },
       { label: 'Unisexe', to: '/shop' },

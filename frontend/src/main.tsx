@@ -5,6 +5,7 @@ import './styles/global.css'
 import './styles/layout.css'
 import './styles/home.css'
 import './styles/shop.css'
+import './styles/offers.css'
 import './styles/checkout.css'
 import './styles/motion.css'
 

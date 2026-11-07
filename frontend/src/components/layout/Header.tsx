@@ -7,6 +7,7 @@ import { Logo } from '../Logo'
 const links = [
   { label: 'Accueil', to: '/' },
   { label: 'Boutique', to: '/shop' },
+  { label: 'Offres', to: '/offers' },
   { label: 'Collections', to: '/#collections' },
   { label: 'Découvrir', to: '/#discover' },
   { label: 'À propos', to: '/#about' },
@@ -19,7 +20,7 @@ export function Header() {
   const menu = useRef<HTMLDialogElement>(null)
 
   const isActive = (to: string) => {
-    if (to === '/shop') return pathname.startsWith('/shop')
+    if (!to.startsWith('/#') && to !== '/') return pathname.startsWith(to)
     return `${pathname}${hash}` === to
   }
 

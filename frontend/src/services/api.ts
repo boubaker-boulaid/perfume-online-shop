@@ -5,9 +5,10 @@
 // replace the insides of this file. The pages and components don't need to change.
 
 import { categories } from '../data/categories'
+import { offers, type OfferSeed } from '../data/offers'
 import { products } from '../data/products'
-import type { Category, OrderPayload, Paginated, PlacedOrder, Product, ProductFilters } from '../types'
-import { formatPrice } from '../utils/format'
+import type { Category, Offer, OrderPayload, Paginated, PlacedOrder, Product, ProductFilters } from '../types'
+import { discountPercent, formatPrice } from '../utils/format'
 
 const PER_PAGE = 10
 const FAKE_WHATSAPP_NUMBER = '212600000000'
@@ -102,6 +103,50 @@ export function getProduct(slug: string): Promise<Product> {
     if (!product) throw new ApiError('La ressource demandée est introuvable.', 404)
 
     return product
+  })
+}
+
+function toOffer({ product_slugs, ...offer }: OfferSeed): Offer {
+  const onSale = visibleProducts().filter((product) => product_slugs.includes(product.slug) && product.compare_at_price)
+  // Only what can still be bought sets the advertised discount. If nothing can, the
+  // page says the offer is sold out, and the badge still describes the offer.
+  const inStock = onSale.filter((product) => product.stock > 0)
+  const reductions = (inStock.length > 0 ? inStock : onSale).map((product) => ({
+    percent: discountPercent(product.price, product.compare_at_price!),
+    saving: Number(product.compare_at_price) - Number(product.price),
+  }))
+
+  return {
+    ...offer,
+    products: onSale,
+    max_discount_percent: Math.max(0, ...reductions.map((reduction) => reduction.percent)),
+    max_saving: Math.max(0, ...reductions.map((reduction) => reduction.saving)).toFixed(2),
+  }
+}
+
+// Started, not over yet, and with something left to sell.
+const currentOffers = () => {
+  const now = new Date().toISOString()
+
+  return offers
+    .filter((offer) => offer.starts_at <= now && now <= offer.ends_at)
+    .map(toOffer)
+    .filter((offer) => offer.products.length > 0)
+}
+
+// GET /api/v1/offers (doesn't exist in the backend yet)
+export function getOffers(): Promise<Offer[]> {
+  return respond(currentOffers)
+}
+
+// GET /api/v1/offers/{slug} (doesn't exist in the backend yet)
+export function getOffer(slug: string): Promise<Offer> {
+  return respond(() => {
+    const offer = currentOffers().find((item) => item.slug === slug)
+
+    if (!offer) throw new ApiError('La ressource demandée est introuvable.', 404)
+
+    return offer
   })
 }
 

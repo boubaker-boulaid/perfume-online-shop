@@ -240,6 +240,10 @@ html {
   animation-delay: 0.5s;
 }
 
+.menu-panel[open] .menu-panel__links a:nth-child(7) {
+  animation-delay: 0.6s;
+}
+
 /* Forms and messages */
 .field__error,
 .form-error,
@@ -341,9 +345,66 @@ html {
 
 /* The bar comes up from the bottom of the screen on phones */
 @media (max-width: 767px) {
-  .product__info > .buy-bar {
+  .product__info > .buy-bar,
+  .offer__info > .buy-bar {
     animation: bar-up 0.9s var(--ease-out) 0.5s backwards;
   }
+}
+
+/* Offers: cards respond to touch, and one offer's page arrives piece by piece */
+.offer-card {
+  transition:
+    transform 0.6s var(--ease-out),
+    background 0.4s ease,
+    box-shadow 0.6s ease;
+}
+
+.offer-card:active {
+  transform: scale(0.985);
+}
+
+.offer-card__image img {
+  transition: transform 1s var(--ease-out);
+}
+
+.offer-card__more svg {
+  transition: transform 0.5s var(--ease-out);
+}
+
+.offer__image {
+  animation: fade-in 1.2s ease-out backwards;
+}
+
+.offer__image img {
+  animation: photo-settle 1.8s var(--ease-out) backwards;
+}
+
+.offer__image .offer-badge {
+  animation: rise 1.1s var(--ease-out) 0.6s backwards;
+}
+
+.offer__info > * {
+  animation: rise 1.2s var(--ease-out) 0.15s backwards;
+}
+
+.offer__info > :nth-child(2) {
+  animation-delay: 0.27s;
+}
+
+.offer__info > :nth-child(3) {
+  animation-delay: 0.39s;
+}
+
+.offer__info > :nth-child(4) {
+  animation-delay: 0.51s;
+}
+
+.offer__info > :nth-child(5) {
+  animation-delay: 0.63s;
+}
+
+.offer__info > :nth-child(n + 6) {
+  animation-delay: 0.75s;
 }
 
 /* Only on devices with a real pointer: a hover effect sticks after a tap on a phone */
@@ -365,6 +426,19 @@ html {
 
   .slide:hover img {
     transform: scale(1.03);
+  }
+
+  .offer-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 14px 30px rgba(6, 12, 24, 0.35);
+  }
+
+  .offer-card:hover .offer-card__image img {
+    transform: scale(1.04);
+  }
+
+  .offer-card:hover .offer-card__more svg {
+    transform: translateX(4px);
   }
 
   .product__image:hover img {
