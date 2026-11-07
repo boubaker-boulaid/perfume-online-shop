@@ -54,4 +54,4 @@ Base styles are for phones. Larger screens add to them with `min-width` media qu
 
 Replace the insides of `src/services/api.ts`. Its functions already have the same inputs, outputs and errors as the real endpoints, so pages and components shouldn't need to change. Read `backend/docs/API.md` for the CSRF step.
 
-The prices also need checking at that point: `formatPrice` in `utils/format.ts` shows dollars, as in the design, while the backend's emails use DH. The design's star ratings have no backend field yet, and the home carousel shows each category's `image_path`, so categories need images in the backend.
+Prices are in DH, in `formatPrice` in `utils/format.ts`, like the backend's emails. The design's star ratings have no backend field yet, and the home carousel shows each category's `image_path`, so categories need images in the backend.

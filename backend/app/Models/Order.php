@@ -56,17 +56,17 @@ class Order extends Model
         $money = fn ($v) => number_format((float) $v, 2, ',', '').' DH';
 
         $lines = collect([
-            "New Order {$this->order_number}",
+            "Nouvelle commande {$this->order_number}",
             '',
         ])->concat($this->items->map(
-            fn ($i) => "{$i->product_name}: quantity {$i->quantity} / cost {$money($i->line_total)} "
+            fn ($i) => "{$i->product_name} : quantité {$i->quantity} / prix {$money($i->line_total)}"
         ))->concat([
             '',
-            'Shipping: '.($this->shipping_cost == 0 ? 'free' : $money($this->shipping_cost)),
-            "Total: {$money($this->total)}",
-            "Name: {$this->customer_name}",
-            "City: {$this->city}",
-            "Address: {$this->address}",
+            'Livraison : '.($this->shipping_cost == 0 ? 'offerte' : $money($this->shipping_cost)),
+            "Total : {$money($this->total)}",
+            "Nom : {$this->customer_name}",
+            "Ville : {$this->city}",
+            "Adresse : {$this->address}",
         ]);
 
         if ($this->note) {

@@ -78,7 +78,7 @@ class CategoryService
     public function deleteCategory(Category $category)
     {
         // products are restricted on delete, so they have to be moved or removed first
-        abort_if($category->products()->exists(), 409, 'Cannot delete a category that still has products.');
+        abort_if($category->products()->exists(), 409, 'Impossible de supprimer une catégorie qui contient encore des produits.');
 
         $category->delete();
 

@@ -23,7 +23,7 @@ class OrderEmailsTest extends TestCase
 
         $mail = new CustomerOrderPlacedMail($order);
 
-        $mail->assertHasSubject('We received your order');
+        $mail->assertHasSubject('Nous avons bien reçu votre commande');
         $mail->assertSeeInHtml("/api/v1/orders/{$order->order_number}/whatsapp?", false);
         $mail->assertDontSeeInHtml('is being prepared');
         $mail->assertDontSeeInHtml("{$order->order_number} confirmed");
@@ -33,7 +33,7 @@ class OrderEmailsTest extends TestCase
     {
         $mail = new CustomerPaymentReminderMail(Order::factory()->create());
 
-        $mail->assertHasSubject('Complete your order');
+        $mail->assertHasSubject('Finalisez votre commande');
         $mail->assertDontSeeInHtml('arrange payment');
     }
 
@@ -85,7 +85,7 @@ class OrderEmailsTest extends TestCase
     {
         $mail = new CustomerOrderCancelledMail(Order::factory()->create());
 
-        $mail->assertHasSubject('Your order was cancelled');
+        $mail->assertHasSubject('Votre commande a été annulée');
         $mail->assertSeeInHtml(config('app.frontend_url'));
         $mail->assertDontSeeInHtml('wa.me');
     }

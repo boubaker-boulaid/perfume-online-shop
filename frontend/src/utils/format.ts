@@ -1,4 +1,3 @@
-// The one place that decides how money looks, in French format: 89,00 $. The design uses dollars.
 const DAY = 24 * 60 * 60 * 1000
 
 // Rounded down, so the page never promises more than the real reduction.
@@ -15,7 +14,7 @@ export function formatDiscount(percent: number): string {
 }
 
 export function formatDate(iso: string): string {
-  return new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(iso))
+  return new Intl.DateTimeFormat('fr-MA', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(iso))
 }
 
 export function formatTimeLeft(endsAt: string): string {
@@ -26,6 +25,7 @@ export function formatTimeLeft(endsAt: string): string {
   return days === 1 ? 'Plus qu’un jour' : `Plus que ${days} jours`
 }
 
+// The one place that decides how money looks, the same way as the backend's emails: 89,00 DH.
 export function formatPrice(value: string | number): string {
-  return `${Number(value).toFixed(2).replace('.', ',')}\u00a0$`
+  return `${Number(value).toFixed(2).replace('.', ',')}\u00a0DH`
 }

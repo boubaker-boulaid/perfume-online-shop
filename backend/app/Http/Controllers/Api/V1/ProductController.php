@@ -24,14 +24,14 @@ class ProductController extends Controller
     {
         $products = $this->product_service->getAdminProducts($request->validated());
 
-        return $this->ok(ProductResource::collection($products), 'Products retrieved.');
+        return $this->ok(ProductResource::collection($products), 'Produits récupérés.');
     }
 
     public function active(FiltersRequest $request)
     {
         $products = $this->product_service->getProducts($request->validated());
 
-        return $this->ok(ProductResource::collection($products), 'Products retrieved.');
+        return $this->ok(ProductResource::collection($products), 'Produits récupérés.');
     }
 
     /**
@@ -41,7 +41,7 @@ class ProductController extends Controller
     {
         $product = $this->product_service->createProduct($request->validated(), $request->file('image'));
 
-        return $this->created(new ProductResource($product), 'Product created.');
+        return $this->created(new ProductResource($product), 'Produit créé.');
     }
 
     /**
@@ -50,13 +50,13 @@ class ProductController extends Controller
     public function show(Product $product)
     {
         return $this->okNoPgs(new ProductResource($product->load('category')),
-            'Product Retrieved');
+            'Produit récupéré.');
     }
 
     public function showActive(string $slug)
     {
         return $this->okNoPgs(new ProductResource($this->product_service->getProduct($slug)),
-            'Product Retrieved');
+            'Produit récupéré.');
     }
 
     /**
@@ -66,7 +66,7 @@ class ProductController extends Controller
     {
         $product = $this->product_service->updateProduct($product, $request->validated(), $request->file('image'));
 
-        return $this->okNoPgs(new ProductResource($product), 'Product updated.');
+        return $this->okNoPgs(new ProductResource($product), 'Produit mis à jour.');
     }
 
     /**
@@ -83,6 +83,6 @@ class ProductController extends Controller
     {
         $products = $this->product_service->getFeatured();
 
-        return $this->okNoPgs(ProductResource::collection($products), 'Featured products retrieved');
+        return $this->okNoPgs(ProductResource::collection($products), 'Produits en vedette récupérés.');
     }
 }

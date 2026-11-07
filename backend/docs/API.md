@@ -27,7 +27,7 @@ Successful responses share one shape:
 ```json
 {
   "success": true,
-  "message": "Product Retrieved",
+  "message": "Produit récupéré.",
   "data": {},
   "errors": null
 }
@@ -38,7 +38,7 @@ Paginated lists add `meta` and `links`. Lists return 10 items per page, and you 
 ```json
 {
   "success": true,
-  "message": "Products retrieved.",
+  "message": "Produits récupérés.",
   "data": [],
   "meta": { "current_page": 1, "per_page": 10, "total": 3, "last_page": 1 },
   "links": {
@@ -53,7 +53,7 @@ Paginated lists add `meta` and `links`. Lists return 10 items per page, and you 
 
 Deleting returns `204 No Content` with an empty body.
 
-Prices are strings with two decimals, such as `"890.00"`, so convert them before doing arithmetic. Dates are ISO 8601 in UTC.
+Prices are strings with two decimals, such as `"890.00"`, so convert them before doing arithmetic. Dates are ISO 8601 in UTC. The shop itself runs on Morocco time (`Africa/Casablanca`). Messages are in French.
 
 ### Errors
 
@@ -62,7 +62,7 @@ Errors have the same shape, with `success: false`. Validation errors list the me
 ```json
 {
   "success": false,
-  "message": "The given data was invalid",
+  "message": "Les données saisies ne sont pas valides.",
   "data": null,
   "errors": {
     "sort": ["The selected sort is invalid."]
@@ -133,7 +133,7 @@ Checks that the API is running. It doesn't use the usual response shape.
 ```json
 {
   "success": true,
-  "message": "Shop API is running",
+  "message": "L’API de la boutique fonctionne",
   "version": "1.0.0",
   "timestamp": "2026-11-05T22:15:04.888506Z"
 }
@@ -206,7 +206,7 @@ Response, `201 Created`:
 ```json
 {
   "success": true,
-  "message": "The order was created successfully.",
+  "message": "La commande a bien été créée.",
   "data": {
     "order_number": "ORD-2026-000001",
     "total": "1780.00",
@@ -305,7 +305,7 @@ Returns the dashboard numbers, cached for 5 minutes.
 ```json
 {
   "success": true,
-  "message": "Stats retrieved.",
+  "message": "Statistiques récupérées.",
   "data": {
     "revenue_this_month": 0,
     "orders_by_status": { "pending": 0, "confirmed": 1, "shipped": 0, "delivered": 0, "cancelled": 0 },

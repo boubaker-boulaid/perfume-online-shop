@@ -2,12 +2,12 @@
     $money = fn ($v) => number_format((float) $v, 2, ',', ' ') . ' DH';
 @endphp
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="x-apple-disable-message-reformatting">
-    <title>Complete Your Order</title>
+    <title>Finalisez votre commande</title>
     <style>
         @media screen and (max-width: 620px) {
             .container { width: 100% !important; }
@@ -23,7 +23,7 @@
 <body style="margin:0; padding:0; background-color:#f6f4ef; font-family:Helvetica, Arial, sans-serif;">
     {{-- preheader, invisible but picked up by mail clients --}}
     <div style="display:none; max-height:0; overflow:hidden;">
-        Your order {{ $order->order_number }} is waiting — send it on WhatsApp to confirm it.
+        Votre commande {{ $order->order_number }} vous attend : envoyez-la sur WhatsApp pour la confirmer.
     </div>
 
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f6f4ef; padding:24px 12px;">
@@ -44,18 +44,18 @@
                         <td class="pad" style="background-color:#ffffff; padding:40px 40px 0; border-left:1px solid #e8e1d6; border-right:1px solid #e8e1d6;">
 
                             <h1 style="margin:0 0 8px; font-family:Georgia, 'Times New Roman', serif; font-size:26px; color:#221a12;">
-                                Your order is waiting, {{ $order->customer_name }}
+                                {{ $order->customer_name }}, votre commande vous attend
                             </h1>
                             <p style="margin:0 0 28px; font-size:14px; line-height:22px; color:#6d635a;">
-                                We have reserved your items, but we haven't received your order on WhatsApp yet.
-                                Send us the order message to confirm it. You pay when your order is delivered.
+                                Nous avons réservé vos articles, mais nous n’avons pas encore reçu votre commande sur WhatsApp.
+                                Envoyez-nous le message de commande pour la confirmer. Vous payez à la livraison.
                             </p>
 
                             {{-- order summary box --}}
                             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#fbf9f5; border:1px solid #e8e1d6; border-radius:12px; margin-bottom:28px;">
                                 <tr>
                                     <td class="summary-cell" style="padding:16px 20px;">
-                                        <span style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#a2957f;">Order number</span><br>
+                                        <span style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#a2957f;">Numéro de commande</span><br>
                                         <span style="font-family:Georgia, 'Times New Roman', serif; font-size:18px; color:#221a12;">{{ $order->order_number }}</span>
                                     </td>
                                     <td align="right" class="summary-cell" style="padding:16px 20px;">
@@ -81,7 +81,7 @@
                                     <td align="center">
                                         <a href="{{ $order->whatsappRedirectUrl() }}" class="button" target="_blank"
                                            style="display:inline-block; background-color:#221a12; color:#ffffff; font-size:15px; font-weight:bold; text-decoration:none; padding:16px 36px; border-radius:999px;">
-                                            Complete my order on WhatsApp
+                                            Finaliser ma commande sur WhatsApp
                                         </a>
                                     </td>
                                 </tr>
@@ -91,15 +91,15 @@
                             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#fbf4e6; border:1px solid #ecdcb4; border-radius:12px; margin-bottom:32px;">
                                 <tr>
                                     <td style="padding:14px 20px; font-size:13px; line-height:20px; color:#6d5a2e;">
-                                        Orders that are not confirmed within <strong>1 hour</strong> of being placed are
-                                        cancelled automatically and the items are released.
+                                        Les commandes non confirmées dans un délai d’<strong>une heure</strong> sont
+                                        annulées automatiquement et les articles sont libérés.
                                     </td>
                                 </tr>
                             </table>
 
                             <p style="margin:0 0 32px; font-size:13px; line-height:20px; color:#6d635a;">
-                                Already sent us the message? You can ignore this email — we will confirm your
-                                order shortly.
+                                Vous nous avez déjà envoyé le message ? Vous pouvez ignorer cet e-mail : nous confirmerons votre
+                                commande très bientôt.
                             </p>
                         </td>
                     </tr>
@@ -109,8 +109,8 @@
                         <td align="center" class="pad-footer" style="background-color:#221a12; padding:28px 40px; border-radius:0 0 16px 16px;">
                             <p class="brand" style="margin:0 0 6px; font-family:Georgia, 'Times New Roman', serif; font-size:13px; letter-spacing:4px; color:#c8a24a;">LUME PERFUMS</p>
                             <p style="margin:0; font-size:12px; line-height:18px; color:#8a7f72;">
-                                You are receiving this email because you placed an order on our online store.<br>
-                                This is an automatic reminder — no reply is required.
+                                Vous recevez cet e-mail car vous avez passé une commande sur notre boutique en ligne.<br>
+                                Ceci est un rappel automatique : aucune réponse n’est nécessaire.
                             </p>
                         </td>
                     </tr>

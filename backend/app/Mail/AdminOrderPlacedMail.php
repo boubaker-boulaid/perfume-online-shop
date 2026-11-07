@@ -28,7 +28,7 @@ class AdminOrderPlacedMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'A new order has been placed',
+            subject: 'Une nouvelle commande a été passée',
         );
     }
 

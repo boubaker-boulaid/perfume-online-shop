@@ -16,7 +16,7 @@ class InsufficientStockException extends Exception
         public readonly int $stockRequested,
         public readonly int $stockAvaliable,
     ) {
-        parent::__construct("Insufficient stock for {$productName}. Stock requested: {$stockRequested}, Stock avaliable: {$stockAvaliable}.");
+        parent::__construct("Stock insuffisant pour {$productName}. Quantité demandée : {$stockRequested}, quantité disponible : {$stockAvaliable}.");
     }
 
     public function render(Request $request)

@@ -14,6 +14,6 @@ class StatsController extends Controller
 
     public function index()
     {
-        return $this->okNoPgs($this->stats_service->dashboard(), 'Stats retrieved.');
+        return $this->okNoPgs($this->stats_service->dashboard(), 'Statistiques récupérées.');
     }
 }

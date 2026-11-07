@@ -24,7 +24,7 @@ class OrderController extends Controller
     {
         $orders = $this->order_service->getOrders($request->validated());
 
-        return $this->ok(OrderResource::collection($orders), 'Orders retrieved.');
+        return $this->ok(OrderResource::collection($orders), 'Commandes récupérées.');
     }
 
     /**
@@ -43,8 +43,8 @@ class OrderController extends Controller
 
         // a retry with the same idempotency key gets the existing order back
         return $order->wasRecentlyCreated
-            ? $this->created($data, 'The order was created successfully.')
-            : $this->okNoPgs($data, 'The order was already placed.');
+            ? $this->created($data, 'La commande a bien été créée.')
+            : $this->okNoPgs($data, 'Cette commande a déjà été passée.');
     }
 
     public function whatsappOpened(string $orderNumber)
@@ -73,7 +73,7 @@ class OrderController extends Controller
      */
     public function show(Order $order)
     {
-        return $this->okNoPgs(new OrderResource($this->order_service->getOrder($order)), 'Order retrieved.');
+        return $this->okNoPgs(new OrderResource($this->order_service->getOrder($order)), 'Commande récupérée.');
     }
 
     public function status(Order $order, UpdateStatusRequest $request)
@@ -81,6 +81,6 @@ class OrderController extends Controller
         $validated = $request->validated();
         $order = $this->order_service->changeStatus($order, $validated['status'], $request->user(), $validated['note'] ?? null);
 
-        return $this->okNoPgs(new OrderResource($this->order_service->getOrder($order)), 'Order status updated.');
+        return $this->okNoPgs(new OrderResource($this->order_service->getOrder($order)), 'Statut de la commande mis à jour.');
     }
 }

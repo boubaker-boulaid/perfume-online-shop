@@ -70,6 +70,10 @@
 }
 
 .product-card__price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 8px;
   margin-bottom: 8px;
   color: rgba(255, 255, 255, 0.82);
   font-size: 14px;
@@ -80,6 +84,11 @@
   margin-left: 8px;
   color: var(--text-50);
   font-size: 0.85em;
+}
+
+/* the gap above keeps them apart, and the old price moves under the new one if it doesn't fit */
+.product-card__price s {
+  margin-left: 0;
 }
 
 .product-card--skeleton {

@@ -4,15 +4,15 @@ import { Reveal } from '../Reveal'
 
 const details: { icon: ReactNode; label: string; value: ReactNode }[] = [
   { icon: <MailIcon size={17} />, label: 'E-mail', value: 'hello@lumeparfums.com' },
-  { icon: <PhoneIcon size={17} />, label: 'Téléphone', value: '+351 21 555 0148' },
+  { icon: <PhoneIcon size={17} />, label: 'Téléphone', value: '+212 6 00 00 00 00' },
   {
     icon: <PinIcon size={17} />,
     label: 'Atelier',
     value: (
       <>
-        Rua das Flores 27
+        12 Avenue Hassan II
         <br />
-        1200-193 Lisbonne, Portugal
+        80000 Agadir, Maroc
       </>
     ),
   },
@@ -21,7 +21,7 @@ const details: { icon: ReactNode; label: string; value: ReactNode }[] = [
     label: 'Horaires',
     value: (
       <>
-        Lun – ven, 10h00 – 18h00 (WET)
+        Lun – ven, 10h00 – 18h00 (heure du Maroc)
         <br />
         Samedi sur rendez-vous
       </>

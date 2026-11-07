@@ -23,14 +23,14 @@ class CategoryController extends Controller
     {
         $categories = $this->category_service->getAdminCategories();
 
-        return $this->ok(CategoryResource::collection($categories), 'Categories retrieved');
+        return $this->ok(CategoryResource::collection($categories), 'Catégories récupérées.');
     }
 
     public function active()
     {
         $categories = $this->category_service->getCategories();
 
-        return $this->ok(CategoryResource::collection($categories), 'Categories retrieved');
+        return $this->ok(CategoryResource::collection($categories), 'Catégories récupérées.');
     }
 
     /**
@@ -40,7 +40,7 @@ class CategoryController extends Controller
     {
         $category = $this->category_service->createCategory($request->validated(), $request->file('image'));
 
-        return $this->created(new CategoryResource($category), 'Category created.');
+        return $this->created(new CategoryResource($category), 'Catégorie créée.');
     }
 
     /**
@@ -49,7 +49,7 @@ class CategoryController extends Controller
     public function show(Category $category)
     {
         return $this->okNoPgs(new CategoryResource($category->loadCount('products')),
-            'Category Retrieved');
+            'Catégorie récupérée.');
     }
 
     /**
@@ -59,7 +59,7 @@ class CategoryController extends Controller
     {
         $category = $this->category_service->updateCategory($category, $request->validated(), $request->file('image'));
 
-        return $this->okNoPgs(new CategoryResource($category), 'Category updated.');
+        return $this->okNoPgs(new CategoryResource($category), 'Catégorie mise à jour.');
     }
 
     /**

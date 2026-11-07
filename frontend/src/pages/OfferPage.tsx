@@ -79,8 +79,8 @@ function OfferDetails({ offer }: { offer: Offer }) {
                 </button>
               )
             )}
-            <button type="button" className="button button--accent buy-bar__button" disabled={available.length === 0} onClick={orderOffer}>
-              {available.length > 0 ? `Commander l’offre · ${formatPrice(total)}` : 'Offre épuisée'}
+            <button type="button" className="button button--accent buy-bar__button" disabled={available.length === 0} aria-label={available.length > 0 ? `Commander l’offre, ${formatPrice(total)}` : undefined} onClick={orderOffer}>
+              {available.length > 0 ? `Commander · ${formatPrice(total)}` : 'Offre épuisée'}
             </button>
           </div>
         </div>

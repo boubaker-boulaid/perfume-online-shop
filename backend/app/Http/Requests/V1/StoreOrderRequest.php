@@ -50,7 +50,7 @@ class StoreOrderRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'phone.regex' => 'Please enter a valid Moroccan phone number.',
+            'phone.regex' => 'Veuillez saisir un numéro de téléphone marocain valide.',
         ];
     }
 }

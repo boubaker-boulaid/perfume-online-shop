@@ -3,7 +3,7 @@ import { PillLink } from '../PillLink'
 import { Reveal } from '../Reveal'
 
 const stats = [
-  { value: '2016', label: 'Fondée à Lisbonne' },
+  { value: '2016', label: 'Fondée à Agadir' },
   { value: '42', label: 'Ingrédients naturels' },
   { value: '18k', label: 'Flacons par an' },
 ]
@@ -24,7 +24,7 @@ export function AboutSection() {
           petites séries, matières naturelles et une formule achevée seulement lorsqu’elle sent le souvenir.
         </p>
         <p className="about__text">
-          Chaque parfum est assemblé et mis en flacon dans notre atelier de Lisbonne, puis repose six semaines avant de vous parvenir. Nous nous fournissons auprès de producteurs que nous rencontrons
+          Chaque parfum est assemblé et mis en flacon dans notre atelier d’Agadir, puis repose six semaines avant de vous parvenir. Nous nous fournissons auprès de producteurs que nous rencontrons
           en personne, et chaque ingrédient figure sur l’étiquette.
         </p>
         <div className="about__stats">

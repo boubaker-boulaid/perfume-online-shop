@@ -15,7 +15,7 @@ class EnsureGuest extends RedirectIfAuthenticated
     {
         foreach ($guards ?: [null] as $guard) {
             if ($request->expectsJson() && Auth::guard($guard)->check()) {
-                abort(409, 'You are already logged in.');
+                abort(409, 'Vous êtes déjà connecté.');
             }
         }
 
