@@ -16,7 +16,20 @@ class Product extends Model
     use HasFactory;
 
     protected $fillable = [
-        'category_id', 'name', 'slug', 'description', 'notes', 'sort_order', 'sku', 'price', 'compare_at_price', 'stock', 'image_path', 'is_active', 'is_featured',
+        'category_id',
+        'name',
+        'slug',
+        'description',
+        'notes',
+        'sort_order',
+        'sku',
+        'price',
+        'compare_at_price',
+        'stock',
+        'image_path',
+        'is_active',
+        'is_featured',
+        'is_offer',
     ];
 
     protected $casts = [
@@ -25,6 +38,7 @@ class Product extends Model
         'stock' => 'int',
         'is_active' => 'bool',
         'is_featured' => 'bool',
+        'is_offer' => 'bool',
     ];
 
     // scope the query to include only active products
@@ -36,7 +50,13 @@ class Product extends Model
     // scope a query to what customers can see: active products in an active category
     public function scopeVisible(Builder $query)
     {
-        $query->where('is_active', true)->whereRelation('category', 'is_active', true);
+        $query->active()->whereRelation('category', 'is_active', true);
+    }
+
+    // prevent the offers sets being listed with the normal products
+    public function scopeListed(Builder $query)
+    {
+        $query->visible()->where('is_offer', false);
     }
 
     // scope a query to include only featured products
