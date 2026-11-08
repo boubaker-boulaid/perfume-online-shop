@@ -20,7 +20,7 @@ class CategoryService
         $key = $this->versionedKey('catalog', 'categories', 'page', (string) Paginator::resolveCurrentPage());
 
         return $this->cached($key, self::CATEGORIES_CACHE_SECONDS,
-            fn () => Category::active()->withCount(['products' => fn ($q) => $q->active()])->orderBy('sort_order')->latest()->paginate(10));
+            fn () => Category::active()->withCount(['products' => fn ($q) => $q->active()->where('is_offer', false)])->orderBy('sort_order')->latest()->paginate(10));
     }
 
     public function getAdminCategories()

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Offer;
 use App\Models\Product;
 use App\Services\Concerns\HandlesCache;
 use App\Services\Concerns\HandlesSlugsAndImages;
@@ -33,9 +34,12 @@ class ProductService
         ksort($filters);
         $key = $this->versionedKey('catalog', 'products', md5(json_encode([$filters, Paginator::resolveCurrentPage()])));
 
-        return $this->cached($key, self::PRODUCTS_CACHE_SECONDS,
+        return $this->cached(
+            $key,
+            self::PRODUCTS_CACHE_SECONDS,
             // only validated filters go in the links: this page is cached and shared between visitors
-            fn () => $this->filteredProducts($filters)->with('category')->visible()->paginate(10)->appends($filters));
+            fn() => $this->filteredProducts($filters)->with('category')->listed()->paginate(10)->appends($filters)
+        );
     }
 
     public function getAdminProducts(array $filters)
@@ -48,11 +52,11 @@ class ProductService
     private function filteredProducts(array $filters)
     {
         $query = Product::query();
-        $query->when($filters['q'] ?? null, fn ($q, $search) => $q->where('name', 'like', '%'.$search.'%'))
-            ->when($filters['category'] ?? null, fn ($q, $cat) => $q->whereRelation('category', 'slug', $cat))
+        $query->when($filters['q'] ?? null, fn($q, $search) => $q->where('name', 'like', '%' . $search . '%'))
+            ->when($filters['category'] ?? null, fn($q, $cat) => $q->whereRelation('category', 'slug', $cat))
             // isset, because a price of 0 is a real filter
-            ->when(isset($filters['min_price']), fn ($q) => $q->where('price', '>=', $filters['min_price']))
-            ->when(isset($filters['max_price']), fn ($q) => $q->where('price', '<=', $filters['max_price']));
+            ->when(isset($filters['min_price']), fn($q) => $q->where('price', '>=', $filters['min_price']))
+            ->when(isset($filters['max_price']), fn($q) => $q->where('price', '<=', $filters['max_price']));
 
         match ($filters['sort'] ?? null) {
             'price_desc' => $query->orderByDesc('price'),
@@ -68,15 +72,21 @@ class ProductService
     public function getProduct(string $slug)
     {
         // firstOrFail throws before anything is stored, so unknown slugs are never cached
-        return $this->cached($this->versionedKey('catalog', 'product', $slug), self::PRODUCT_CACHE_SECONDS,
-            fn () => Product::with('category')->visible()->where('slug', $slug)->firstOrFail());
+        return $this->cached(
+            $this->versionedKey('catalog', 'product', $slug),
+            self::PRODUCT_CACHE_SECONDS,
+            fn() => Product::with('category')->listed()->where('slug', $slug)->firstOrFail()
+        );
     }
 
     public function getFeatured()
     {
         // cache all featured products and pick 5 per request, so the homepage still changes on every visit
-        $featured = $this->cached($this->versionedKey('catalog', 'featured'), self::FEATURED_CACHE_SECONDS,
-            fn () => Product::with('category')->visible()->featured()->get());
+        $featured = $this->cached(
+            $this->versionedKey('catalog', 'featured'),
+            self::FEATURED_CACHE_SECONDS,
+            fn() => Product::with('category')->listed()->featured()->get()
+        );
 
         return $featured->shuffle()->take(5)->values();
     }
@@ -129,6 +139,11 @@ class ProductService
 
     public function deleteProduct(Product $product)
     {
+        abort_if(
+            Offer::where('product_id', $product->id)->exists() && $product->offers()->exists(),
+            409,
+            'Impossible de supprimer un produit utilisé dans une offre. Masquez-le ou retirez-le de l’offre.'
+        );
 
         $product->delete();
 
