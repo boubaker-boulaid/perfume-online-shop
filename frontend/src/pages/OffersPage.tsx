@@ -9,8 +9,8 @@ export function OffersPage() {
 
   return (
     <div className="container page">
-      <PageHeading eyebrow="Offres spéciales" title="Nos offres du moment">
-        Des parfums choisis à prix réduit, pour un temps limité. Choisissez une offre pour tout savoir.
+      <PageHeading eyebrow="Promos" title={<>Les offres <em>du moment</em></>}>
+        Des packs à petit prix, pour une durée limitée.
       </PageHeading>
 
       <div className="offer-grid">
@@ -20,7 +20,7 @@ export function OffersPage() {
 
       {(Boolean(error) || offers?.length === 0) && (
         <div className="empty">
-          <p>{error ? 'Impossible de charger les offres pour le moment.' : 'Aucune offre en ce moment. Revenez bientôt !'}</p>
+          <p>{error ? 'Impossible de charger les offres. Réessayez dans un instant.' : 'Pas d’offre en ce moment. Revenez bientôt\u00a0!'}</p>
           <PillLink to="/shop">Voir la boutique</PillLink>
         </div>
       )}

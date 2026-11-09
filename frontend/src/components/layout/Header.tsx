@@ -9,8 +9,8 @@ const links = [
   { label: 'Boutique', to: '/shop' },
   { label: 'Offres', to: '/offers' },
   { label: 'Collections', to: '/#collections' },
-  { label: 'Découvrir', to: '/#discover' },
-  { label: 'À propos', to: '/#about' },
+  { label: 'Nouveautés', to: '/#discover' },
+  { label: 'Qui sommes-nous', to: '/#about' },
   { label: 'Contact', to: '/#contact' },
 ]
 

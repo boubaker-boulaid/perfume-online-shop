@@ -60,20 +60,20 @@ function ProductDetails({ product }: { product: Product }) {
         )}
 
         <div className={`product__stock${soldOut ? ' is-out' : ''}`}>
-          {soldOut ? 'En rupture de stock' : product.stock <= LOW_STOCK ? `Plus que ${product.stock} en stock` : 'En stock'}
+          {soldOut ? 'Épuisé' : product.stock <= LOW_STOCK ? `Plus que ${product.stock} en stock` : 'En stock'}
         </div>
 
         {/* Fixed to the bottom of the screen on phones, so it's always in reach. */}
         <div className="buy-bar">
           {!soldOut && <QuantityStepper value={quantity} max={Math.min(product.stock, 99)} label="Quantité" onChange={setQuantity} />}
           <button type="button" className="button button--accent buy-bar__button" disabled={soldOut} onClick={add}>
-            {soldOut ? 'Épuisé' : added ? <><CheckIcon size={16} /> Ajouté au panier</> : 'Ajouter au panier'}
+            {soldOut ? 'Épuisé' : added ? <>Ajouté <CheckIcon size={16} /></> : 'Ajouter au panier'}
           </button>
         </div>
 
         <ul className="product__facts">
-          <li>Livraison offerte</li>
-          <li>Paiement en espèces à la réception</li>
+          <li>Livraison gratuite partout au Maroc</li>
+          <li>Paiement à la réception</li>
           {product.sku && <li>Réf. {product.sku}</li>}
         </ul>
       </div>

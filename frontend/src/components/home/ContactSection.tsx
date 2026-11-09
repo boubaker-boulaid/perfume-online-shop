@@ -1,32 +1,13 @@
 import { useState, type ReactNode } from 'react'
 import { ClockIcon, MailIcon, PhoneIcon, PinIcon } from '../Icons'
 import { Reveal } from '../Reveal'
+import { WHATSAPP_DISPLAY } from '../../utils/whatsapp'
 
 const details: { icon: ReactNode; label: string; value: ReactNode }[] = [
-  { icon: <MailIcon size={17} />, label: 'E-mail', value: 'hello@lumeparfums.com' },
-  { icon: <PhoneIcon size={17} />, label: 'Téléphone', value: '+212 6 00 00 00 00' },
-  {
-    icon: <PinIcon size={17} />,
-    label: 'Atelier',
-    value: (
-      <>
-        12 Avenue Hassan II
-        <br />
-        80000 Agadir, Maroc
-      </>
-    ),
-  },
-  {
-    icon: <ClockIcon size={17} />,
-    label: 'Horaires',
-    value: (
-      <>
-        Lun – ven, 10h00 – 18h00 (heure du Maroc)
-        <br />
-        Samedi sur rendez-vous
-      </>
-    ),
-  },
+  { icon: <PhoneIcon size={17} />, label: 'WhatsApp', value: WHATSAPP_DISPLAY },
+  { icon: <MailIcon size={17} />, label: 'E-mail', value: 'contact@lumeparfums.ma' },
+  { icon: <PinIcon size={17} />, label: 'Adresse', value: 'Agadir, Maroc' },
+  { icon: <ClockIcon size={17} />, label: 'Horaires', value: 'Lun – sam, 10h – 20h' },
 ]
 
 export function ContactSection() {
@@ -35,15 +16,15 @@ export function ContactSection() {
   return (
     <section id="contact" className="container section section--wide">
       <Reveal className="contact-heading">
-        <div className="eyebrow">Contactez-nous</div>
+        <div className="eyebrow">Contact</div>
         <h2 className="display-title">
-          Dites-nous ce que vous <em>recherchez</em>
+          Une question sur un <em>parfum</em>&nbsp;?
         </h2>
       </Reveal>
 
       <div className="contact">
         <Reveal className="panel">
-          <p className="contact__intro">Notre équipe répond à chaque message sous un jour ouvré. Pour une commande déjà passée, indiquez le numéro de téléphone utilisé pour la commande.</p>
+          <p className="contact__intro">Le plus rapide, c’est WhatsApp. Pour une commande déjà passée, donnez-nous le numéro de téléphone utilisé.</p>
           <div className="contact__details">
             {details.map((detail) => (
               <div key={detail.label} className="contact__detail">
@@ -72,28 +53,28 @@ export function ContactSection() {
                 <input type="text" name="name" placeholder="Votre nom" autoComplete="name" />
               </label>
               <label className="field">
-                <span className="field__label">E-mail</span>
-                <input type="email" name="email" placeholder="vous@email.com" autoComplete="email" />
+                <span className="field__label">Téléphone</span>
+                <input type="tel" name="phone" placeholder="06 12 34 56 78" autoComplete="tel" inputMode="tel" />
               </label>
             </div>
             <label className="field">
               <span className="field__label">Sujet</span>
               <select name="subject" defaultValue="Conseil parfum">
                 <option>Conseil parfum</option>
-                <option>Commande ou livraison</option>
-                <option>Retours et échanges</option>
-                <option>Grossistes et presse</option>
+                <option>Ma commande</option>
+                <option>Échange</option>
+                <option>Vente en gros</option>
               </select>
             </label>
             <label className="field">
               <span className="field__label">Message</span>
-              <textarea name="message" rows={5} placeholder="Parlez-nous du parfum que vous recherchez : les notes que vous aimez, les occasions, ce que vous avez déjà porté." />
+              <textarea name="message" rows={5} placeholder="Dites-nous ce que vous cherchez : un parfum pour vous, un cadeau, une odeur que vous aimez…" />
             </label>
             <div className="contact__send">
               <button type="submit" className="button button--accent">
-                {sent ? 'Message envoyé' : 'Envoyer le message'}
+                {sent ? 'Envoyé ✓' : 'Envoyer'}
               </button>
-              <span role="status">{sent ? 'Merci, nous vous répondrons sous un jour ouvré.' : 'Nous répondons sous un jour ouvré.'}</span>
+              <span role="status">{sent ? 'Merci\u00a0! On vous répond très vite.' : 'On vous répond dans la journée.'}</span>
             </div>
           </form>
         </Reveal>

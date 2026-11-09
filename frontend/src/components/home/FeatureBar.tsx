@@ -2,10 +2,10 @@ import { CalendarIcon, HeadsetIcon, ShieldIcon, UserCircleIcon } from '../Icons'
 import { Reveal } from '../Reveal'
 
 const features = [
-  { icon: <ShieldIcon />, title: 'Expérience authentique', text: 'Des parfums sélectionnés et créés avec passion' },
-  { icon: <CalendarIcon />, title: 'Meilleur prix garanti', text: 'Une qualité exceptionnelle à prix imbattable' },
-  { icon: <HeadsetIcon />, title: 'Assistance 24h/24', text: 'À votre écoute à tout moment, où que vous soyez' },
-  { icon: <UserCircleIcon />, title: 'Sûr et fiable', text: 'Votre satisfaction est notre priorité' },
+  { icon: <ShieldIcon />, title: '100% originaux', text: 'Chaque flacon est vérifié avant l’envoi.' },
+  { icon: <CalendarIcon />, title: 'Livraison gratuite', text: 'Partout au Maroc, en 24 à 72h.' },
+  { icon: <HeadsetIcon />, title: 'Paiement à la réception', text: 'Vous payez seulement quand vous avez le colis.' },
+  { icon: <UserCircleIcon />, title: 'Réponse rapide sur WhatsApp', text: 'Une question\u00a0? On vous répond dans la journée.' },
 ]
 
 export function FeatureBar() {

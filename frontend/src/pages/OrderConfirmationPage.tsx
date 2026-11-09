@@ -16,15 +16,15 @@ export function OrderConfirmationPage() {
       <span className="confirmation__icon">
         <CheckIcon size={26} />
       </span>
-      <div className="eyebrow">Presque terminé</div>
+      <div className="eyebrow">Dernière étape</div>
       <h1 className="display-title">
-        Une dernière étape, <em>sur WhatsApp</em>
+        Envoyez votre commande <em>sur WhatsApp</em>
       </h1>
-      <p className="confirmation__text">Vos articles sont réservés. Envoyez-nous votre commande sur WhatsApp pour la confirmer. Les commandes non envoyées sous 1 heure sont annulées automatiquement.</p>
+      <p className="confirmation__text">Vos parfums sont réservés. Envoyez-nous la commande sur WhatsApp pour la confirmer. Sans message dans l’heure, la réservation est annulée.</p>
 
       <div className="panel confirmation__summary">
         <div className="summary__row">
-          <span>Total, à payer à la livraison</span>
+          <span>Total à payer au livreur</span>
           <strong>{formatPrice(order.total)}</strong>
         </div>
       </div>
@@ -39,11 +39,11 @@ export function OrderConfirmationPage() {
           void markWhatsappOpened(order.whatsapp_opened_url)
         }}
       >
-        {opened ? 'Rouvrir WhatsApp' : 'Envoyer ma commande sur WhatsApp'}
+        {opened ? 'Rouvrir WhatsApp' : 'Envoyer sur WhatsApp'}
       </a>
       {opened && (
         <p className="confirmation__note" role="status">
-          Merci. Nous confirmerons votre commande et organiserons la livraison avec vous.
+          Merci&nbsp;! On vous appelle ou on vous écrit pour confirmer la livraison.
         </p>
       )}
       <Link to="/shop" className="text-button">

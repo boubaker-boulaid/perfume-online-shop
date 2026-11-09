@@ -1,31 +1,31 @@
 import about from '../../assets/images/about.webp'
-import { PillLink } from '../PillLink'
+import { WHATSAPP_URL } from '../../utils/whatsapp'
+import { ArrowRightIcon } from '../Icons'
 import { Reveal } from '../Reveal'
 
 const stats = [
-  { value: '2016', label: 'Fondée à Agadir' },
-  { value: '42', label: 'Ingrédients naturels' },
-  { value: '18k', label: 'Flacons par an' },
+  { value: '2019', label: 'Depuis' },
+  { value: '+3000', label: 'Clients livrés' },
+  { value: '60+', label: 'Parfums en stock' },
 ]
 
 export function AboutSection() {
   return (
     <section id="about" className="container section section--wide about">
       <Reveal className="about__image">
-        <img src={about} alt="Trois flacons de parfum Lumé côte à côte" width={860} height={510} loading="lazy" />
+        <img src={about} alt="Trois flacons de parfum Lumé" width={860} height={510} loading="lazy" />
       </Reveal>
       <Reveal delay={200}>
-        <div className="eyebrow">À propos</div>
+        <div className="eyebrow">Qui sommes-nous</div>
         <h2 className="display-title">
-          Un parfum créé lentement, en <em>petites séries</em>
+          Une petite parfumerie, <em>de confiance</em>
         </h2>
         <p className="about__text">
-          Lumé est née en 2016 d’un seul mélange de jasmin et de cèdre, préparé dans la cuisine d’un atelier et offert à des amis. Dix ans plus tard, nous travaillons toujours de la même façon :
-          petites séries, matières naturelles et une formule achevée seulement lorsqu’elle sent le souvenir.
+          Lumé a commencé à Agadir en 2019 avec quelques flacons vendus à la famille et aux amis. Aujourd’hui on livre partout au Maroc, mais on travaille toujours pareil : on choisit nos parfums
+          un par un, et on ne vend que ce qu’on a déjà senti nous-mêmes.
         </p>
         <p className="about__text">
-          Chaque parfum est assemblé et mis en flacon dans notre atelier d’Agadir, puis repose six semaines avant de vous parvenir. Nous nous fournissons auprès de producteurs que nous rencontrons
-          en personne, et chaque ingrédient figure sur l’étiquette.
+          Vous hésitez entre deux parfums&nbsp;? Envoyez-nous un message sur WhatsApp, on vous conseille selon vos goûts et votre budget.
         </p>
         <div className="about__stats">
           {stats.map((stat) => (
@@ -35,7 +35,13 @@ export function AboutSection() {
             </div>
           ))}
         </div>
-        <PillLink to="/#contact">Visiter l’atelier</PillLink>
+        {/* Same look as PillLink, but it opens WhatsApp in a new tab */}
+        <a href={WHATSAPP_URL} target="_blank" rel="noreferrer" className="pill-link">
+          Nous écrire sur WhatsApp
+          <span className="pill-link__arrow">
+            <ArrowRightIcon size={15} strokeWidth={1.7} />
+          </span>
+        </a>
       </Reveal>
     </section>
   )

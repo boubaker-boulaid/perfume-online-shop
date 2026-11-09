@@ -9,9 +9,9 @@ import { offers, type OfferSeed } from '../data/offers'
 import { products } from '../data/products'
 import type { Category, Offer, OrderPayload, Paginated, PlacedOrder, Product, ProductFilters } from '../types'
 import { discountPercent, formatPrice } from '../utils/format'
+import { WHATSAPP_NUMBER } from '../utils/whatsapp'
 
 const PER_PAGE = 10
-const FAKE_WHATSAPP_NUMBER = '212600000000'
 
 export class ApiError extends Error {
   status: number
@@ -160,11 +160,12 @@ function validateOrder(payload: OrderPayload): Record<string, string[]> {
   const errors: Record<string, string[]> = {}
   const phone = payload.phone.replace(/[\s().-]/g, '')
 
-  if (!payload.customer_name.trim()) errors.customer_name = ['Veuillez saisir votre nom.']
-  if (!MOROCCAN_PHONE.test(phone)) errors.phone = ['Veuillez saisir un numéro de téléphone marocain valide.']
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.email)) errors.email = ['Veuillez saisir une adresse e-mail valide.']
-  if (!payload.city.trim()) errors.city = ['Veuillez saisir votre ville.']
-  if (!payload.address.trim()) errors.address = ['Veuillez saisir votre adresse.']
+  if (!payload.customer_name.trim()) errors.customer_name = ['Écrivez votre nom.']
+  if (!MOROCCAN_PHONE.test(phone)) errors.phone = ['Ce numéro ne semble pas correct. Exemple\u00a0: 06 12 34 56 78']
+  // the e-mail is optional, so it's only checked when something was typed
+  if (payload.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.email)) errors.email = ['Cette adresse e-mail ne semble pas correcte.']
+  if (!payload.city.trim()) errors.city = ['Écrivez votre ville.']
+  if (!payload.address.trim()) errors.address = ['Écrivez votre adresse.']
   if (payload.items.length === 0) errors.items = ['Votre panier est vide.']
 
   return errors
@@ -178,15 +179,15 @@ export function placeOrder(payload: OrderPayload): Promise<PlacedOrder> {
     if (existing) return existing
 
     const errors = validateOrder(payload)
-    if (Object.keys(errors).length > 0) throw new ApiError('Les données saisies ne sont pas valides.', 422, errors)
+    if (Object.keys(errors).length > 0) throw new ApiError('Certaines informations ne sont pas correctes.', 422, errors)
 
     // like the backend, prices come from the catalog and never from the browser
     const lines = payload.items.map((item) => {
       const product = activeProducts().find((candidate) => candidate.id === item.product_id)
 
-      if (!product) throw new ApiError('Un produit de votre panier n’est plus disponible.', 422)
+      if (!product) throw new ApiError('Un parfum de votre panier n’est plus disponible.', 422)
       if (product.stock < item.quantity) {
-        throw new ApiError(`Stock insuffisant pour ${product.name}. Quantité demandée\u00a0: ${item.quantity}, quantité disponible\u00a0: ${product.stock}.`, 400)
+        throw new ApiError(`Il ne reste que ${product.stock} ${product.name} en stock (vous en avez demandé ${item.quantity}).`, 400)
       }
 
       return { product, quantity: item.quantity, total: Number(product.price) * item.quantity }
@@ -195,11 +196,11 @@ export function placeOrder(payload: OrderPayload): Promise<PlacedOrder> {
     const total = lines.reduce((sum, line) => sum + line.total, 0)
 
     const message = [
-      'Nouvelle commande',
+      'Salam, je voudrais commander :',
       '',
-      ...lines.map((line) => `${line.product.name}${line.product.is_offer ? ` (${line.product.description})` : ''} : quantité ${line.quantity} / prix ${formatPrice(line.total)}`),
+      ...lines.map((line) => `${line.product.name}${line.product.is_offer ? ` (${line.product.description})` : ''} × ${line.quantity} : ${formatPrice(line.total)}`),
       '',
-      'Livraison : offerte',
+      'Livraison : gratuite',
       `Total : ${formatPrice(total)}`,
       `Nom : ${payload.customer_name}`,
       `Ville : ${payload.city}`,
@@ -209,7 +210,7 @@ export function placeOrder(payload: OrderPayload): Promise<PlacedOrder> {
 
     const order: PlacedOrder = {
       total: total.toFixed(2),
-      whatsapp_link: `https://wa.me/${FAKE_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`,
+      whatsapp_link: `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`,
       whatsapp_opened_url: `/api/v1/orders/${payload.idempotency_key}/whatsapp-opened`,
     }
 

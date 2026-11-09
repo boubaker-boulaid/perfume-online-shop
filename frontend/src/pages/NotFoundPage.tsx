@@ -5,9 +5,9 @@ export function NotFoundPage() {
   return (
     <div className="container page">
       <PageHeading eyebrow="404" title={<>Page <em>introuvable</em></>}>
-        La page ou le parfum que vous recherchez n’existe pas ou n’est plus disponible.
+        Cette page ou ce parfum n’existe plus.
       </PageHeading>
-      <PillLink to="/shop">Découvrir la boutique</PillLink>
+      <PillLink to="/shop">Voir les parfums</PillLink>
     </div>
   )
 }

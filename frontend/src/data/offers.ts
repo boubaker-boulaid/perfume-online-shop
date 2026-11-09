@@ -29,18 +29,18 @@ const daysFromNow = (days: number) => {
 // An offer is a fixed-price set. Its price comes from the product with the same slug
 // (see data/products.ts), and that's what reaches the cart and the order.
 const terms = [
-  'La réduction est déjà appliquée au prix affiché : aucun code à saisir.',
-  'Offre valable dans la limite des stocks disponibles.',
-  'Livraison offerte et paiement en espèces à la réception.',
+  'Le prix affiché est déjà réduit, pas besoin de code.',
+  'Dans la limite des stocks.',
+  'Livraison gratuite, paiement à la réception.',
 ]
 
 export const offers: OfferSeed[] = [
   {
     id: 1,
     slug: '5-parfums-199-dh',
-    title: '5 parfums à 199 DH + parfum gratuit',
-    tagline: 'Cinq parfums à prix fixe, le sixième est offert.',
-    description: 'Cinq parfums aux styles bien différents pour 199 DH, et un sixième offert : de quoi choisir selon l’humeur et le moment.',
+    title: '5 parfums à 199 DH + 1 offert',
+    tagline: 'Prenez 5 parfums, le 6e est cadeau.',
+    description: '5 parfums différents pour 199 DH, et on vous en ajoute un 6e gratuit. De quoi changer selon l’humeur.',
     image_path: cinqParfums,
     starts_at: daysFromNow(-6),
     ends_at: daysFromNow(5),
@@ -51,9 +51,9 @@ export const offers: OfferSeed[] = [
   {
     id: 2,
     slug: 'collection-gissah',
-    title: 'Collection Gissah',
-    tagline: 'Quatre parfums aux flacons dorés pour 180 DH.',
-    description: 'Flair, La Luna, Legend of the Sky et Imperial Valley réunis dans une seule offre : quatre flacons ciselés, du plus chaud au plus doux.',
+    title: 'Pack Gissah',
+    tagline: '4 parfums Gissah pour 180 DH.',
+    description: 'Flair, La Luna, Legend of the Sky et Imperial Valley dans un seul pack. Du plus chaud au plus doux, il y en a pour chaque jour.',
     image_path: collectionGissah,
     starts_at: daysFromNow(-3),
     ends_at: daysFromNow(12),
@@ -63,9 +63,9 @@ export const offers: OfferSeed[] = [
   {
     id: 3,
     slug: 'collection-kayali',
-    title: 'Collection Kayali',
-    tagline: 'Quatre parfums gourmands et solaires pour 180 DH.',
-    description: 'Vanilla 28, Eden Juicy Apple, Maldives in a Bottle et Yum Marshmallow : de la vanille à la pomme, quatre parfums à porter en toute saison.',
+    title: 'Pack Kayali',
+    tagline: '4 parfums sucrés et fruités pour 180 DH.',
+    description: 'Vanilla 28, Eden Juicy Apple, Maldives in a Bottle et Yum Marshmallow. De la vanille à la pomme, 4 parfums qu’on porte toute l’année.',
     image_path: collectionKayali,
     starts_at: daysFromNow(-1),
     ends_at: daysFromNow(18),
@@ -75,9 +75,9 @@ export const offers: OfferSeed[] = [
   {
     id: 4,
     slug: 'collection-9-pm',
-    title: 'Collection 9 PM',
-    tagline: 'Quatre extraits de parfum pour 180 DH.',
-    description: '9 PM, Rebel, Elixir et Night Out : quatre extraits de parfum faits pour la soirée, à porter tour à tour.',
+    title: 'Pack 9 PM',
+    tagline: '4 parfums 9 PM pour 180 DH.',
+    description: '9 PM, Rebel, Elixir et Night Out. Les 4 parfums de la gamme, parfaits pour le soir.',
     image_path: collection9Pm,
     starts_at: daysFromNow(-2),
     ends_at: daysFromNow(26),
