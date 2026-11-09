@@ -20,9 +20,9 @@ export function formatDate(iso: string): string {
 export function formatTimeLeft(endsAt: string): string {
   const days = Math.floor((new Date(endsAt).getTime() - Date.now()) / DAY)
 
-  if (days < 1) return 'Dernier jour'
+  if (days < 1) return 'Dernier jour\u00a0!'
 
-  return days === 1 ? 'Plus qu’un jour' : `Plus que ${days} jours`
+  return days === 1 ? 'Plus qu’un jour' : `Encore ${days} jours`
 }
 
 // The one place that decides how money looks, the same way as the backend's emails: 89,00 DH.

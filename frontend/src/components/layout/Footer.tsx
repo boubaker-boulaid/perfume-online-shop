@@ -1,49 +1,48 @@
 import { Link } from 'react-router'
 import { Logo } from '../Logo'
 import { Reveal } from '../Reveal'
+import { WHATSAPP_URL } from '../../utils/whatsapp'
 
 const columns = [
   {
     title: 'Boutique',
     links: [
       { label: 'Tous les parfums', to: '/shop' },
-      { label: 'Offres spéciales', to: '/offers' },
-      { label: 'Pour elle', to: '/shop' },
-      { label: 'Pour lui', to: '/shop' },
-      { label: 'Unisexe', to: '/shop' },
+      { label: 'Promos', to: '/offers' },
+      { label: 'Femme', to: '/shop' },
+      { label: 'Homme', to: '/shop' },
+      { label: 'Mixte', to: '/shop' },
       { label: 'Coffrets cadeaux', to: '/shop' },
     ],
   },
   {
     title: 'Collections',
     links: [
-      { label: 'Meilleures ventes', to: '/#collections' },
+      { label: 'Les plus vendus', to: '/#collections' },
       { label: 'Nouveautés', to: '/#collections' },
-      { label: 'Édition limitée', to: '/#collections' },
-      { label: 'Coffrets découverte', to: '/#collections' },
+      { label: 'Packs', to: '/offers' },
     ],
   },
   {
-    title: 'Service client',
+    title: 'Aide',
     links: [
-      { label: 'Expédition et livraison', to: '/#contact' },
-      { label: 'Retours et échanges', to: '/#contact' },
-      { label: 'FAQ', to: '/#contact' },
+      { label: 'Livraison', to: '/#contact' },
+      { label: 'Échanges', to: '/#contact' },
+      { label: 'Questions fréquentes', to: '/#contact' },
       { label: 'Suivre ma commande', to: '/#contact' },
     ],
   },
   {
-    title: 'La maison',
+    title: 'Lumé',
     links: [
-      { label: 'À propos', to: '/#about' },
-      { label: 'Nos ingrédients', to: '/#about' },
-      { label: 'Durabilité', to: '/#about' },
-      { label: 'Nous contacter', to: '/#contact' },
+      { label: 'Qui sommes-nous', to: '/#about' },
+      { label: 'Contact', to: '/#contact' },
+      { label: 'WhatsApp', to: WHATSAPP_URL },
     ],
   },
 ]
 
-const socials = ['In', 'Fb', 'Tk', 'Pt']
+const socials = ['In', 'Fb', 'Tk']
 
 export function Footer() {
   return (
@@ -51,7 +50,7 @@ export function Footer() {
       <Reveal className="site-footer__grid">
         <div className="site-footer__brand">
           <Logo />
-          <p>Nous créons des parfums inoubliables qui inspirent, donnent confiance et laissent une empreinte durable.</p>
+          <p>Parfums originaux, livrés partout au Maroc. Vous payez à la réception.</p>
           <div className="site-footer__socials">
             {socials.map((social) => (
               <a key={social} href="#top">
@@ -65,21 +64,28 @@ export function Footer() {
           <div key={column.title}>
             <h2 className="site-footer__title">{column.title}</h2>
             <div className="site-footer__links">
-              {column.links.map((link) => (
-                <Link key={link.label} to={link.to}>
-                  {link.label}
-                </Link>
-              ))}
+              {column.links.map((link) =>
+                // links to other sites, like WhatsApp, open in a new tab
+                link.to.startsWith('https://') ? (
+                  <a key={link.label} href={link.to} target="_blank" rel="noreferrer">
+                    {link.label}
+                  </a>
+                ) : (
+                  <Link key={link.label} to={link.to}>
+                    {link.label}
+                  </Link>
+                ),
+              )}
             </div>
           </div>
         ))}
       </Reveal>
 
       <div className="site-footer__bottom">
-        <div>© 2026 Lumé Parfums. Tous droits réservés.</div>
+        <div>© 2026 Lumé Parfums</div>
         <div className="site-footer__legal">
-          <a href="#top">Politique de confidentialité</a>
-          <a href="#top">Conditions générales</a>
+          <a href="#top">Confidentialité</a>
+          <a href="#top">Conditions de vente</a>
         </div>
       </div>
     </footer>

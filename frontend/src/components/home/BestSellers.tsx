@@ -11,7 +11,7 @@ export function BestSellers() {
   return (
     <section id="shop" className="container section">
       <Reveal className="section-bar">
-        <h2>Découvrez nos meilleures ventes</h2>
+        <h2>Les plus vendus</h2>
         <Link to="/shop" className="view-all">
           Tout voir <ArrowRightIcon size={16} strokeWidth={1.6} />
         </Link>

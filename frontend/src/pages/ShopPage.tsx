@@ -8,11 +8,11 @@ import { getCategories, getProducts } from '../services/api'
 import type { ProductFilters, ProductSort } from '../types'
 
 const sortOptions: { value: ProductSort | ''; label: string }[] = [
-  { value: '', label: 'En vedette' },
-  { value: 'newest', label: 'Plus récents' },
+  { value: '', label: 'Recommandés' },
+  { value: 'newest', label: 'Nouveautés' },
   { value: 'oldest', label: 'Plus anciens' },
-  { value: 'price_asc', label: 'Prix croissant' },
-  { value: 'price_desc', label: 'Prix décroissant' },
+  { value: 'price_asc', label: 'Prix : du moins cher au plus cher' },
+  { value: 'price_desc', label: 'Prix : du plus cher au moins cher' },
 ]
 
 export function ShopPage() {
@@ -62,9 +62,9 @@ export function ShopPage() {
         }}
       >
         <SearchIcon />
-        <input key={params.get('q') ?? ''} type="search" name="q" aria-label="Rechercher un parfum" placeholder="Rechercher un parfum" defaultValue={params.get('q') ?? ''} maxLength={100} />
+        <input key={params.get('q') ?? ''} type="search" name="q" aria-label="Rechercher un parfum" placeholder="Chercher un parfum" defaultValue={params.get('q') ?? ''} maxLength={100} />
         <button type="submit" className="button button--accent button--small">
-          Rechercher
+          Chercher
         </button>
       </form>
 
@@ -133,7 +133,7 @@ export function ShopPage() {
       {!loading && result?.data.length === 0 && (
         <div className="empty">
           <h2>Aucun parfum trouvé</h2>
-          <p>Essayez une autre recherche ou effacez les filtres.</p>
+          <p>Essayez un autre mot, ou demandez-nous sur WhatsApp.</p>
         </div>
       )}
 

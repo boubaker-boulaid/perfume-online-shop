@@ -12,16 +12,16 @@ export function Hero() {
       <div className="hero__overlay" />
 
       <div className="hero__content">
-        <p className="hero__kicker">Votre parfumerie en ligne au Maroc</p>
+        <p className="hero__kicker">Parfumerie en ligne · Livraison partout au Maroc</p>
         <h1 className="hero__title">
           Votre parfum,
           <br />
           livré chez <em>vous.</em>
         </h1>
         <div className="hero__lines">
-          <div>Des parfums authentiques.</div>
-          <div>Livraison offerte.</div>
-          <div>Paiement à la livraison.</div>
+          <div>Parfums originaux.</div>
+          <div>Livraison gratuite.</div>
+          <div>Vous payez à la réception.</div>
         </div>
         {/* <div className="hero__people">
           <div className="hero__avatars" aria-hidden="true">
@@ -33,8 +33,8 @@ export function Hero() {
           </div>
           <span>Prêt à trouver le vôtre&nbsp;?</span>
         </div> */}
-        <p className="hero__text">Commandez en quelques clics, confirmez sur WhatsApp et payez en espèces à la réception.</p>
-        <PillLink to="/shop">Découvrir la boutique</PillLink>
+        <p className="hero__text">Choisissez votre parfum, confirmez sur WhatsApp, et payez le livreur en espèces.</p>
+        <PillLink to="/shop">Voir les parfums</PillLink>
       </div>
     </section>
   )

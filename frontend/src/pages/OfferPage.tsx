@@ -38,9 +38,9 @@ function OfferDetails({ offer }: { offer: Offer }) {
         </div>
 
         <div className="offer__info">
-          <div className="eyebrow">Offre spéciale</div>
+          <div className="eyebrow">Promo</div>
           <h1 className="display-title">{offer.title}</h1>
-          <p className="offer__saving">Économisez {formatPrice(offer.saving)}</p>
+          <p className="offer__saving">Vous économisez {formatPrice(offer.saving)}</p>
           <p className="offer__description">{offer.description}</p>
           <ul className="offer__dates">
             <li>
@@ -53,7 +53,7 @@ function OfferDetails({ offer }: { offer: Offer }) {
 
           <div className="offer__total">
             <span>
-              Prix de l’offre, {offer.products.length} parfums{offer.free_product && ' + 1 offert'}
+              Prix du pack, {offer.products.length} parfums{offer.free_product && ' + 1 offert'}
             </span>
             <strong>
               {price} <s>{formatPrice(offer.regular_price)}</s>
@@ -75,7 +75,7 @@ function OfferDetails({ offer }: { offer: Offer }) {
               )
             )}
             <button type="button" className="button button--accent buy-bar__button" disabled={!available} aria-label={available ? `Commander l’offre, ${price}` : undefined} onClick={orderOffer}>
-              {available ? `Commander · ${price}` : 'Offre épuisée'}
+              {available ? `Commander · ${price}` : 'Pack épuisé'}
             </button>
           </div>
         </div>
@@ -83,7 +83,7 @@ function OfferDetails({ offer }: { offer: Offer }) {
 
       <section className="section">
         <div className="section-bar">
-          <h2>Les parfums de cette offre</h2>
+          <h2>Les parfums du pack</h2>
         </div>
         <div className="product-grid">
           {offer.products.map((product, index) => <ProductCard key={product.id} product={product} index={index} />)}
@@ -103,7 +103,7 @@ function OfferDetails({ offer }: { offer: Offer }) {
 
       <section className="section">
         <div className="panel offer__terms">
-          <h2>Conditions de l’offre</h2>
+          <h2>Conditions</h2>
           <ul>
             {offer.terms.map((term) => <li key={term}>{term}</li>)}
           </ul>
@@ -122,7 +122,7 @@ export function OfferPage() {
   return (
     <div className="container page">
       <Link to="/offers" className="back-link">
-        <ArrowLeftIcon size={15} strokeWidth={1.6} /> Retour aux offres
+        <ArrowLeftIcon size={15} strokeWidth={1.6} /> Retour aux promos
       </Link>
 
       {loading && <div className="product-skeleton" aria-label="Chargement" />}

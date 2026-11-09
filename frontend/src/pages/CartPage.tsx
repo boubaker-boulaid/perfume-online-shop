@@ -16,9 +16,9 @@ export function CartPage() {
     return (
       <div className="container page">
         <PageHeading eyebrow="Votre panier" title={<>Votre panier est <em>vide</em></>}>
-          Trouvez un parfum que vous aimerez, il apparaîtra ici.
+          Ajoutez un parfum et il apparaîtra ici.
         </PageHeading>
-        <PillLink to="/shop">Découvrir la boutique</PillLink>
+        <PillLink to="/shop">Voir les parfums</PillLink>
       </div>
     )
   }
@@ -64,14 +64,14 @@ export function CartPage() {
           </div>
           <div className="summary__row">
             <span>Livraison</span>
-            <span>Offerte</span>
+            <span>Gratuite</span>
           </div>
           <div className="summary__row summary__row--total">
             <span>Total</span>
             <span>{formatPrice(subtotal)}</span>
           </div>
           <Link to="/checkout" className="button button--accent button--block">
-            Passer la commande
+            Commander
           </Link>
           <Link to="/shop" className="text-button summary__continue">
             Continuer mes achats

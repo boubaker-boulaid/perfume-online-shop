@@ -8,17 +8,17 @@ export function DiscoverBanner() {
     <section id="discover" className="container section section--tight">
       <Reveal className="banner">
         <div className="banner__content">
-          <div className="eyebrow">Nouvelle collection</div>
+          <div className="eyebrow">Nouveautés</div>
           <h2>
-            Éveillez votre <em>véritable essence</em>
+            Les derniers <em>arrivages</em>
           </h2>
-          <p>Une nouvelle collection inspirée par la beauté de la nature et votre élégance.</p>
+          <p>Nouveaux parfums en stock cette semaine. Quantités limitées.</p>
           <Link to="/#collections" className="ghost-link">
-            Découvrir la collection <ArrowRightIcon size={15} strokeWidth={1.6} />
+            Voir les nouveautés <ArrowRightIcon size={15} strokeWidth={1.6} />
           </Link>
         </div>
         <div className="banner__image">
-          <img src={banner} alt="Un flacon Lumé bleu nuit parmi les fleurs au coucher du soleil" width={1536} height={456} loading="lazy" />
+          <img src={banner} alt="Un flacon de parfum Lumé" width={1536} height={456} loading="lazy" />
         </div>
       </Reveal>
     </section>

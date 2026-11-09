@@ -32,9 +32,9 @@ export function CheckoutPage() {
     return (
       <div className="container page">
         <PageHeading eyebrow="Commande" title={<>Votre panier est <em>vide</em></>}>
-          Ajoutez un parfum à votre panier avant de commander.
+          Ajoutez un parfum avant de commander.
         </PageHeading>
-        <PillLink to="/shop">Découvrir la boutique</PillLink>
+        <PillLink to="/shop">Voir les parfums</PillLink>
       </div>
     )
   }
@@ -67,7 +67,7 @@ export function CheckoutPage() {
         setErrors(error.errors ?? {})
         if (!error.errors) setMessage(error.message)
       } else {
-        setMessage('Une erreur est survenue. Veuillez réessayer.')
+        setMessage('Un problème est survenu. Réessayez s’il vous plaît.')
       }
       setSubmitting(false)
     }
@@ -75,31 +75,31 @@ export function CheckoutPage() {
 
   return (
     <div className="container page">
-      <PageHeading eyebrow="Commande" title={<>Vos <em>coordonnées</em></>}>
-        Payez en espèces à la réception. Après cette étape, vous nous enverrez votre commande sur WhatsApp.
+      <PageHeading eyebrow="Commande" title={<>Vos <em>informations</em></>}>
+        Vous payez en espèces au livreur. À l’étape suivante, vous nous envoyez la commande sur WhatsApp.
       </PageHeading>
 
       <div className="checkout-layout">
         <form className="panel" onSubmit={submit} noValidate>
-          <Field label="Nom complet" name="customer_name" error={errors.customer_name}>
+          <Field label="Nom et prénom" name="customer_name" error={errors.customer_name}>
             <input id="customer_name" name="customer_name" type="text" autoComplete="name" maxLength={50} required />
           </Field>
           <div className="field-row">
             <Field label="Téléphone" name="phone" error={errors.phone}>
               <input id="phone" name="phone" type="tel" autoComplete="tel" inputMode="tel" placeholder="06 12 34 56 78" required />
             </Field>
-            <Field label="E-mail" name="email" error={errors.email}>
-              <input id="email" name="email" type="email" autoComplete="email" inputMode="email" placeholder="vous@email.com" required />
+            <Field label="E-mail (facultatif)" name="email" error={errors.email}>
+              <input id="email" name="email" type="email" autoComplete="email" inputMode="email" placeholder="vous@email.com" />
             </Field>
           </div>
           <Field label="Ville" name="city" error={errors.city}>
             <input id="city" name="city" type="text" autoComplete="address-level2" maxLength={50} required />
           </Field>
-          <Field label="Adresse" name="address" error={errors.address}>
+          <Field label="Adresse (quartier, rue, n°)" name="address" error={errors.address}>
             <input id="address" name="address" type="text" autoComplete="street-address" maxLength={255} required />
           </Field>
-          <Field label="Note (facultatif)" name="note">
-            <textarea id="note" name="note" rows={3} maxLength={255} placeholder="Une précision pour la livraison&nbsp;?" />
+          <Field label="Remarque (facultatif)" name="note">
+            <textarea id="note" name="note" rows={3} maxLength={255} placeholder="Ex. : appelez-moi avant de venir" />
           </Field>
 
           {message && (
@@ -109,7 +109,7 @@ export function CheckoutPage() {
           )}
 
           <button type="submit" className="button button--accent button--block" disabled={submitting}>
-            {submitting ? 'Commande en cours…' : `Commander · ${formatPrice(subtotal)}`}
+            {submitting ? 'Envoi en cours…' : `Commander · ${formatPrice(subtotal)}`}
           </button>
         </form>
 
@@ -130,7 +130,7 @@ export function CheckoutPage() {
           </ul>
           <div className="summary__row">
             <span>Livraison</span>
-            <span>Offerte</span>
+            <span>Gratuite</span>
           </div>
           <div className="summary__row summary__row--total">
             <span>Total</span>
