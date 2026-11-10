@@ -26,4 +26,11 @@ class OfferService
         return $this->cached($this->versionedKey('catalog', 'offers'), self::OFFERS_CACHE_SECONDS, 
             fn () => Offer::current()->with(self::RELATIONS)->orderBy('sort_order')->orderBy('ends_at')->get());
     }
+
+    public function getCurrentOffer(Offer $offer)
+    {
+        abort_unless($offer->isCurrent(), 404);
+
+        return $offer->load(self::RELATIONS);
+    }
 }
