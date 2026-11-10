@@ -1,10 +1,10 @@
 import { useState, type ReactNode } from 'react'
-import { ClockIcon, MailIcon, PhoneIcon, PinIcon } from '../Icons'
+import { ClockIcon, MailIcon, PinIcon, WhatsAppIcon } from '../Icons'
 import { Reveal } from '../Reveal'
 import { WHATSAPP_DISPLAY } from '../../utils/whatsapp'
 
 const details: { icon: ReactNode; label: string; value: ReactNode }[] = [
-  { icon: <PhoneIcon size={17} />, label: 'WhatsApp', value: WHATSAPP_DISPLAY },
+  { icon: <WhatsAppIcon size={15} />, label: 'WhatsApp', value: WHATSAPP_DISPLAY },
   { icon: <MailIcon size={17} />, label: 'E-mail', value: 'contact@lumeparfums.ma' },
   { icon: <PinIcon size={17} />, label: 'Adresse', value: 'Agadir, Maroc' },
   { icon: <ClockIcon size={17} />, label: 'Horaires', value: 'Lun – sam, 10h – 20h' },

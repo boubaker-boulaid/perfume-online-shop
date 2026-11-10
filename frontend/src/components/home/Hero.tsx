@@ -1,14 +1,41 @@
-import heroMobile from '../../assets/images/hero-mobile.webp'
-import hero from '../../assets/images/hero.webp'
+import heroMobileMp4 from '../../assets/images/hero-mobile.mp4'
+import heroMobileWebm from '../../assets/images/hero-mobile.webm'
+import heroMp4 from '../../assets/images/hero.mp4'
+import heroPosterMobile from '../../assets/images/hero-poster-mobile.webp'
+import heroPoster from '../../assets/images/hero-poster.webp'
+import heroWebm from '../../assets/images/hero.webm'
 import { PillLink } from '../PillLink'
+
+type NetworkInfo = { saveData?: boolean; effectiveType?: string }
+
+// Phones get a small square video cut around the bottle, bigger screens the wide one.
+const isPhone = window.matchMedia('(max-width: 639px)').matches
+const video = isPhone
+  ? { webm: heroMobileWebm, mp4: heroMobileMp4, poster: heroPosterMobile, width: 720, height: 720 }
+  : { webm: heroWebm, mp4: heroMp4, poster: heroPoster, width: 1280, height: 720 }
+
+// The video is only decoration, so it's skipped (and never downloaded) when the visitor saves data,
+// is on a very slow connection, or asked for less motion. They see its first frame instead.
+const connection = (navigator as Navigator & { connection?: NetworkInfo }).connection
+const playVideo =
+  !connection?.saveData &&
+  !['slow-2g', '2g'].includes(connection?.effectiveType ?? '') &&
+  !window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
 export function Hero() {
   return (
     <section className="hero">
-      <picture className="hero__image">
-        <source media="(min-width: 640px)" srcSet={hero} width={1600} height={901} />
-        <img src={heroMobile} alt="" width={840} height={1859} fetchPriority="high" />
-      </picture>
+      <div className="hero__image">
+        {playVideo ? (
+          // The 3 second loop is short and light (under 100 KB in most browsers)
+          <video poster={video.poster} width={video.width} height={video.height} autoPlay muted loop playsInline aria-hidden="true">
+            <source src={video.webm} type="video/webm" />
+            <source src={video.mp4} type="video/mp4" />
+          </video>
+        ) : (
+          <img src={video.poster} alt="" width={video.width} height={video.height} fetchPriority="high" />
+        )}
+      </div>
       <div className="hero__overlay" />
 
       <div className="hero__content">

@@ -44,8 +44,8 @@ export const offers: OfferSeed[] = [
     image_path: cinqParfums,
     starts_at: daysFromNow(-6),
     ends_at: daysFromNow(5),
-    product_slugs: ['girl-of-now', 'inspire-de-gucci-bloom', 'turbulence', 'manifesto', 'baccarat-rouge-540'],
-    free_product_slug: 'oud-majesty',
+    product_slugs: ['l-interdit', 'smoke-for-the-soul', 'chic-for-men', 'manifesto', 'baccarat-rouge-540'],
+    free_product_slug: 'coco-mademoiselle',
     terms,
   },
   {

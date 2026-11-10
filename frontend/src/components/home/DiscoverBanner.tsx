@@ -18,7 +18,7 @@ export function DiscoverBanner() {
           </Link>
         </div>
         <div className="banner__image">
-          <img src={banner} alt="Un flacon de parfum Lumé" width={1536} height={456} loading="lazy" />
+          <img src={banner} alt="Une main qui vaporise un parfum" width={1536} height={456} loading="lazy" />
         </div>
       </Reveal>
     </section>
