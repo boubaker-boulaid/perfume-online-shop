@@ -13,7 +13,7 @@ export function AboutSection() {
   return (
     <section id="about" className="container section section--wide about">
       <Reveal className="about__image">
-        <img src={about} alt="Trois flacons de parfum Lumé" width={860} height={510} loading="lazy" />
+        <img src={about} alt="Des flacons de parfum posés près d’un livre ouvert" width={860} height={510} loading="lazy" />
       </Reveal>
       <Reveal delay={200}>
         <div className="eyebrow">Qui sommes-nous</div>

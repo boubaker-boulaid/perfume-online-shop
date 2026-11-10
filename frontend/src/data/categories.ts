@@ -1,7 +1,7 @@
-import floral from '../assets/images/scenes/bloom.webp'
-import fresh from '../assets/images/scenes/pure-musk.webp'
-import oriental from '../assets/images/scenes/golden-dusk.webp'
-import woody from '../assets/images/scenes/noir.webp'
+import floral from '../assets/images/categories/floral.webp'
+import fresh from '../assets/images/categories/fresh.webp'
+import oriental from '../assets/images/categories/oriental.webp'
+import woody from '../assets/images/categories/woody.webp'
 import type { Category } from '../types'
 
 // Same categories as backend/database/seeders/CategorySeeder.php

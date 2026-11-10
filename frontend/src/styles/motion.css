@@ -77,8 +77,8 @@ html {
   animation: rise 1.3s var(--ease-out) var(--reveal-delay, 0ms) backwards;
 }
 
-/* Hero: the words arrive one by one and the photo drifts slowly */
-.hero__image img {
+/* Hero: the words arrive one by one and the video drifts slowly */
+.hero__image > * {
   transform-origin: center 70%;
   animation:
     fade-in 2s ease-out backwards,

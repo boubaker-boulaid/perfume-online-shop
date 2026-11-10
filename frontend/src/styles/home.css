@@ -1,8 +1,8 @@
 /* Sections of the home page */
 
-/* Hero. The photo is the background of the whole section, as in the design. On phones it's
-   a tall version with the bottle in its lower part. The words sit on the sky, and the space
-   below them matches the height of the bottle, so the two never touch at any screen size. */
+/* Hero. The video is the background of the whole section, as in the design. On phones it fills
+   the lower part, with the bottle in it, and fades into the dark top where the words sit, so the
+   two never touch at any screen size. */
 
 .hero {
   position: relative;
@@ -18,9 +18,13 @@
   display: block;
 }
 
-.hero__image img {
+.hero__image > * {
+  display: block;
   width: 100%;
-  mask-image: linear-gradient(180deg, transparent 0%, #000 8%);
+  height: 105vw;
+  object-fit: cover;
+  object-position: center;
+  mask-image: linear-gradient(180deg, transparent 0%, #000 25%);
 }
 
 .hero__overlay {
@@ -470,9 +474,8 @@
     top: 0;
   }
 
-  .hero__image img {
+  .hero__image > * {
     height: 100%;
-    object-fit: cover;
     object-position: 60% center;
     mask-image: none;
   }
@@ -576,7 +579,7 @@
     padding-top: 124px;
   }
 
-  .hero__image img {
+  .hero__image > * {
     object-position: center;
   }
 
