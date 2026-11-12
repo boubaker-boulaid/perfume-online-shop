@@ -27,10 +27,18 @@ class OfferService
             fn () => Offer::current()->with(self::RELATIONS)->orderBy('sort_order')->orderBy('ends_at')->get());
     }
 
-    public function getCurrentOffer(Offer $offer)
+    public function getCurrentOffer(string $slug)
     {
-        abort_unless($offer->isCurrent(), 404);
+        return Offer::current()->with(self::RELATIONS)->where('slug', $slug)->firstOrFail();
+    }
 
+    public function getAdminOffers()
+    {
+        return Offer::with(self::RELATIONS)->orderBy('sort_order')->latest()->paginate(10);
+    }
+
+    public function getAdminOrder(Offer $offer)
+    {
         return $offer->load(self::RELATIONS);
     }
 }
