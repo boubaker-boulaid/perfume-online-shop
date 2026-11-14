@@ -39,6 +39,7 @@ class UpdateProductRequest extends FormRequest
             'image' => ['sometimes', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'is_active' => ['sometimes', 'boolean'],
             'is_featured' => ['sometimes', 'boolean'],
+            'is_offer' => ['sometimes', 'boolean'],
         ];
     }
 
