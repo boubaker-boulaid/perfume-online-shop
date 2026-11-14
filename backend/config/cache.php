@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Category;
+use App\Models\Offer;
 use App\Models\Product;
 use Carbon\Carbon;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -145,6 +146,9 @@ return [
         Collection::class,
         Product::class,
         Category::class,
+        // the offers list: the offers, and the offer_product rows (is_free) on their perfumes
+        Offer::class,
+        Illuminate\Database\Eloquent\Relations\Pivot::class,
         Illuminate\Support\Carbon::class,
         Carbon::class,
     ],
