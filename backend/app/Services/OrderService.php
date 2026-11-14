@@ -194,7 +194,7 @@ class OrderService
             OrderItem::create([
                 'order_id' => $order->id,
                 'product_id' => $p->id,
-                'product_name' => $p->name,
+                'product_name' => $p->is_offer && $p->description ? "{$p->name} ({$p->description})" : $p->name,
                 'unit_price' => $p->price,
                 'quantity' => $i['quantity'],
                 'line_total' => $i['quantity'] * $p->price,
@@ -380,6 +380,11 @@ class OrderService
             // product_id is null when the product was deleted, nothing to give back
             if ($item->product_id) {
                 Product::where('id', $item->product_id)->increment('stock', $item->quantity);
+
+                $offer = Offer::with('products')->where('product_id', $item->product_id)->first();
+                foreach($offer?->products ?? [] as $p) {
+                    Product::where('id', $p->id)->increment('stock', $item->quantity);
+                }
             }
         }
 
