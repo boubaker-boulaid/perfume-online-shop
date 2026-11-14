@@ -67,7 +67,8 @@ class OfferService
 
         $this->bumpCacheVersion('catalog'); // sync dosnt fire the observer
 
-        return $offer->load(self::RELATIONS);
+        // re-read the row, so the defaults set by the database (is_active...) are in the response
+        return $offer->refresh()->load(self::RELATIONS);
     }
 
     public function updateOffer(Offer $offer, array $data, ?UploadedFile $image)
