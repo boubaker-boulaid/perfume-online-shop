@@ -70,6 +70,42 @@ class OfferService
         return $offer->load(self::RELATIONS);
     }
 
+    public function updateOffer(Offer $offer, array $data, ?UploadedFile $image)
+    {
+        $oldImagePath = $offer->image_path;
+        if ($image) {
+            $data['iamge_path'] = $this->storeImage($image, 'offers');
+        }
+
+        $syncContent = isset($data['product_ids']) ? $this->syncContent($data) : null;
+
+        try {
+            DB::transaction(function () use ($data, $offer, $syncContent) {
+                $offer->update($data);
+
+                if ($syncContent !== null) {
+                    $offer->products()->sync($syncContent);
+                }
+
+                return $offer;
+            });
+        } catch (Throwable $e) {
+            if ($image) {
+                $this->removeImage($data['image_path']);
+            }
+            
+            throw $e;
+        }
+
+        if ($image) {
+            $this->removeImage($oldImagePath);
+        }
+
+        $this->bumpCacheVersion('catalog');
+
+        return $offer->load(self::RELATIONS);
+    }
+
     // turns the product_ids array into what sync() wants: [product id => [is_free => bool]]
     // adding & befor a param means (by reference) it allows the function to work with the real var not a copy of it so it can change the real var
     public function syncContent(array &$data) 
