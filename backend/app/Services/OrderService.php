@@ -118,7 +118,7 @@ class OrderService
 
         // the offers in the order with the perfumes inside them 
         $offers = Offer::with('products')->whereIn('product_id', $productsIds)->get()->keyBy('product_id');
-        $offersProductsIds = $offers->flateMap(fn($offer) => $offer->products->pluck('id')); // flatMap retrun one array with all productIds in the offers 
+        $offersProductsIds = $offers->flatMap(fn($offer) => $offer->products->pluck('id')); // flatMap retrun one array with all productIds in the offers 
 
         // lock everything at once, always sorted by id, so two orders never wait on each other
         $products = Product::whereIn('id', $productsIds->merge($offersProductsIds)->unique())->lockForUpdate()->get()->keyBy('id');
