@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Exceptions\InsufficientStockException;
 use App\Jobs\SendOrderConfirmation;
 use App\Mail\CustomerOrderCancelledMail;
+use App\Models\Offer;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
@@ -16,6 +17,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\ValidationException;
 use Throwable;
 
 class OrderService
@@ -97,11 +99,13 @@ class OrderService
             // a simultaneous retry saved this key first, so send back its order.
             // any other collision (the order number...) is a real error
             return Order::where('idempotency_key', $data['idempotency_key'])->first() ?? throw $e;
+        } catch (ValidationException $e) {
+            throw $e;
         } catch (\Exception $e) {
             // no customer details in the log (name, phone, address): the key and items are enough to investigate
             Log::channel('daily')->error('order.place_failed', [
                 'idempotency_key' => $data['idempotency_key'] ?? null,
-                'items' => collect($data['items'] ?? [])->map(fn ($i) => ['product_id' => $i['product_id'] ?? null, 'quantity' => $i['quantity'] ?? null])->all(),
+                'items' => collect($data['items'] ?? [])->map(fn($i) => ['product_id' => $i['product_id'] ?? null, 'quantity' => $i['quantity'] ?? null])->all(),
                 'exception' => $e,
             ]);
             throw $e;
@@ -111,23 +115,52 @@ class OrderService
     private function lockAndValidateProduct(array $items)
     {
         $productsIds = collect($items)->pluck('product_id');
-        $products = Product::whereIn('id', $productsIds)->lockForUpdate()->get()->keyBy('id');
+
+        // the offers in the order with the perfumes inside them 
+        $offers = Offer::with('products')->whereIn('product_id', $productsIds)->get()->keyBy('product_id');
+        $offersProductsIds = $offers->flateMap(fn($offer) => $offer->products->pluck('id')); // flatMap retrun one array with all productIds in the offers 
+
+        // lock everything at once, always sorted by id, so two orders never wait on each other
+        $products = Product::whereIn('id', $productsIds->merge($offersProductsIds)->unique())->lockForUpdate()->get()->keyBy('id');
 
         foreach ($items as $item) {
             $product = $products->get($item['product_id']);
 
             if (! $product) {
-                throw new ModelNotFoundException('Le produit n° '.$item['product_id'].' est introuvable.');
+                throw new ModelNotFoundException('Le produit n° ' . $item['product_id'] . ' est introuvable.');
             }
 
-            if ($product->stock < $item['quantity']) {
-                throw new InsufficientStockException($product->name, $item['quantity'], $product->stock);
-            }
+            // if ($product->stock < $item['quantity']) {
+            //     throw new InsufficientStockException($product->name, $item['quantity'], $product->stock);
+            // }
 
-            $product->decrement('stock', $item['quantity']);
+            $this->takeStock($product, $item['quantity']);
+
+            if ($product->is_offer) {
+                $offer = $offers->get($product->id);
+
+                if (! $offer?->isCurrent()) {
+                    throw ValidationException::withMessages([
+                        'items' => ["L’offre {$product->name} n’est plus disponible."],
+                    ]);
+                }
+
+                foreach ($offer->products as $p) {
+                    $this->takeStock($products->get($p), $item['quantity']); // use $products intade of $p cause they are locked and up to date 
+                }
+            }
         }
 
         return $products;
+    }
+
+    private function takeStock(Product $product, int $quantity)
+    {
+        if ($product->stock < $quantity) {
+            throw new InsufficientStockException($product->name, $quantity, $product->stock);
+        }
+
+        $product->decrement('stock', $quantity);
     }
 
     private function generateOrderNumber()
@@ -181,13 +214,13 @@ class OrderService
     {
         $query = Order::query();
         $query->when($filters['q'] ?? null, function ($q, $search) {
-            $q->whereAny(['customer_name', 'phone', 'order_number'], 'like', '%'.$search.'%');
+            $q->whereAny(['customer_name', 'phone', 'order_number'], 'like', '%' . $search . '%');
         })->when($filters['status'] ?? null, function ($q, $status) {
             $q->where('status', $status);
         })->when($filters['payment_status'] ?? null, function ($q, $payment_status) {
             $q->where('payment_status', $payment_status);
         })->when($filters['city'] ?? null, function ($q, $city) {
-            $q->where('city', 'like', '%'.$city.'%');
+            $q->where('city', 'like', '%' . $city . '%');
         })->when($filters['date_from'] ?? null, function ($q, $from) {
             $q->whereDate('created_at', '>=', $from);
         })->when($filters['date_to'] ?? null, function ($q, $to) {
@@ -222,14 +255,14 @@ class OrderService
         $orderIds = $this->unpaidOrdersQuery($olderThanHours, $onlyUnopened)->pluck('id');
 
         // one transaction per order, so a failure on one doesn't undo the others
-        return $orderIds->filter(fn ($id) => $this->cancelUnpaidOrder($id, $olderThanHours, $onlyUnopened, $note))->count();
+        return $orderIds->filter(fn($id) => $this->cancelUnpaidOrder($id, $olderThanHours, $onlyUnopened, $note))->count();
     }
 
     private function unpaidOrdersQuery(int $olderThanHours, bool $onlyUnopened)
     {
         return Order::where('status', 'pending')
             ->where('created_at', '<=', now()->subHours($olderThanHours))
-            ->when($onlyUnopened, fn ($q) => $q->whereNull('whatsapp_opened_at'));
+            ->when($onlyUnopened, fn($q) => $q->whereNull('whatsapp_opened_at'));
     }
 
     private function cancelUnpaidOrder(int $orderId, int $olderThanHours, bool $onlyUnopened, string $note): bool
