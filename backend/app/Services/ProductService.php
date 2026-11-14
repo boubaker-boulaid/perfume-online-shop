@@ -140,7 +140,7 @@ class ProductService
     public function deleteProduct(Product $product)
     {
         abort_if(
-            Offer::where('product_id', $product->id)->exists() && $product->offers()->exists(),
+            Offer::where('product_id', $product->id)->exists() || $product->offers()->exists(),
             409,
             'Impossible de supprimer un produit utilisé dans une offre. Masquez-le ou retirez-le de l’offre.'
         );

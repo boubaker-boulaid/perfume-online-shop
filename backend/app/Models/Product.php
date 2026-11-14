@@ -74,4 +74,10 @@ class Product extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
+
+    // the offers this perfume is inside of (through the offer_product table)
+    public function offers()
+    {
+        return $this->belongsToMany(Offer::class)->withPivot('is_free');
+    }
 }
