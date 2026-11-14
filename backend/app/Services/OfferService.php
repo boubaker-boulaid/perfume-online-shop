@@ -74,7 +74,7 @@ class OfferService
     {
         $oldImagePath = $offer->image_path;
         if ($image) {
-            $data['iamge_path'] = $this->storeImage($image, 'offers');
+            $data['image_path'] = $this->storeImage($image, 'offers');
         }
 
         $syncContent = isset($data['product_ids']) ? $this->syncContent($data) : null;
