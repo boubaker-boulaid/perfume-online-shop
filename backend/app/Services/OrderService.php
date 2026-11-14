@@ -37,18 +37,22 @@ class OrderService
 
     public function place(array $data)
     {
+        // a retry of an order that already exists gets that order back.
+        // this is a plain read, before the transaction on purpose: locking a key that doesn't exist yet
+        // locks the gap in the index where it would go, and the orders insert below then deadlocks with
+        // the other orders placed at the same moment. two copies arriving together both pass this check,
+        // and the unique index on idempotency_key refuses the second insert (see the catch below)
+        $orderExists = Order::where('idempotency_key', $data['idempotency_key'])->first();
+        if ($orderExists) {
+            if (is_null($orderExists->confirmation_sent_at)) {
+                SendOrderConfirmation::dispatch($orderExists->id);
+            }
+
+            return $orderExists;
+        }
+
         try {
             return DB::transaction(function () use ($data) {
-                // check if another order with the same idempotency_key already exists
-                $orderExists = Order::where('idempotency_key', $data['idempotency_key'])->lockForUpdate()->first();
-                if ($orderExists) {
-                    if (is_null($orderExists->confirmation_sent_at)) {
-                        SendOrderConfirmation::dispatch($orderExists->id);
-                    }
-
-                    return $orderExists;
-                }
-
                 $products = $this->lockAndValidateProduct($data['items']);
                 // stock changed: the cached catalog shows old stock (bumped only once the order commits)
                 $this->bumpCacheVersion('catalog');
