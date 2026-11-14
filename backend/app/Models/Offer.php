@@ -4,8 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Product;
+use App\Observers\CatalogObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
 
+// saving or deleting an offer makes the cached catalog stale, like products do
+#[ObservedBy(CatalogObserver::class)]
 class Offer extends Model
 {
     protected $fillable = [
