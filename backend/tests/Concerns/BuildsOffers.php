@@ -4,6 +4,7 @@ namespace Tests\Concerns;
 
 use App\Models\Offer;
 use App\Models\Product;
+use Illuminate\Support\Collection;
 
 trait BuildsOffers
 {
@@ -11,7 +12,7 @@ trait BuildsOffers
      * A current offer: a hidden set at 180.00 with the perfumes inside it, one per stock given.
      * $offer overrides the offer's columns, $set the set's columns.
      *
-     * @return array{Offer, Product, \Illuminate\Support\Collection<int, Product>}
+     * @return array{Offer, Product, Collection<int, Product>}
      */
     private function makeOffer(array $insideStocks = [10, 10], array $offer = [], array $set = [], ?Product $free = null): array
     {
