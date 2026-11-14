@@ -6,6 +6,7 @@ use App\Jobs\SendOrderConfirmation;
 use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
 use Tests\Concerns\BuildsOrderPayload;
 use Tests\TestCase;
@@ -122,6 +123,28 @@ class OrderIdempotencyTest extends TestCase
         ))->assertUnprocessable()->assertJsonValidationErrors('idempotency_key');
 
         $this->assertDatabaseCount('orders', 0);
+        $this->assertSame(10, $product->fresh()->stock);
+    }
+
+    // two copies sent at the same moment both find no order in the check before the transaction.
+    // simulated here: the other copy saves its order just before this one's transaction starts
+    public function test_a_copy_that_arrives_at_the_same_moment_gets_the_first_order(): void
+    {
+        $product = Product::factory()->create(['stock' => 10]);
+        $payload = $this->orderPayload([['product_id' => $product->id, 'quantity' => 3]]);
+        $first = null;
+
+        DB::connection()->beforeStartingTransaction(function () use (&$first, $payload) {
+            $first ??= Order::factory()->create(['idempotency_key' => $payload['idempotency_key']]);
+        });
+
+        $this->postJson(self::ENDPOINT, $payload)->assertOk();
+
+        // the unique index refused the second insert, and its stock change was rolled back
+        $this->assertNotNull($first);
+        $this->assertDatabaseCount('orders', 1);
+        $this->assertDatabaseCount('order_items', 0);
+        $this->assertSame($first->id, Order::sole()->id);
         $this->assertSame(10, $product->fresh()->stock);
     }
 
