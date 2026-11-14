@@ -93,7 +93,7 @@ class OfferService
             if ($image) {
                 $this->removeImage($data['image_path']);
             }
-            
+
             throw $e;
         }
 
@@ -106,9 +106,15 @@ class OfferService
         return $offer->load(self::RELATIONS);
     }
 
+    public function deleteOffer(Offer $offer)
+    {
+        $offer->delete();
+        $this->removeImage($offer->image_path);
+    }
+
     // turns the product_ids array into what sync() wants: [product id => [is_free => bool]]
     // adding & befor a param means (by reference) it allows the function to work with the real var not a copy of it so it can change the real var
-    public function syncContent(array &$data) 
+    private function syncContent(array &$data) 
     {
         $row = [];
 
