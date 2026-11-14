@@ -16,6 +16,7 @@ class CancelUnpaidOrders extends Command
      */
     public function handle(OrderService $order_service)
     {
+        // only a whole number of at least 1: --hours=0 or a typo would cancel every pending order
         $hours = filter_var($this->option('hours'), FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
 
         if ($hours === false) {

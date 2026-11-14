@@ -78,6 +78,7 @@ class Order extends Model
 
     public function whatsappLink(): string
     {
+        // rawurlencode writes spaces as %20 (urlencode would write +), and keeps the line breaks as %0A
         return 'https://wa.me/'.config('shop.whatsapp.number').'?text='.rawurlencode($this->whatsappMessage());
     }
 

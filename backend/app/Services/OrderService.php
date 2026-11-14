@@ -148,9 +148,11 @@ class OrderService
 
             $this->takeStock($product, $item['quantity']);
 
+            // a set also takes one of each perfume inside it (the free one too), for every set ordered
             if ($product->is_offer) {
                 $offer = $offers->get($product->id);
 
+                // the offer may have ended (or been switched off) since the customer filled the bag
                 if (! $offer?->isCurrent()) {
                     throw ValidationException::withMessages([
                         'items' => ["L’offre {$product->name} n’est plus disponible."],
@@ -172,6 +174,8 @@ class OrderService
             throw new InsufficientStockException($product->name, $quantity, $product->stock);
         }
 
+        // decrement() also updates $product in memory, so a perfume ordered alone and inside a set
+        // in the same bag is checked against what the first line already took
         $product->decrement('stock', $quantity);
     }
 
@@ -206,6 +210,7 @@ class OrderService
             OrderItem::create([
                 'order_id' => $order->id,
                 'product_id' => $p->id,
+                // a set keeps the perfumes inside it in its name: the WhatsApp message and the emails show them
                 'product_name' => $p->is_offer && $p->description ? "{$p->name} ({$p->description})" : $p->name,
                 'unit_price' => $p->price,
                 'quantity' => $i['quantity'],
@@ -393,6 +398,8 @@ class OrderService
             if ($item->product_id) {
                 Product::where('id', $item->product_id)->increment('stock', $item->quantity);
 
+                // a set also gives back the perfumes inside it. it reads the offer as it is now, so if its
+                // perfumes were changed after the order, the new ones come back (see docs/API.md, Offers)
                 $offer = Offer::with('products')->where('product_id', $item->product_id)->first();
                 foreach ($offer?->products ?? [] as $p) {
                     Product::where('id', $p->id)->increment('stock', $item->quantity);
