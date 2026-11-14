@@ -121,7 +121,7 @@ class OrderService
         $offersProductsIds = $offers->flatMap(fn($offer) => $offer->products->pluck('id')); // flatMap retrun one array with all productIds in the offers 
 
         // lock everything at once, always sorted by id, so two orders never wait on each other
-        $products = Product::whereIn('id', $productsIds->merge($offersProductsIds)->unique())->lockForUpdate()->get()->keyBy('id');
+        $products = Product::whereIn('id', $productsIds->merge($offersProductsIds)->unique())->orderBy('id')->lockForUpdate()->get()->keyBy('id');
 
         foreach ($items as $item) {
             $product = $products->get($item['product_id']);
