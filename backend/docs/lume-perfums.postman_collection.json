@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Lume Perfums API",
-    "description": "Every endpoint of the Lume Perfums backend, with example requests and responses. Field rules are in docs/API.md.\n\n## Setup\n\n1. Open the collection's **Variables** tab and set `admin_email` and `admin_password` to the `SHOP_ADMIN_*` values from your `.env`. Keep them in the current value column, and don't commit them.\n2. If needed, change `base_url` and `frontend_url`. Use `127.0.0.1` rather than `localhost`, to match the default `SESSION_DOMAIN`.\n3. Run **Get CSRF cookie** before any request that changes something.\n\n## Running the whole collection\n\nThe requests are in a working order, and each one saves what the next one needs. First choose an image file on the two requests marked \"choose an image first\".\n\nA run creates one test order and cancels it, which leaves the stock unchanged. It also creates a test category and product and deletes them, and doesn't touch your other data. Rate limits apply, so wait a minute between full runs.",
+    "description": "Every endpoint of the Lume Perfums backend, with example requests and responses. Field rules are in docs/API.md.\n\n## Setup\n\n1. Open the collection's **Variables** tab and set `admin_email` and `admin_password` to the `SHOP_ADMIN_*` values from your `.env`. Keep them in the current value column, and don't commit them.\n2. If needed, change `base_url` and `frontend_url`. Use `127.0.0.1` rather than `localhost`, to match the default `SESSION_DOMAIN`.\n3. Run **Get CSRF cookie** before any request that changes something.\n\n## Running the whole collection\n\nThe requests are in a working order, and each one saves what the next one needs. First choose an image file on the five requests marked \"choose an image first\".\n\nA run creates one test order and cancels it, which leaves the stock unchanged. It also creates a test category, product, set and offer and deletes them, and doesn't touch your other data. Rate limits apply, so wait a minute between full runs.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "event": [
@@ -90,6 +90,22 @@
     },
     {
       "key": "whatsapp_opened_url",
+      "value": ""
+    },
+    {
+      "key": "offer_slug",
+      "value": ""
+    },
+    {
+      "key": "set_product_id",
+      "value": ""
+    },
+    {
+      "key": "set_product_slug",
+      "value": ""
+    },
+    {
+      "key": "offer_category_id",
       "value": ""
     }
   ],
@@ -580,6 +596,98 @@
               "body": "{\n    \"success\": false,\n    \"message\": \"La ressource demandée est introuvable.\",\n    \"data\": null,\n    \"errors\": null\n}"
             }
           ]
+        },
+        {
+          "name": "List current offers",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('returns 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/offers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "offers"
+              ]
+            },
+            "description": "Only the offers running right now. Not paginated."
+          },
+          "response": [
+            {
+              "name": "Offers",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/offers",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "offers"
+                  ]
+                },
+                "description": "Only the offers running right now. Not paginated."
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n    \"success\": true,\n    \"message\": \"Offres récupérées.\",\n    \"data\": [\n        {\n            \"id\": 1,\n            \"slug\": \"collection-gissah\",\n            \"title\": \"Collection Gissah\",\n            \"tagline\": \"2 parfums + 1 offert\",\n            \"description\": \"Nos deux best-sellers, et un troisième offert.\",\n            \"image_path\": \"http://127.0.0.1:8000/storage/offers/collection-gissah.webp\",\n            \"starts_at\": \"2026-11-13T00:00:00.000000Z\",\n            \"ends_at\": \"2026-11-30T23:59:59.000000Z\",\n            \"terms\": [\n                \"Dans la limite des stocks\",\n                \"Une offre par commande\"\n            ],\n            \"is_active\": true,\n            \"sort_order\": 0,\n            \"set\": {\n                \"id\": 4,\n                \"category_id\": 1,\n                \"name\": \"Collection Gissah\",\n                \"slug\": \"collection-gissah\",\n                \"category\": {\n                    \"id\": 1,\n                    \"name\": \"Oriental\",\n                    \"slug\": \"oriental\",\n                    \"description\": \"Warm and spicy scents\",\n                    \"image_path\": null,\n                    \"is_active\": true,\n                    \"sort_order\": 0,\n                    \"created_at\": \"2026-11-14T10:00:00.000000Z\",\n                    \"updated_at\": \"2026-11-14T10:00:00.000000Z\"\n                },\n                \"description\": \"Oud Royal + Rose Musk + Amber Night offert\",\n                \"notes\": null,\n                \"sku\": null,\n                \"price\": \"100.00\",\n                \"compare_at_price\": null,\n                \"stock\": 10,\n                \"sort_order\": 0,\n                \"image_path\": \"http://127.0.0.1:8000/storage/products/collection-gissah.jpg\",\n                \"is_active\": true,\n                \"is_featured\": false,\n                \"is_offer\": true,\n                \"created_at\": \"2026-11-14T10:00:00.000000Z\",\n                \"updated_at\": \"2026-11-14T10:00:00.000000Z\"\n            },\n            \"products\": [\n                {\n                    \"id\": 1,\n                    \"category_id\": 1,\n                    \"name\": \"Oud Royal\",\n                    \"slug\": \"oud-royal\",\n                    \"category\": {\n                        \"id\": 1,\n                        \"name\": \"Oriental\",\n                        \"slug\": \"oriental\",\n                        \"description\": \"Warm and spicy scents\",\n                        \"image_path\": null,\n                        \"is_active\": true,\n                        \"sort_order\": 0,\n                        \"created_at\": \"2026-11-14T10:00:00.000000Z\",\n                        \"updated_at\": \"2026-11-14T10:00:00.000000Z\"\n                    },\n                    \"description\": \"A perfume.\",\n                    \"notes\": \"Oud, Amber\",\n                    \"sku\": \"PRF-OU-050\",\n                    \"price\": \"60.00\",\n                    \"compare_at_price\": null,\n                    \"stock\": 20,\n                    \"sort_order\": 0,\n                    \"image_path\": \"http://127.0.0.1:8000/storage/products/oud-royal.jpg\",\n                    \"is_active\": true,\n                    \"is_featured\": false,\n                    \"is_offer\": false,\n                    \"created_at\": \"2026-11-14T10:00:00.000000Z\",\n                    \"updated_at\": \"2026-11-14T10:00:00.000000Z\"\n                },\n                {\n                    \"id\": 2,\n                    \"category_id\": 1,\n                    \"name\": \"Rose Musk\",\n                    \"slug\": \"rose-musk\",\n                    \"category\": {\n                        \"id\": 1,\n                        \"name\": \"Oriental\",\n                        \"slug\": \"oriental\",\n                        \"description\": \"Warm and spicy scents\",\n                        \"image_path\": null,\n                        \"is_active\": true,\n                        \"sort_order\": 0,\n                        \"created_at\": \"2026-11-14T10:00:00.000000Z\",\n                        \"updated_at\": \"2026-11-14T10:00:00.000000Z\"\n                    },\n                    \"description\": \"A perfume.\",\n                    \"notes\": \"Oud, Amber\",\n                    \"sku\": \"PRF-RO-050\",\n                    \"price\": \"60.00\",\n                    \"compare_at_price\": null,\n                    \"stock\": 20,\n                    \"sort_order\": 0,\n                    \"image_path\": \"http://127.0.0.1:8000/storage/products/rose-musk.jpg\",\n                    \"is_active\": true,\n                    \"is_featured\": false,\n                    \"is_offer\": false,\n                    \"created_at\": \"2026-11-14T10:00:00.000000Z\",\n                    \"updated_at\": \"2026-11-14T10:00:00.000000Z\"\n                }\n            ],\n            \"free_product\": {\n                \"id\": 3,\n                \"category_id\": 1,\n                \"name\": \"Amber Night\",\n                \"slug\": \"amber-night\",\n                \"category\": {\n                    \"id\": 1,\n                    \"name\": \"Oriental\",\n                    \"slug\": \"oriental\",\n                    \"description\": \"Warm and spicy scents\",\n                    \"image_path\": null,\n                    \"is_active\": true,\n                    \"sort_order\": 0,\n                    \"created_at\": \"2026-11-14T10:00:00.000000Z\",\n                    \"updated_at\": \"2026-11-14T10:00:00.000000Z\"\n                },\n                \"description\": \"A perfume.\",\n                \"notes\": \"Oud, Amber\",\n                \"sku\": \"PRF-AM-050\",\n                \"price\": \"40.00\",\n                \"compare_at_price\": null,\n                \"stock\": 20,\n                \"sort_order\": 0,\n                \"image_path\": \"http://127.0.0.1:8000/storage/products/amber-night.jpg\",\n                \"is_active\": true,\n                \"is_featured\": false,\n                \"is_offer\": false,\n                \"created_at\": \"2026-11-14T10:00:00.000000Z\",\n                \"updated_at\": \"2026-11-14T10:00:00.000000Z\"\n            },\n            \"regular_price\": \"160.00\",\n            \"saving\": \"60.00\",\n            \"discount_percent\": 37\n        }\n    ],\n    \"errors\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "Show unknown offer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('returns 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/offers/does-not-exist",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "offers",
+                "does-not-exist"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
@@ -2455,7 +2563,576 @@
       "description": "Everything created here is deleted again at the end of the folder."
     },
     {
-      "name": "9. Admin orders",
+      "name": "9. Admin offers",
+      "description": "Everything created here is deleted again at the end of the folder. The offer is created switched off, so customers never see it.",
+      "item": [
+        {
+          "name": "Pick a category for the set",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('returns 200', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('offer_category_id', pm.response.json().data[0].id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/categories?page=1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "categories"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "The test category of the previous folder is deleted, so the set goes in the first existing one."
+          },
+          "response": []
+        },
+        {
+          "name": "Create set product (choose an image first)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('returns 201', () => pm.response.to.have.status(201));",
+                  "pm.test('is a set', () => pm.expect(pm.response.json().data.is_offer).to.be.true);",
+                  "pm.collectionVariables.set('set_product_id', pm.response.json().data.id);",
+                  "pm.collectionVariables.set('set_product_slug', pm.response.json().data.slug);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/products",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products"
+              ]
+            },
+            "description": "In the Body tab, choose an image file for the `image` field. `is_offer=1` makes it a set: it never shows in the shop, and its price is the offer's price.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "category_id",
+                  "value": "{{offer_category_id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "name",
+                  "value": "Postman Test Set",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Postman Test Perfume + gift",
+                  "type": "text"
+                },
+                {
+                  "key": "price",
+                  "value": "180.00",
+                  "type": "text"
+                },
+                {
+                  "key": "stock",
+                  "value": "5",
+                  "type": "text"
+                },
+                {
+                  "key": "is_offer",
+                  "value": "1",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "",
+                  "description": "Choose a jpg, jpeg, png or webp file, max 2 MB"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create offer (choose an image first)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('returns 201', () => pm.response.to.have.status(201));",
+                  "pm.test('contains the perfume', () => pm.expect(pm.response.json().data.products[0].id).to.eql(Number(pm.collectionVariables.get('product_id'))));",
+                  "pm.collectionVariables.set('offer_slug', pm.response.json().data.slug);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/offers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "offers"
+              ]
+            },
+            "description": "In the Body tab, choose an image file for the `image` field. Lists use `[]` in the field name. To add a gift, enable `free_product_id` and set a product ID that isn't in `product_ids`.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "product_id",
+                  "value": "{{set_product_id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "title",
+                  "value": "Postman Test Offer",
+                  "type": "text"
+                },
+                {
+                  "key": "tagline",
+                  "value": "Created by the Postman run",
+                  "type": "text"
+                },
+                {
+                  "key": "starts_at",
+                  "value": "2026-01-01 00:00:00",
+                  "type": "text"
+                },
+                {
+                  "key": "ends_at",
+                  "value": "2030-12-31 23:59:59",
+                  "type": "text"
+                },
+                {
+                  "key": "is_active",
+                  "value": "0",
+                  "type": "text"
+                },
+                {
+                  "key": "product_ids[]",
+                  "value": "{{product_id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "terms[]",
+                  "value": "Dans la limite des stocks",
+                  "type": "text"
+                },
+                {
+                  "key": "free_product_id",
+                  "value": "",
+                  "type": "text",
+                  "disabled": true,
+                  "description": "Optional: a normal product ID that isn't in product_ids"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "",
+                  "description": "Choose a jpg, jpeg, png or webp file, max 2 MB"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List all offers",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('returns 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/offers?page=1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "offers"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Every offer, including ended, future and switched-off ones. Paginated."
+          },
+          "response": []
+        },
+        {
+          "name": "Show switched-off offer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('returns 200', () => pm.response.to.have.status(200));",
+                  "pm.test('is switched off', () => pm.expect(pm.response.json().data.is_active).to.be.false);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/offers/{{offer_slug}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "offers",
+                "{{offer_slug}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Switched-off offer is not public",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('returns 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/offers/{{offer_slug}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "offers",
+                "{{offer_slug}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update offer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('returns 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/offers/{{offer_slug}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "offers",
+                "{{offer_slug}}"
+              ]
+            },
+            "description": "Send `starts_at` and `ends_at` together, or the date check fails.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Postman Test Offer (edited)\",\n  \"terms\": [\n    \"Dans la limite des stocks\",\n    \"Une offre par commande\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update offer with an image (choose an image first)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('returns 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/offers/{{offer_slug}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "offers",
+                "{{offer_slug}}"
+              ]
+            },
+            "description": "Uses POST with `_method=PATCH`, because many PHP setups do not read files from a real PATCH request. The old image is deleted.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "_method",
+                  "value": "PATCH",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "",
+                  "description": "Choose a jpg, jpeg, png or webp file, max 2 MB"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete a set used by an offer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('returns 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/products/{{set_product_slug}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products",
+                "{{set_product_slug}}"
+              ]
+            },
+            "description": "A product that is an offer's set, or is inside an offer, can't be deleted."
+          },
+          "response": [
+            {
+              "name": "Conflict",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/admin/products/{{set_product_slug}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "products",
+                    "{{set_product_slug}}"
+                  ]
+                },
+                "description": "A product that is an offer's set, or is inside an offer, can't be deleted."
+              },
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n    \"success\": false,\n    \"message\": \"Impossible de supprimer un produit utilisé dans une offre. Masquez-le ou retirez-le de l’offre.\",\n    \"data\": null,\n    \"errors\": null,\n    \"request_id\": \"01M7E42WD2H4VNM1G9T55H0Z2C\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete offer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('returns 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/offers/{{offer_slug}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "offers",
+                "{{offer_slug}}"
+              ]
+            },
+            "description": "Deletes the offer and its image. The set and the perfumes stay."
+          },
+          "response": [
+            {
+              "name": "Deleted",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/admin/offers/{{offer_slug}}",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "admin",
+                    "offers",
+                    "{{offer_slug}}"
+                  ]
+                },
+                "description": "Deletes the offer and its image. The set and the perfumes stay."
+              },
+              "status": "No Content",
+              "code": 204,
+              "_postman_previewlanguage": "text",
+              "header": [],
+              "body": ""
+            }
+          ]
+        },
+        {
+          "name": "Delete set product",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('returns 204', () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/admin/products/{{set_product_slug}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "products",
+                "{{set_product_slug}}"
+              ]
+            },
+            "description": "Works now that no offer uses it."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "10. Admin orders",
       "item": [
         {
           "name": "List orders",
@@ -2849,7 +3526,7 @@
       ]
     },
     {
-      "name": "10. Log out",
+      "name": "11. Log out",
       "item": [
         {
           "name": "Log out",
