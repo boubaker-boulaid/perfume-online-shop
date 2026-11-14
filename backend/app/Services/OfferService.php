@@ -15,6 +15,7 @@ class OfferService
     use HandlesCache, HandlesSlugsAndImages;
 
     private const OFFERS_CACHE_SECONDS = 300;
+
     private const RELATIONS = ['bundle.category', 'products.category'];
 
     /**
@@ -27,7 +28,7 @@ class OfferService
 
     public function getCurrentOffers()
     {
-        return $this->cached($this->versionedKey('catalog', 'offers'), self::OFFERS_CACHE_SECONDS, 
+        return $this->cached($this->versionedKey('catalog', 'offers'), self::OFFERS_CACHE_SECONDS,
             fn () => Offer::current()->with(self::RELATIONS)->orderBy('sort_order')->orderBy('ends_at')->get());
     }
 
@@ -115,7 +116,7 @@ class OfferService
 
     // turns the product_ids array into what sync() wants: [product id => [is_free => bool]]
     // adding & befor a param means (by reference) it allows the function to work with the real var not a copy of it so it can change the real var
-    private function syncContent(array &$data) 
+    private function syncContent(array &$data)
     {
         $row = [];
 
@@ -123,12 +124,12 @@ class OfferService
             $row[$id] = ['is_free' => false];
         }
 
-        if (!empty($data['free_product_id'])) {
+        if (! empty($data['free_product_id'])) {
             $row[$data['free_product_id']] = ['is_free' => true];
         }
 
         // format $data to only keep the offers table's columns
-        unset($data['free_product_id'], $data['product_ids'], $data['image']); 
+        unset($data['free_product_id'], $data['product_ids'], $data['image']);
 
         return $row;
     }

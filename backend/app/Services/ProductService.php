@@ -38,7 +38,7 @@ class ProductService
             $key,
             self::PRODUCTS_CACHE_SECONDS,
             // only validated filters go in the links: this page is cached and shared between visitors
-            fn() => $this->filteredProducts($filters)->with('category')->listed()->paginate(10)->appends($filters)
+            fn () => $this->filteredProducts($filters)->with('category')->listed()->paginate(10)->appends($filters)
         );
     }
 
@@ -52,11 +52,11 @@ class ProductService
     private function filteredProducts(array $filters)
     {
         $query = Product::query();
-        $query->when($filters['q'] ?? null, fn($q, $search) => $q->where('name', 'like', '%' . $search . '%'))
-            ->when($filters['category'] ?? null, fn($q, $cat) => $q->whereRelation('category', 'slug', $cat))
+        $query->when($filters['q'] ?? null, fn ($q, $search) => $q->where('name', 'like', '%'.$search.'%'))
+            ->when($filters['category'] ?? null, fn ($q, $cat) => $q->whereRelation('category', 'slug', $cat))
             // isset, because a price of 0 is a real filter
-            ->when(isset($filters['min_price']), fn($q) => $q->where('price', '>=', $filters['min_price']))
-            ->when(isset($filters['max_price']), fn($q) => $q->where('price', '<=', $filters['max_price']));
+            ->when(isset($filters['min_price']), fn ($q) => $q->where('price', '>=', $filters['min_price']))
+            ->when(isset($filters['max_price']), fn ($q) => $q->where('price', '<=', $filters['max_price']));
 
         match ($filters['sort'] ?? null) {
             'price_desc' => $query->orderByDesc('price'),
@@ -75,7 +75,7 @@ class ProductService
         return $this->cached(
             $this->versionedKey('catalog', 'product', $slug),
             self::PRODUCT_CACHE_SECONDS,
-            fn() => Product::with('category')->listed()->where('slug', $slug)->firstOrFail()
+            fn () => Product::with('category')->listed()->where('slug', $slug)->firstOrFail()
         );
     }
 
@@ -85,7 +85,7 @@ class ProductService
         $featured = $this->cached(
             $this->versionedKey('catalog', 'featured'),
             self::FEATURED_CACHE_SECONDS,
-            fn() => Product::with('category')->listed()->featured()->get()
+            fn () => Product::with('category')->listed()->featured()->get()
         );
 
         return $featured->shuffle()->take(5)->values();

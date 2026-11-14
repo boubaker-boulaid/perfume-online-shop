@@ -105,7 +105,7 @@ class OrderService
             // no customer details in the log (name, phone, address): the key and items are enough to investigate
             Log::channel('daily')->error('order.place_failed', [
                 'idempotency_key' => $data['idempotency_key'] ?? null,
-                'items' => collect($data['items'] ?? [])->map(fn($i) => ['product_id' => $i['product_id'] ?? null, 'quantity' => $i['quantity'] ?? null])->all(),
+                'items' => collect($data['items'] ?? [])->map(fn ($i) => ['product_id' => $i['product_id'] ?? null, 'quantity' => $i['quantity'] ?? null])->all(),
                 'exception' => $e,
             ]);
             throw $e;
@@ -135,7 +135,7 @@ class OrderService
             $product = $products->get($item['product_id']);
 
             if (! $product) {
-                throw new ModelNotFoundException('Le produit n° ' . $item['product_id'] . ' est introuvable.');
+                throw new ModelNotFoundException('Le produit n° '.$item['product_id'].' est introuvable.');
             }
 
             // if ($product->stock < $item['quantity']) {
@@ -154,7 +154,7 @@ class OrderService
                 }
 
                 foreach ($offer->products as $p) {
-                    $this->takeStock($products->get($p->id), $item['quantity']); // use $products intade of $p cause they are locked and up to date 
+                    $this->takeStock($products->get($p->id), $item['quantity']); // use $products intade of $p cause they are locked and up to date
                 }
             }
         }
@@ -222,13 +222,13 @@ class OrderService
     {
         $query = Order::query();
         $query->when($filters['q'] ?? null, function ($q, $search) {
-            $q->whereAny(['customer_name', 'phone', 'order_number'], 'like', '%' . $search . '%');
+            $q->whereAny(['customer_name', 'phone', 'order_number'], 'like', '%'.$search.'%');
         })->when($filters['status'] ?? null, function ($q, $status) {
             $q->where('status', $status);
         })->when($filters['payment_status'] ?? null, function ($q, $payment_status) {
             $q->where('payment_status', $payment_status);
         })->when($filters['city'] ?? null, function ($q, $city) {
-            $q->where('city', 'like', '%' . $city . '%');
+            $q->where('city', 'like', '%'.$city.'%');
         })->when($filters['date_from'] ?? null, function ($q, $from) {
             $q->whereDate('created_at', '>=', $from);
         })->when($filters['date_to'] ?? null, function ($q, $to) {
@@ -263,14 +263,14 @@ class OrderService
         $orderIds = $this->unpaidOrdersQuery($olderThanHours, $onlyUnopened)->pluck('id');
 
         // one transaction per order, so a failure on one doesn't undo the others
-        return $orderIds->filter(fn($id) => $this->cancelUnpaidOrder($id, $olderThanHours, $onlyUnopened, $note))->count();
+        return $orderIds->filter(fn ($id) => $this->cancelUnpaidOrder($id, $olderThanHours, $onlyUnopened, $note))->count();
     }
 
     private function unpaidOrdersQuery(int $olderThanHours, bool $onlyUnopened)
     {
         return Order::where('status', 'pending')
             ->where('created_at', '<=', now()->subHours($olderThanHours))
-            ->when($onlyUnopened, fn($q) => $q->whereNull('whatsapp_opened_at'));
+            ->when($onlyUnopened, fn ($q) => $q->whereNull('whatsapp_opened_at'));
     }
 
     private function cancelUnpaidOrder(int $orderId, int $olderThanHours, bool $onlyUnopened, string $note): bool
@@ -390,7 +390,7 @@ class OrderService
                 Product::where('id', $item->product_id)->increment('stock', $item->quantity);
 
                 $offer = Offer::with('products')->where('product_id', $item->product_id)->first();
-                foreach($offer?->products ?? [] as $p) {
+                foreach ($offer?->products ?? [] as $p) {
                     Product::where('id', $p->id)->increment('stock', $item->quantity);
                 }
             }

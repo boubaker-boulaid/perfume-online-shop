@@ -2,11 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use App\Models\Product;
 use App\Observers\CatalogObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 // saving or deleting an offer makes the cached catalog stale, like products do
 #[ObservedBy(CatalogObserver::class)]
@@ -23,7 +22,7 @@ class Offer extends Model
         'starts_at',
         'ends_at',
         'is_active',
-        'sort_order'
+        'sort_order',
     ];
 
     protected $casts = [
@@ -40,7 +39,7 @@ class Offer extends Model
         return $this->belongsTo(Product::class, 'product_id');
     }
 
-    // the products inside the set including the free ones 
+    // the products inside the set including the free ones
     public function products()
     {
         return $this->belongsToMany(Product::class)->withPivot('is_free');

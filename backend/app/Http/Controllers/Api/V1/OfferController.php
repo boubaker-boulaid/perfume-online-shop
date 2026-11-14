@@ -40,6 +40,7 @@ class OfferController extends Controller
     public function store(StoreOfferRequest $request)
     {
         $product = $this->offer_service->createOffer($request->validated(), $request->file('image'));
+
         return $this->created(new OfferResource($product), 'Offre créée.');
     }
 
@@ -57,6 +58,7 @@ class OfferController extends Controller
     public function update(UpdateOfferRequest $request, Offer $offer)
     {
         $offer = $this->offer_service->updateOffer($offer, $request->validated(), $request->file('image'));
+
         return $this->okNoPgs(new OfferResource($offer), 'Offre mise à jour.');
     }
 
@@ -66,6 +68,7 @@ class OfferController extends Controller
     public function destroy(Offer $offer)
     {
         $this->offer_service->deleteOffer($offer);
+
         return $this->noContent();
     }
 }
