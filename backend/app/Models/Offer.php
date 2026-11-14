@@ -48,6 +48,7 @@ class Offer extends Model
     // what customer see (active, started, not over and visible)
     public function scopeCurrent(Builder $query)
     {
+        // whereValueBetween: now() is between the two columns, both ends included
         $query->where('is_active', true)->whereValueBetween(now(), ['starts_at', 'ends_at'])
             ->whereHas('bundle', fn ($b) => $b->visible());
     }

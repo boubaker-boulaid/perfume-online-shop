@@ -19,6 +19,7 @@ class CategoryService
     {
         $key = $this->versionedKey('catalog', 'categories', 'page', (string) Paginator::resolveCurrentPage());
 
+        // products_count only counts what customers can see: active products, without the offers' sets
         return $this->cached($key, self::CATEGORIES_CACHE_SECONDS,
             fn () => Category::active()->withCount(['products' => fn ($q) => $q->active()->where('is_offer', false)])->orderBy('sort_order')->latest()->paginate(10));
     }

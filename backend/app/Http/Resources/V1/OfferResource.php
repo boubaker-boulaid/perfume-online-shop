@@ -33,10 +33,12 @@ class OfferResource extends JsonResource
             'is_active' => $this->is_active,
             'sort_order' => $this->sort_order,
             'set' => new ProductResource($this->bundle),
+            // values() renumbers the keys after the filter, so the JSON is a list and not an object
             'products' => ProductResource::collection($this->products->where('pivot.is_free', false)->values()),
             'free_product' => $free ? new ProductResource($free) : null,
             'regular_price' => number_format($regular / 100, 2, '.', ''), // turn the price back to dh
             'saving' => number_format(($regular - $price) / 100, 2, '.', ''), // turn the price back to dh
+            // intdiv rounds down: the shop never shows a bigger discount than the real one
             'discount_percent' => $regular > 0 ? intdiv(($regular - $price) * 100, $regular) : 0,
         ];
     }

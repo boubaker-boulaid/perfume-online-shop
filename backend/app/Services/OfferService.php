@@ -49,12 +49,15 @@ class OfferService
 
     public function createOffer(array $data, UploadedFile $image)
     {
+        // the offer takes its set's slug: the cart only knows the set, and links back to the offer with it
         $data['slug'] = Product::findOrFail($data['product_id'])->slug;
         $data['image_path'] = $this->storeImage($image, 'offers');
         $data['sort_order'] ??= 0;
+        // also removes the form's lists from $data, so create() only gets the offers columns
         $syncContent = $this->syncContent($data);
 
         try {
+            // the offer and its perfumes are saved together, or not at all
             $offer = DB::transaction(function () use ($data, $syncContent) {
                 $offer = Offer::create($data);
                 $offer->products()->sync($syncContent);
@@ -79,6 +82,8 @@ class OfferService
             $data['image_path'] = $this->storeImage($image, 'offers');
         }
 
+        // the perfumes are only replaced when the form sends product_ids: null keeps the current ones.
+        // free_product_id is read with them, so sending it alone changes nothing
         $syncContent = isset($data['product_ids']) ? $this->syncContent($data) : null;
 
         try {
@@ -99,6 +104,7 @@ class OfferService
             throw $e;
         }
 
+        // only remove the old image once the new one is saved
         if ($image) {
             $this->removeImage($oldImagePath);
         }
@@ -110,6 +116,7 @@ class OfferService
 
     public function deleteOffer(Offer $offer)
     {
+        // the offer_product rows go with it (cascadeOnDelete). the set and the perfumes stay
         $offer->delete();
         $this->removeImage($offer->image_path);
     }

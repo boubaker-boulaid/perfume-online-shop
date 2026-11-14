@@ -139,6 +139,8 @@ class ProductService
 
     public function deleteProduct(Product $product)
     {
+        // a set used by an offer (offers.product_id), or a perfume inside one (offer_product): the foreign
+        // keys would refuse the delete with a database error, so answer with a clear 409 first
         abort_if(
             Offer::where('product_id', $product->id)->exists() || $product->offers()->exists(),
             409,
