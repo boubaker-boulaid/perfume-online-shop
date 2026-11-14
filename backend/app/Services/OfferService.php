@@ -41,7 +41,7 @@ class OfferService
         return Offer::with(self::RELATIONS)->orderBy('sort_order')->latest()->paginate(10);
     }
 
-    public function getAdminOrder(Offer $offer)
+    public function getAdminOffer(Offer $offer)
     {
         return $offer->load(self::RELATIONS);
     }
