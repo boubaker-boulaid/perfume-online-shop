@@ -29,8 +29,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // first of all, so even an error thrown by another middleware has a request id
         $middleware->prepend(AssignRequestId::class);
 
+        // lets the browser frontend use Sanctum's cookie session (login + CSRF) instead of API tokens
         $middleware->api(prepend: [
             EnsureFrontendRequestsAreStateful::class,
         ]);
@@ -58,10 +60,12 @@ return Application::configure(basePath: dirname(__DIR__))
         );
 
         $exceptions->render(function (Throwable $e, Request $request) use ($res) {
+            // null hands anything that isn't an API call back to Laravel's normal error pages
             if (! $request->is('api/*') && ! $request->expectsJson()) {
                 return null;
             }
 
+            // the first matching line wins: the specific cases must stay above HttpExceptionInterface and default
             return match (true) {
                 $e instanceof ValidationException => $res('Les données saisies ne sont pas valides.', 422, $e->errors()),
 
@@ -103,6 +107,7 @@ return Application::configure(basePath: dirname(__DIR__))
             };
         });
 
+        // expected errors (an unknown slug, a wrong form), not bugs: keep them out of the error log
         $exceptions->dontReport([
             ModelNotFoundException::class,
             ValidationException::class,

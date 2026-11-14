@@ -31,14 +31,17 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // the reset link in the email opens the frontend's page, which then calls POST /reset-password
         ResetPassword::createUrlUsing(function (object $notifiable, string $token) {
             return config('app.frontend_url')."/password-reset/$token?email={$notifiable->getEmailForPasswordReset()}";
         });
 
+        // per logged-in admin, or per IP address for guests
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });
 
+        // stricter, because every order takes stock: a script can't empty the shop with fake orders
         RateLimiter::for('orders', function (Request $request) {
             return Limit::perMinute(10)->by($request->ip());
         });
