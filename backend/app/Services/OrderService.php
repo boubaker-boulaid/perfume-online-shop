@@ -146,7 +146,7 @@ class OrderService
                 }
 
                 foreach ($offer->products as $p) {
-                    $this->takeStock($products->get($p), $item['quantity']); // use $products intade of $p cause they are locked and up to date 
+                    $this->takeStock($products->get($p->id), $item['quantity']); // use $products intade of $p cause they are locked and up to date 
                 }
             }
         }
