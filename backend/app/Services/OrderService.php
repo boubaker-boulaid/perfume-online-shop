@@ -116,12 +116,20 @@ class OrderService
     {
         $productsIds = collect($items)->pluck('product_id');
 
-        // the offers in the order with the perfumes inside them 
-        $offers = Offer::with('products')->whereIn('product_id', $productsIds)->get()->keyBy('product_id');
-        $offersProductsIds = $offers->flatMap(fn($offer) => $offer->products->pluck('id')); // flatMap retrun one array with all productIds in the offers 
+        // the ids of the perfumes inside the sets in the order, with a locking read: on MariaDB a plain read here
+        // would take the transaction's snapshot, and locking a product changed after it fails with error 1020.
+        // only the offer_product rows get the shared lock, never the products (they are locked for update below)
+        $offersProductsIds = DB::table('offer_product')
+            ->join('offers', 'offers.id', '=', 'offer_product.offer_id')
+            ->whereIn('offers.product_id', $productsIds)
+            ->sharedLock()
+            ->pluck('offer_product.product_id');
 
         // lock everything at once, always sorted by id, so two orders never wait on each other
         $products = Product::whereIn('id', $productsIds->merge($offersProductsIds)->unique())->orderBy('id')->lockForUpdate()->get()->keyBy('id');
+
+        // a plain read is safe now: the products are locked, nobody can change them any more
+        $offers = Offer::with('products')->whereIn('product_id', $productsIds)->get()->keyBy('product_id');
 
         foreach ($items as $item) {
             $product = $products->get($item['product_id']);
