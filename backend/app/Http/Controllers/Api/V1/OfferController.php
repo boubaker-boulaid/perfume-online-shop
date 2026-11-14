@@ -9,7 +9,6 @@ use App\Http\Requests\V1\UpdateOfferRequest;
 use App\Http\Resources\V1\OfferResource;
 use App\Models\Offer;
 use App\Services\OfferService;
-use Illuminate\Http\Request;
 
 class OfferController extends Controller
 {
