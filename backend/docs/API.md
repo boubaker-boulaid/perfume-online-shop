@@ -80,10 +80,10 @@ Fields inside arrays use dotted names, such as `items.0.quantity`.
 | 400 | Not enough stock | Show `message`, which names the product and the quantity available |
 | 401 | Not logged in, or the session expired | Send the user to the login page |
 | 403 | Logged in but not an admin, or a signed link that's invalid or expired | Show an error |
-| 404 | The record or endpoint doesn't exist, or the product is hidden | Show a not found page |
-| 409 | Can't delete a category that still has products, or logging in while already logged in | Show `message` |
+| 404 | The record or endpoint doesn't exist, the product is hidden, or the offer isn't running | Show a not found page |
+| 409 | Can't delete a category that still has products or a product used in an offer, or logging in while already logged in | Show `message` |
 | 419 | CSRF token missing or expired | Call `/sanctum/csrf-cookie` again, then retry |
-| 422 | Validation failed, or the status change isn't allowed | Show `errors`, or `message` when `errors` is null |
+| 422 | Validation failed, the status change isn't allowed, or an offer in the bag is no longer running | Show `errors`, or `message` when `errors` is null |
 | 429 | Too many requests | Wait for the number of seconds in the `Retry-After` header |
 | 500 | Server error | Show a general error with `request_id` and let the user retry |
 | 503 | The database can't be reached | Ask the user to try again shortly |
@@ -141,11 +141,11 @@ Checks that the API is running. It doesn't use the usual response shape.
 
 ### GET /api/v1/categories
 
-Lists active categories, by `sort_order` and then newest first, paginated. Each one is a [Category](#category) with `products_count`, which only counts active products.
+Lists active categories, by `sort_order` and then newest first, paginated. Each one is a [Category](#category) with `products_count`, which only counts active products, without the offers' sets.
 
 ### GET /api/v1/products
 
-Lists active products in active categories, paginated. Each one is a [Product](#product).
+Lists active products in active categories, paginated. Each one is a [Product](#product). The sets sold by offers (`is_offer: true`) never appear here, in the featured products or on a product page: they're only sold from their [offer](#get-apiv1offers).
 
 | Query parameter | Type | Notes |
 |---|---|---|
@@ -163,7 +163,21 @@ Returns up to 5 featured products from the public catalog, in a random order tha
 
 ### GET /api/v1/products/{slug}
 
-Returns one [Product](#product). The response is 404 if the product is unknown or hidden, or if its category is hidden.
+Returns one [Product](#product). The response is 404 if the product is unknown or hidden, if its category is hidden, or if it's an offer's set.
+
+### GET /api/v1/offers
+
+Lists the offers running right now. Each one is an [Offer](#offer). An offer is listed when:
+
+- its `is_active` is `true`,
+- the current time is between its `starts_at` and `ends_at`,
+- its set is visible: the set product is active and in an active category.
+
+Offers are listed by `sort_order`, then the soonest `ends_at` first. The list isn't paginated, because the shop only runs a few offers at once and the page shows all of them. It's cached for 5 minutes, but changes made by the admin show up straight away.
+
+### GET /api/v1/offers/{slug}
+
+Returns one [Offer](#offer). The slug is the slug of its set. The response is 404 if the offer is unknown or isn't running, by the same rules as the list.
 
 ## Orders
 
@@ -181,7 +195,7 @@ Places an order. It's a public endpoint, so customers don't need an account. Sto
 | `note` | Optional, max 255 characters |
 | `idempotency_key` | Required, a UUID. [See below](#avoiding-duplicate-orders). |
 | `items` | Required, 1 to 99 lines |
-| `items[].product_id` | Required, an active product in an active category. A product can only appear once per order. |
+| `items[].product_id` | Required, an active product in an active category. A product can only appear once per order. To order an offer, send its `set.id`. [See below](#ordering-an-offer). |
 | `items[].quantity` | Required, whole number from 1 to 99 |
 
 Each item may only contain `product_id` and `quantity`. Sending anything else in an item, such as `price`, returns 422. Other unknown fields in the body, such as `total`, are ignored. The server always calculates the total itself.
@@ -226,6 +240,35 @@ If there isn't enough stock, the response is `400` and nothing is saved:
   "errors": null
 }
 ```
+
+#### Ordering an offer
+
+An offer is sold as one product, its set. Put the offer's `set.id` in `items`, like any other product:
+
+```json
+"items": [
+  { "product_id": 4, "quantity": 1 }
+]
+```
+
+- **Price:** the set's own `price` is charged. The prices of the perfumes inside it never change the total.
+- **Stock:** each set ordered takes one from the set's stock, and one bottle of each perfume inside it, including the free one. If any of them is short, the response is `400` and names that perfume. A perfume ordered on its own and inside a set in the same order is counted for both.
+- **Offer over:** if the offer has ended, hasn't started yet or was switched off, the response is `422` and nothing is saved:
+
+```json
+{
+  "success": false,
+  "message": "Les données saisies ne sont pas valides.",
+  "data": null,
+  "errors": {
+    "items": ["L’offre Collection Gissah n’est plus disponible."]
+  },
+  "request_id": "01JD8XQ7M3V9T2K5N6R4W8Y1ZB"
+}
+```
+
+- **Order item:** the item's `product_name` is the set's name followed by its `description` in brackets, such as `Collection Gissah (Oud Royal + Rose Musk + Amber Night offert)`. The WhatsApp message and the emails read this name, so they list the perfumes.
+- **Cancelling:** cancelling the order gives back the set and every perfume inside it.
 
 #### Avoiding duplicate orders
 
@@ -331,11 +374,11 @@ Returns the dashboard numbers, cached for 5 minutes.
 
 | Method and path | Purpose | Success |
 |---|---|---|
-| `GET /api/v1/admin/products` | List all products, including hidden ones. Takes the same filters as the [public list](#get-apiv1products), and `category` also accepts hidden categories. | `200`, paginated |
+| `GET /api/v1/admin/products` | List all products, including hidden ones and the offers' sets. Takes the same filters as the [public list](#get-apiv1products), and `category` also accepts hidden categories. | `200`, paginated |
 | `POST /api/v1/admin/products` | Create | `201` |
 | `GET /api/v1/admin/products/{slug}` | Show one, even if hidden | `200` |
 | `PATCH /api/v1/admin/products/{slug}` | Update (`PUT` works the same way) | `200` |
-| `DELETE /api/v1/admin/products/{slug}` | Delete. Past orders keep their copy of the name and price. | `204` |
+| `DELETE /api/v1/admin/products/{slug}` | Delete. Past orders keep their copy of the name and price. Returns `409` if the product is an offer's set, or is inside an offer, free or not. | `204` |
 
 Fields for create and update:
 
@@ -352,6 +395,7 @@ Fields for create and update:
 | `sort_order` | Optional, default 0 | Optional | Whole number, at least 0. Lower numbers are listed first. |
 | `is_active` | Optional, default `true` | Optional | Boolean. `false` hides the product. |
 | `is_featured` | Optional, default `false` | Optional | Boolean |
+| `is_offer` | Optional, default `false` | Optional | Boolean. `true` makes the product an offer's set: it's hidden from the shop and only sold through its [offer](#offers). |
 
 The slug is generated from the name when the product is created, with a suffix like `-2` if it's taken. It doesn't change if the product is renamed.
 
@@ -383,6 +427,57 @@ await api.post(`/api/v1/admin/products/${slug}`, form);
 | `image` | Optional | Optional | jpg, jpeg, png or webp, max 2 MB |
 | `is_active` | Optional, default `true` | Optional | Boolean. `false` hides the category and all its products from the public API. |
 | `sort_order` | Optional, default 0 | Optional | Whole number, at least 0. Lower numbers are listed first. |
+
+### Offers
+
+| Method and path | Purpose | Success |
+|---|---|---|
+| `GET /api/v1/admin/offers` | List all offers, including ended, future and switched-off ones, by `sort_order` and then newest first | `200`, paginated |
+| `POST /api/v1/admin/offers` | Create | `201` |
+| `GET /api/v1/admin/offers/{slug}` | Show one, even if it isn't running | `200` |
+| `PATCH /api/v1/admin/offers/{slug}` | Update (`PUT` works the same way) | `200` |
+| `DELETE /api/v1/admin/offers/{slug}` | Delete the offer and its image. The set and the perfumes stay, so delete or hide the set afterwards. | `204` |
+
+Creating an offer takes two steps:
+
+1. Create its set with `POST /api/v1/admin/products` and `is_offer=1`. The set's `price` is the offer's price, and the set has its own stock.
+2. Create the offer with the set's ID in `product_id`, and the perfumes inside it in `product_ids`.
+
+| Field | Create | Update | Rules |
+|---|---|---|---|
+| `product_id` | Required | Can't be changed | The set: a product with `is_offer: true` that no other offer uses. The offer takes the set's slug. |
+| `title` | Required | Optional | Max 255 characters |
+| `tagline` | Optional | Optional | Max 255 characters |
+| `description` | Optional | Optional | Text |
+| `image` | Required | Optional | jpg, jpeg, png or webp, max 2 MB. A new image replaces and deletes the old one. |
+| `terms` | Optional | Optional | Up to 10 lines of text, max 255 characters each |
+| `starts_at`, `ends_at` | Required | Optional | Dates, such as `2026-12-01 00:00:00`. `ends_at` must be after `starts_at`. On an update, always send both together, or the check fails. |
+| `is_active` | Optional, default `true` | Optional | Boolean. `false` hides the offer from customers. |
+| `sort_order` | Optional, default 0 | Optional | Whole number, at least 0. Lower numbers are listed first. |
+| `product_ids` | Required | Optional | 1 to 20 IDs of normal products (`is_offer: false`), with no duplicates: the paid perfumes inside the set |
+| `free_product_id` | Optional | Optional | The ID of a normal product that isn't in `product_ids`: the gift in an offer like "2 perfumes + 1 free" |
+
+On an update, `product_ids` and `free_product_id` are read together and replace the old contents. Sending `product_ids` without `free_product_id` removes the gift, and sending `free_product_id` alone does nothing.
+
+**Don't change the perfumes of an offer that has orders in progress.** Cancelling an order gives back the perfumes the offer contains at the moment of the cancel, so after a swap the wrong bottles come back. Create a new offer instead.
+
+Offers are sent as `multipart/form-data`, because of the image. Lists use `[]` in their field names:
+
+```js
+const form = new FormData();
+form.append('product_id', setId);
+form.append('title', 'Collection Gissah');
+form.append('image', file);
+form.append('starts_at', '2026-12-01 00:00:00');
+form.append('ends_at', '2026-12-31 23:59:59');
+perfumeIds.forEach((id) => form.append('product_ids[]', id));
+form.append('free_product_id', giftId);
+form.append('terms[]', 'Dans la limite des stocks');
+
+await api.post('/api/v1/admin/offers', form);
+```
+
+For updates with an image, send a `POST` with `_method=PATCH`, like for [products](#products).
 
 ### Orders
 
@@ -439,7 +534,7 @@ Anything else returns `422`, with a message like `Cannot change order status fro
 | `image_path` | string or null | Full image URL, despite the name |
 | `is_active` | boolean | |
 | `sort_order` | integer | |
-| `products_count` | integer | Only in category responses, not when nested in a product. Public lists count active products only, and admin responses count all of them. |
+| `products_count` | integer | Only in category responses, not when nested in a product. Public lists count active products only, without the offers' sets, and admin responses count all of them. |
 | `created_at`, `updated_at` | string | |
 
 ### Product
@@ -456,7 +551,55 @@ Anything else returns `422`, with a message like `Cannot change order status fro
 | `sort_order` | integer | |
 | `image_path` | string | Full image URL, despite the name |
 | `is_active`, `is_featured` | boolean | |
+| `is_offer` | boolean | `true` for an offer's set, which is never listed in the shop |
 | `created_at`, `updated_at` | string | |
+
+### Offer
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | integer | |
+| `slug` | string | The same as its set's slug |
+| `title` | string | |
+| `tagline`, `description` | string or null | |
+| `image_path` | string | Full image URL, despite the name |
+| `starts_at`, `ends_at` | string | |
+| `terms` | array of strings | Empty when there are none |
+| `is_active` | boolean | |
+| `sort_order` | integer | |
+| `set` | [Product](#product) | What goes in the bag. Its `price` is the offer's price. |
+| `products` | array of [Product](#product) | The paid perfumes inside the set |
+| `free_product` | [Product](#product) or null | The gift, if the offer has one |
+| `regular_price` | string | What the perfumes cost bought one by one, including the free one |
+| `saving` | string | `regular_price` minus the set's price |
+| `discount_percent` | integer | The saving as a percentage of `regular_price`, rounded down |
+
+Every product in the offer comes with its `category`. Example, with the products shortened:
+
+```json
+{
+  "id": 1,
+  "slug": "collection-gissah",
+  "title": "Collection Gissah",
+  "tagline": "2 parfums + 1 offert",
+  "description": "Nos deux best-sellers, et un troisième offert.",
+  "image_path": "http://127.0.0.1:8000/storage/offers/collection-gissah.webp",
+  "starts_at": "2026-11-13T00:00:00.000000Z",
+  "ends_at": "2026-11-30T23:59:59.000000Z",
+  "terms": ["Dans la limite des stocks", "Une offre par commande"],
+  "is_active": true,
+  "sort_order": 0,
+  "set": { "id": 4, "name": "Collection Gissah", "price": "100.00", "stock": 10, "is_offer": true },
+  "products": [
+    { "id": 1, "name": "Oud Royal", "price": "60.00", "is_offer": false },
+    { "id": 2, "name": "Rose Musk", "price": "60.00", "is_offer": false }
+  ],
+  "free_product": { "id": 3, "name": "Amber Night", "price": "40.00", "is_offer": false },
+  "regular_price": "160.00",
+  "saving": "60.00",
+  "discount_percent": 37
+}
+```
 
 ### Order
 

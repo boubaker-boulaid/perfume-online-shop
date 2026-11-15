@@ -31,6 +31,7 @@ class ProductResource extends JsonResource
             'image_path' => Storage::disk('public')->url($this->image_path),
             'is_active' => $this->is_active,
             'is_featured' => $this->is_featured,
+            'is_offer' => $this->is_offer,
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
         ];

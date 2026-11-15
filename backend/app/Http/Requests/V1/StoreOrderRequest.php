@@ -33,6 +33,7 @@ class StoreOrderRequest extends FormRequest
     {
         return [
             'customer_name' => ['required', 'string', 'max:50'],
+            // +212, 00212 or 0, then 5 (landline), 6 or 7 (mobile), then 8 more digits
             'phone' => ['required', 'string', 'regex:/^(?:\+212|00212|0)[5-7][0-9]{8}$/'],
             'city' => ['required', 'string', 'max:50'],
             'address' => ['required', 'string', 'max:255'],
@@ -40,7 +41,10 @@ class StoreOrderRequest extends FormRequest
             'note' => ['nullable', 'string', 'max:255'],
             'idempotency_key' => ['required', 'string', 'uuid'],
             'items' => ['required', 'array', 'min:1', 'max:99'],
+            // an item may only have these two keys: a price sent by the browser is refused, never trusted
             'items.*' => ['required', 'array:product_id,quantity'],
+            // once per order, and an active product in an active category (the subquery), so a hidden
+            // product can't be ordered by guessing its id
             'items.*.product_id' => ['required', 'distinct', Rule::exists('products', 'id')->where('is_active', true)
                 ->where(fn ($q) => $q->whereIn('category_id', fn ($categories) => $categories->select('id')->from('categories')->where('is_active', true)))],
             'items.*.quantity' => ['required', 'integer', 'min:1', 'max:99'],

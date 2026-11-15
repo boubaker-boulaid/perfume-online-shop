@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Exceptions\InsufficientStockException;
 use App\Jobs\SendOrderConfirmation;
 use App\Mail\CustomerOrderCancelledMail;
+use App\Models\Offer;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
@@ -16,6 +17,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\ValidationException;
 use Throwable;
 
 class OrderService
@@ -35,18 +37,22 @@ class OrderService
 
     public function place(array $data)
     {
+        // a retry of an order that already exists gets that order back.
+        // this is a plain read, before the transaction on purpose: locking a key that doesn't exist yet
+        // locks the gap in the index where it would go, and the orders insert below then deadlocks with
+        // the other orders placed at the same moment. two copies arriving together both pass this check,
+        // and the unique index on idempotency_key refuses the second insert (see the catch below)
+        $orderExists = Order::where('idempotency_key', $data['idempotency_key'])->first();
+        if ($orderExists) {
+            if (is_null($orderExists->confirmation_sent_at)) {
+                SendOrderConfirmation::dispatch($orderExists->id);
+            }
+
+            return $orderExists;
+        }
+
         try {
             return DB::transaction(function () use ($data) {
-                // check if another order with the same idempotency_key already exists
-                $orderExists = Order::where('idempotency_key', $data['idempotency_key'])->lockForUpdate()->first();
-                if ($orderExists) {
-                    if (is_null($orderExists->confirmation_sent_at)) {
-                        SendOrderConfirmation::dispatch($orderExists->id);
-                    }
-
-                    return $orderExists;
-                }
-
                 $products = $this->lockAndValidateProduct($data['items']);
                 // stock changed: the cached catalog shows old stock (bumped only once the order commits)
                 $this->bumpCacheVersion('catalog');
@@ -97,6 +103,8 @@ class OrderService
             // a simultaneous retry saved this key first, so send back its order.
             // any other collision (the order number...) is a real error
             return Order::where('idempotency_key', $data['idempotency_key'])->first() ?? throw $e;
+        } catch (ValidationException $e) {
+            throw $e;
         } catch (\Exception $e) {
             // no customer details in the log (name, phone, address): the key and items are enough to investigate
             Log::channel('daily')->error('order.place_failed', [
@@ -111,7 +119,21 @@ class OrderService
     private function lockAndValidateProduct(array $items)
     {
         $productsIds = collect($items)->pluck('product_id');
-        $products = Product::whereIn('id', $productsIds)->lockForUpdate()->get()->keyBy('id');
+
+        // the ids of the perfumes inside the sets in the order, with a locking read: on MariaDB a plain read here
+        // would take the transaction's snapshot, and locking a product changed after it fails with error 1020.
+        // only the offer_product rows get the shared lock, never the products (they are locked for update below)
+        $offersProductsIds = DB::table('offer_product')
+            ->join('offers', 'offers.id', '=', 'offer_product.offer_id')
+            ->whereIn('offers.product_id', $productsIds)
+            ->sharedLock()
+            ->pluck('offer_product.product_id');
+
+        // lock everything at once, always sorted by id, so two orders never wait on each other
+        $products = Product::whereIn('id', $productsIds->merge($offersProductsIds)->unique())->orderBy('id')->lockForUpdate()->get()->keyBy('id');
+
+        // a plain read is safe now: the products are locked, nobody can change them any more
+        $offers = Offer::with('products')->whereIn('product_id', $productsIds)->get()->keyBy('product_id');
 
         foreach ($items as $item) {
             $product = $products->get($item['product_id']);
@@ -120,14 +142,41 @@ class OrderService
                 throw new ModelNotFoundException('Le produit n° '.$item['product_id'].' est introuvable.');
             }
 
-            if ($product->stock < $item['quantity']) {
-                throw new InsufficientStockException($product->name, $item['quantity'], $product->stock);
-            }
+            // if ($product->stock < $item['quantity']) {
+            //     throw new InsufficientStockException($product->name, $item['quantity'], $product->stock);
+            // }
 
-            $product->decrement('stock', $item['quantity']);
+            $this->takeStock($product, $item['quantity']);
+
+            // a set also takes one of each perfume inside it (the free one too), for every set ordered
+            if ($product->is_offer) {
+                $offer = $offers->get($product->id);
+
+                // the offer may have ended (or been switched off) since the customer filled the bag
+                if (! $offer?->isCurrent()) {
+                    throw ValidationException::withMessages([
+                        'items' => ["L’offre {$product->name} n’est plus disponible."],
+                    ]);
+                }
+
+                foreach ($offer->products as $p) {
+                    $this->takeStock($products->get($p->id), $item['quantity']); // use $products intade of $p cause they are locked and up to date
+                }
+            }
         }
 
         return $products;
+    }
+
+    private function takeStock(Product $product, int $quantity)
+    {
+        if ($product->stock < $quantity) {
+            throw new InsufficientStockException($product->name, $quantity, $product->stock);
+        }
+
+        // decrement() also updates $product in memory, so a perfume ordered alone and inside a set
+        // in the same bag is checked against what the first line already took
+        $product->decrement('stock', $quantity);
     }
 
     private function generateOrderNumber()
@@ -161,7 +210,8 @@ class OrderService
             OrderItem::create([
                 'order_id' => $order->id,
                 'product_id' => $p->id,
-                'product_name' => $p->name,
+                // a set keeps the perfumes inside it in its name: the WhatsApp message and the emails show them
+                'product_name' => $p->is_offer && $p->description ? "{$p->name} ({$p->description})" : $p->name,
                 'unit_price' => $p->price,
                 'quantity' => $i['quantity'],
                 'line_total' => $i['quantity'] * $p->price,
@@ -347,6 +397,13 @@ class OrderService
             // product_id is null when the product was deleted, nothing to give back
             if ($item->product_id) {
                 Product::where('id', $item->product_id)->increment('stock', $item->quantity);
+
+                // a set also gives back the perfumes inside it. it reads the offer as it is now, so if its
+                // perfumes were changed after the order, the new ones come back (see docs/API.md, Offers)
+                $offer = Offer::with('products')->where('product_id', $item->product_id)->first();
+                foreach ($offer?->products ?? [] as $p) {
+                    Product::where('id', $p->id)->increment('stock', $item->quantity);
+                }
             }
         }
 

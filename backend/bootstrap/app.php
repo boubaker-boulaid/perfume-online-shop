@@ -23,14 +23,16 @@ use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__.'/../routes/web.php',
-        api: __DIR__.'/../routes/api.php',
-        commands: __DIR__.'/../routes/console.php',
+        web: __DIR__ . '/../routes/web.php',
+        api: __DIR__ . '/../routes/api.php',
+        commands: __DIR__ . '/../routes/console.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // first of all, so even an error thrown by another middleware has a request id
         $middleware->prepend(AssignRequestId::class);
 
+        // lets the browser frontend use Sanctum's cookie session (login + CSRF) instead of API tokens
         $middleware->api(prepend: [
             EnsureFrontendRequestsAreStateful::class,
         ]);
@@ -45,7 +47,7 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // local helper so every error response shares the same shape
-        $res = fn (string $message, int $status, ?array $errors = null) => response()->json([
+        $res = fn(string $message, int $status, ?array $errors = null) => response()->json([
             'success' => false,
             'message' => $message,
             'data' => null,
@@ -54,14 +56,16 @@ return Application::configure(basePath: dirname(__DIR__))
         ], $status);
 
         $exceptions->shouldRenderJsonWhen(
-            fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
+            fn(Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
 
         $exceptions->render(function (Throwable $e, Request $request) use ($res) {
+            // null hands anything that isn't an API call back to Laravel's normal error pages
             if (! $request->is('api/*') && ! $request->expectsJson()) {
                 return null;
             }
 
+            // the first matching line wins: the specific cases must stay above HttpExceptionInterface and default
             return match (true) {
                 $e instanceof ValidationException => $res('Les données saisies ne sont pas valides.', 422, $e->errors()),
 
@@ -81,15 +85,15 @@ return Application::configure(basePath: dirname(__DIR__))
                 $e instanceof TooManyRequestsHttpException => $res('Trop de requêtes. Veuillez patienter un instant.', 429)
                     ->withHeaders($e->getHeaders()),
 
-                // anything with its own status like abort(403)...
                 // __() translates the framework's own English messages, from lang/fr.json
                 $e instanceof MethodNotAllowedHttpException => $res('Cette méthode n’est pas autorisée pour cette adresse.', 405),
 
+                // anything with its own status like abort(403)...
                 $e instanceof HttpExceptionInterface => $res(__($e->getMessage()) ?: 'La requête a échoué.', $e->getStatusCode()),
 
                 // the database can't be reached: nothing the customer did wrong, and worth retrying soon
                 ($e instanceof QueryException || $e instanceof PDOException)
-                && (new LostConnectionDetector)->causedByLostConnection($e) => $res('Le service est temporairement indisponible. Veuillez réessayer dans quelques instants.', 503),
+                    && (new LostConnectionDetector)->causedByLostConnection($e) => $res('Le service est temporairement indisponible. Veuillez réessayer dans quelques instants.', 503),
 
                 default => $res(
                     config('app.debug') ? $e->getMessage() : 'Une erreur inattendue s’est produite. Veuillez réessayer plus tard.',
@@ -103,6 +107,7 @@ return Application::configure(basePath: dirname(__DIR__))
             };
         });
 
+        // expected errors (an unknown slug, a wrong form), not bugs: keep them out of the error log
         $exceptions->dontReport([
             ModelNotFoundException::class,
             ValidationException::class,

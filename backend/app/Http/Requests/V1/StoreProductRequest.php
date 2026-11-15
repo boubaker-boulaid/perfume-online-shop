@@ -35,6 +35,7 @@ class StoreProductRequest extends FormRequest
             'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'is_active' => ['boolean'],
             'is_featured' => ['boolean'],
+            'is_offer' => ['boolean'],
         ];
     }
 }

@@ -8,13 +8,14 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Override;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\Concerns\BuildsOffers;
 use Tests\TestCase;
 
 // the rest of the suite uses the array store, which never serializes anything.
 // these tests use the database store, so a cached answer really goes through unserialize
 class CatalogCacheTest extends TestCase
 {
-    use RefreshDatabase;
+    use BuildsOffers, RefreshDatabase;
 
     #[Override]
     protected function setUp(): void
@@ -55,6 +56,18 @@ class CatalogCacheTest extends TestCase
 
         $this->getJson('/api/v1/products/featured')->assertOk();
         $this->getJson('/api/v1/products/featured')->assertOk()->assertJsonCount(1, 'data');
+    }
+
+    // the offers come with their set, perfumes and pivot rows: all of it must survive unserialize
+    public function test_a_cached_offers_list_is_the_same_as_a_fresh_one(): void
+    {
+        $this->makeOffer(free: Product::factory()->create());
+
+        $fresh = $this->getJson('/api/v1/offers')->assertOk();
+        $cached = $this->getJson('/api/v1/offers')->assertOk();
+
+        $this->assertSame($fresh->json('data'), $cached->json('data'));
+        $this->assertNotNull($cached->json('data.0.free_product'));
     }
 
     private function seedCatalog(): void

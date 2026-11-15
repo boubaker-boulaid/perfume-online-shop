@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Offer;
 use App\Models\Product;
 use App\Services\Concerns\HandlesCache;
 use App\Services\Concerns\HandlesSlugsAndImages;
@@ -33,9 +34,12 @@ class ProductService
         ksort($filters);
         $key = $this->versionedKey('catalog', 'products', md5(json_encode([$filters, Paginator::resolveCurrentPage()])));
 
-        return $this->cached($key, self::PRODUCTS_CACHE_SECONDS,
+        return $this->cached(
+            $key,
+            self::PRODUCTS_CACHE_SECONDS,
             // only validated filters go in the links: this page is cached and shared between visitors
-            fn () => $this->filteredProducts($filters)->with('category')->visible()->paginate(10)->appends($filters));
+            fn () => $this->filteredProducts($filters)->with('category')->listed()->paginate(10)->appends($filters)
+        );
     }
 
     public function getAdminProducts(array $filters)
@@ -68,15 +72,21 @@ class ProductService
     public function getProduct(string $slug)
     {
         // firstOrFail throws before anything is stored, so unknown slugs are never cached
-        return $this->cached($this->versionedKey('catalog', 'product', $slug), self::PRODUCT_CACHE_SECONDS,
-            fn () => Product::with('category')->visible()->where('slug', $slug)->firstOrFail());
+        return $this->cached(
+            $this->versionedKey('catalog', 'product', $slug),
+            self::PRODUCT_CACHE_SECONDS,
+            fn () => Product::with('category')->listed()->where('slug', $slug)->firstOrFail()
+        );
     }
 
     public function getFeatured()
     {
         // cache all featured products and pick 5 per request, so the homepage still changes on every visit
-        $featured = $this->cached($this->versionedKey('catalog', 'featured'), self::FEATURED_CACHE_SECONDS,
-            fn () => Product::with('category')->visible()->featured()->get());
+        $featured = $this->cached(
+            $this->versionedKey('catalog', 'featured'),
+            self::FEATURED_CACHE_SECONDS,
+            fn () => Product::with('category')->listed()->featured()->get()
+        );
 
         return $featured->shuffle()->take(5)->values();
     }
@@ -129,6 +139,13 @@ class ProductService
 
     public function deleteProduct(Product $product)
     {
+        // a set used by an offer (offers.product_id), or a perfume inside one (offer_product): the foreign
+        // keys would refuse the delete with a database error, so answer with a clear 409 first
+        abort_if(
+            Offer::where('product_id', $product->id)->exists() || $product->offers()->exists(),
+            409,
+            'Impossible de supprimer un produit utilisé dans une offre. Masquez-le ou retirez-le de l’offre.'
+        );
 
         $product->delete();
 

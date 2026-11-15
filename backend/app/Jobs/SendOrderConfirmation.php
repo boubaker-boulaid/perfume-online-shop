@@ -15,6 +15,7 @@ class SendOrderConfirmation implements ShouldQueue
 
     public $tries = 3;
 
+    // wait 10 s, then 1 min, then 5 min between tries: a mail server that is down for a moment gets time to come back
     public array $backoff = [10, 60, 300];
 
     /**
@@ -32,7 +33,7 @@ class SendOrderConfirmation implements ShouldQueue
     {
         $order = Order::findOrFail($this->orderId);
 
-        // stop if the email already sent
+        // stop if the email already sent: a retried job or a retried order must not send the emails twice
         if ($order->confirmation_sent_at) {
             return;
         }

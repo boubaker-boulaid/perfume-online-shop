@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\CategoryController;
+use App\Http\Controllers\Api\V1\OfferController;
 use App\Http\Controllers\Api\V1\OrderController;
 use App\Http\Controllers\Api\V1\ProductController;
 use App\Http\Controllers\Api\V1\StatsController;
@@ -17,6 +18,10 @@ Route::apiResource('products', ProductController::class)->parameters([
 
 Route::apiResource('categories', CategoryController::class)->parameters([
     'categories' => 'category:slug',
+]);
+
+Route::apiResource('offers', OfferController::class)->parameters([
+    'offers' => 'offer:slug'
 ]);
 
 Route::get('orders', [OrderController::class, 'index'])->name('orders.index');

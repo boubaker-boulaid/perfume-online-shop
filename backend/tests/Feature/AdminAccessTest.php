@@ -9,11 +9,12 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Sanctum;
+use Tests\Concerns\BuildsOffers;
 use Tests\TestCase;
 
 class AdminAccessTest extends TestCase
 {
-    use RefreshDatabase;
+    use BuildsOffers, RefreshDatabase;
 
     public function test_visitors_who_are_not_logged_in_are_refused(): void
     {
@@ -57,6 +58,7 @@ class AdminAccessTest extends TestCase
         $this->getJson('/api/v1/admin/orders')->assertOk();
         $this->getJson('/api/v1/admin/products')->assertOk();
         $this->getJson('/api/v1/admin/categories')->assertOk();
+        $this->getJson('/api/v1/admin/offers')->assertOk();
     }
 
     /**
@@ -72,6 +74,7 @@ class AdminAccessTest extends TestCase
             '{product}' => Product::factory()->create()->slug,
             '{category}' => Category::factory()->create()->slug,
             '{order}' => Order::factory()->create()->order_number,
+            '{offer}' => $this->makeOffer()[0]->slug,
         ];
 
         $endpoints = collect(Route::getRoutes()->getRoutes())

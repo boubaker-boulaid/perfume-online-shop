@@ -45,6 +45,7 @@ class StatsService
 
     public function getMonthRevenue(): float
     {
+        // paid means delivered: payment is cash on delivery
         return (float) Order::where('payment_status', 'paid')
             ->where('created_at', '>=', now()->startOfMonth())
             ->sum('total');
@@ -83,6 +84,8 @@ class StatsService
 
     public function getTopProducts(int $limit = 5): array
     {
+        // adds up the order lines of every order that wasn't cancelled, one row per product. the join is
+        // only there for the status: the product's name and stock are loaded afterwards by with()
         return OrderItem::query()
             ->join('orders', 'orders.id', '=', 'order_items.order_id')
             ->where('orders.status', '!=', 'cancelled')

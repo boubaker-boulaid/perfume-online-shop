@@ -88,6 +88,9 @@ The tests focus on where a bug would cost money:
 | `OrderStatusTest` | Orders can only move through the allowed statuses |
 | `AdminAccessTest` | Every admin route refuses guests and non-admins |
 | `HiddenProductsTest` | Hidden products stay out of the public API, even when the catalog is cached |
+| `OfferOrderTest` | Ordering a set charges the set's price, takes one of each perfume inside it, and gives them back on cancel |
+| `PublicOffersTest` | Customers only see running offers with the right totals, and the sets stay out of the shop |
+| `AdminOfferTest` | The admin can manage offers and their images, and can't delete a product an offer uses |
 
 Two customers buying the last unit at the same moment isn't covered. It relies on database row locks, which SQLite ignores, so test it by hand on MySQL.
 
@@ -109,6 +112,17 @@ The second command reads the table structure from the database in your `.env`, a
 2. The API returns a WhatsApp link with the order filled in, and the customer sends that message to the shop.
 3. An admin moves the order along: `pending` → `confirmed` → `shipped` → `delivered`. Delivery marks it as paid, because payment is cash on delivery.
 4. Orders can be cancelled while `pending` or `confirmed`. Cancelling restores the stock and emails the customer.
+
+## How offers work
+
+An offer such as "Collection Gissah, 2 perfumes + 1 free for 100 DH" is sold as one product, its set. The set is a normal product with `is_offer` turned on: it has its own price and stock, and it never shows in the shop. The perfumes inside it are linked through the `offer_product` table.
+
+1. The admin creates the set as a product, then the offer with its dates and the perfumes inside it.
+2. Customers see the offer while it's switched on and between its start and end dates.
+3. Ordering the set takes one bottle of each perfume inside it, including the free one. Once the offer is over, the set can't be ordered any more.
+4. Cancelling the order gives back the set and its perfumes.
+
+The endpoints and field rules are in [docs/API.md](docs/API.md#get-apiv1offers).
 
 ## Logs
 
