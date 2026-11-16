@@ -98,7 +98,7 @@ export function ShopPage() {
             </label>
             <label className="field">
               <span className="field__label">Max</span>
-              <input key={params.get('max_price') ?? ''} type="number" name="max_price" min="0" inputMode="decimal" defaultValue={params.get('max_price') ?? ''} placeholder="200" />
+              <input key={params.get('max_price') ?? ''} type="number" name="max_price" min="0" inputMode="decimal" defaultValue={params.get('max_price') ?? ''} placeholder="400" />
             </label>
             <button type="submit" className="button button--ghost">
               Appliquer
