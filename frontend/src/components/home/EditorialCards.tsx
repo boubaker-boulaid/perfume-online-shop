@@ -30,7 +30,7 @@ const cards = [
 
 export function EditorialCards() {
   return (
-    <section className="home-container editorial">
+    <section className="container editorial">
       {cards.map((card, index) => (
         <Reveal key={card.key} delay={index * 150}>
           <Link to={card.to} className={`editorial-card editorial-card--${card.key}`}>

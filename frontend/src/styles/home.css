@@ -1,4 +1,4 @@
-/* Sections of the home page. Its colors, fonts and shared pieces are in home-theme.css. */
+/* Sections of the home page. The colors, fonts and shared pieces are in global.css. */
 
 /* Hero. On phones the upright photo is on top and fades into the dark, where the words sit.
    From 768px the wide photo fills the section and the words sit on its dark lower left corner. */
@@ -305,7 +305,7 @@
   padding: 30px var(--gutter) 46px;
 }
 
-.split__content .home-text {
+.split__content .body-text {
   max-width: 50ch;
   margin: 16px 0 24px;
 }

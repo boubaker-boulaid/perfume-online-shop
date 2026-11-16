@@ -1,22 +1,40 @@
+import type { FormEvent } from 'react'
 import { WHATSAPP_URL } from '../utils/whatsapp'
-import { SendIcon } from './Icons'
+import { LeafSprig } from './home/Botanicals'
 import { Reveal } from './Reveal'
 
+// The shop has no e-mail list yet: people join on WhatsApp. So the form opens WhatsApp with a
+// message that's already written and carries the address, and the shop really receives it.
 export function Newsletter() {
+  const subscribe = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    const email = new FormData(event.currentTarget).get('email')
+    const message = `Bonjour, je souhaite recevoir vos nouveautés et vos offres. Mon e-mail : ${email}`
+
+    window.open(`${WHATSAPP_URL}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer')
+  }
+
   return (
-    <section className="container section newsletter-section">
-      <Reveal className="newsletter">
-        <span className="newsletter__icon">
-          <SendIcon size={21} />
-        </span>
-        <div>
-          <div className="newsletter__kicker">Les promos en premier</div>
-          <div className="newsletter__title">Rejoignez-nous sur WhatsApp</div>
-          <div className="newsletter__text">Nouveaux arrivages et promos, directement sur votre téléphone.</div>
-        </div>
-        <a href={WHATSAPP_URL} target="_blank" rel="noreferrer" className="button button--accent newsletter__action">
-          Rejoindre sur WhatsApp
-        </a>
+    <section className="subscribe">
+      <LeafSprig className="line-art subscribe__leaves subscribe__leaves--left" />
+      <LeafSprig className="line-art subscribe__leaves subscribe__leaves--right" />
+
+      <Reveal className="subscribe__content">
+        <p className="eyebrow">Restons en contact</p>
+        <h2 className="display-title subscribe__title">Un peu plus de luxe dans votre boîte mail.</h2>
+        <p className="subscribe__text">Soyez les premiers informés des nouveaux parfums, des offres exclusives et plus encore.</p>
+
+        <form className="subscribe__form" onSubmit={subscribe}>
+          <label className="sr-only" htmlFor="subscribe-email">
+            Votre adresse e-mail
+          </label>
+          <input id="subscribe-email" type="email" name="email" placeholder="Votre adresse e-mail" autoComplete="email" required />
+          <button type="submit" className="button button--accent">
+            S’abonner
+          </button>
+        </form>
+        <p className="subscribe__note">L’inscription se confirme sur WhatsApp.</p>
       </Reveal>
     </section>
   )

@@ -14,10 +14,10 @@ export function ContactSection() {
   const [sent, setSent] = useState(false)
 
   return (
-    <section id="contact" className="home-container contact-section">
+    <section id="contact" className="container contact-section">
       <Reveal className="contact-heading">
-        <p className="tag">Contact</p>
-        <h2 className="home-title">Une question sur un parfum&nbsp;?</h2>
+        <p className="eyebrow">Contact</p>
+        <h2 className="display-title">Une question sur un parfum&nbsp;?</h2>
       </Reveal>
 
       <div className="contact">

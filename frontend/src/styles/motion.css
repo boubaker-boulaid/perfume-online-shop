@@ -408,21 +408,21 @@ html {
 }
 
 /* Home page. Its hero uses the hero rules above: the photo drifts and the words arrive one by one. */
-.home-nav__link::after {
+.site-nav__link::after {
   transition: transform 0.45s var(--ease-out);
 }
 
-.home-nav__link,
-.home-footer__links a,
-.home-footer__legal a,
-.home-footer__socials a,
+.site-nav__link,
+.site-footer__links a,
+.site-footer__legal a,
+.site-footer__socials a,
 .round-button {
   transition:
     color 0.2s ease,
     background 0.2s ease;
 }
 
-.home-footer__top {
+.site-footer__top {
   transition:
     transform 0.4s var(--ease-out),
     background 0.2s ease;
@@ -454,7 +454,7 @@ html {
 }
 
 .arrow-link svg,
-.app--home .button svg {
+.button svg {
   transition: transform 0.5s var(--ease-out);
 }
 
@@ -477,13 +477,12 @@ html {
     transform: translateX(4px);
   }
 
-  .home-footer__top:hover {
+  .site-footer__top:hover {
     transform: translateY(-3px);
   }
 
   .product-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 14px 30px rgba(6, 12, 24, 0.35);
+    transform: translateY(-4px);
   }
 
   .product-card:hover .product-card__image img {
@@ -501,8 +500,8 @@ html {
   }
 
   .offer-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 14px 30px rgba(6, 12, 24, 0.35);
+    transform: translateY(-4px);
+    box-shadow: 0 16px 34px rgba(33, 19, 13, 0.2);
   }
 
   .offer-card:hover .offer-card__image img {
