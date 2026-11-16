@@ -2,6 +2,8 @@ import { useEffect, useRef } from 'react'
 import { Outlet, useLocation } from 'react-router'
 import { Footer } from './Footer'
 import { Header } from './Header'
+import { HomeFooter } from '../home/HomeFooter'
+import { HomeNewsletter } from '../home/HomeNewsletter'
 import { Newsletter } from '../Newsletter'
 
 const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined
@@ -35,16 +37,19 @@ function useScrollOnNavigate() {
 export function Layout() {
   useScrollOnNavigate()
   const { pathname } = useLocation()
+  // The home page has the new design, with its own header, newsletter and footer. The other
+  // pages keep theirs. "app--home" switches the colors and fonts for everything inside.
+  const isHome = pathname === '/'
 
   return (
-    <div className="app" id="top">
-      <Header />
+    <div className={`app${isHome ? ' app--home' : ''}`} id="top">
+      <Header home={isHome} />
       {/* Only opacity here: a transform would stop the phone buy bar staying fixed */}
       <main key={pathname} className="page-fade">
         <Outlet />
       </main>
-      <Newsletter />
-      <Footer />
+      {isHome ? <HomeNewsletter /> : <Newsletter />}
+      {isHome ? <HomeFooter /> : <Footer />}
     </div>
   )
 }
