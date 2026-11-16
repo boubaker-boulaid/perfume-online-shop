@@ -407,8 +407,80 @@ html {
   animation-delay: 0.75s;
 }
 
+/* Home page. Its hero uses the hero rules above: the photo drifts and the words arrive one by one. */
+.home-nav__link::after {
+  transition: transform 0.45s var(--ease-out);
+}
+
+.home-nav__link,
+.home-footer__links a,
+.home-footer__legal a,
+.home-footer__socials a,
+.round-button {
+  transition:
+    color 0.2s ease,
+    background 0.2s ease;
+}
+
+.home-footer__top {
+  transition:
+    transform 0.4s var(--ease-out),
+    background 0.2s ease;
+}
+
+/* The carousel: bottles glide along the arc, and fade out as they leave it. "visibility" waits
+   for the fade to end, so a bottle that's leaving can still be seen while it goes. */
+.fragrance {
+  transition:
+    transform 0.9s var(--ease-out),
+    opacity 0.6s ease,
+    visibility 0.6s;
+}
+
+.fragrance__bottle img {
+  transition: transform 0.9s var(--ease-out);
+}
+
+.fragrance__caption,
+.fragrance__details {
+  transition:
+    opacity 0.5s ease,
+    visibility 0.5s;
+}
+
+.editorial-card img,
+.split__image img {
+  transition: transform 1.4s var(--ease-out);
+}
+
+.arrow-link svg,
+.app--home .button svg {
+  transition: transform 0.5s var(--ease-out);
+}
+
 /* Only on devices with a real pointer: a hover effect sticks after a tap on a phone */
 @media (hover: hover) {
+  .editorial-card:hover img {
+    transform: scale(1.04);
+  }
+
+  .split__image:hover img {
+    transform: scale(1.03);
+  }
+
+  .fragrance__bottle:hover img {
+    transform: scale(calc(var(--scale, 1) * 1.04));
+  }
+
+  .editorial-card:hover .arrow-link svg,
+  .app--home .button:hover svg {
+    transform: translateX(4px);
+  }
+
+  .home-footer__top:hover {
+    transform: translateY(-3px);
+  }
+
   .product-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 14px 30px rgba(6, 12, 24, 0.35);
