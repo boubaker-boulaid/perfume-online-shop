@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 import { Breadcrumbs } from '../components/Breadcrumbs'
-import { BadgeCheckIcon, BanknoteIcon, CheckIcon, TruckIcon } from '../components/Icons'
+import { BadgeCheckIcon, BagIcon, BanknoteIcon, CheckIcon, TruckIcon } from '../components/Icons'
 import { ProductCard } from '../components/ProductCard'
 import { QuantityStepper } from '../components/QuantityStepper'
-import { Stars } from '../components/Stars'
 import { useCart } from '../context/cartContext'
 import { useApi } from '../hooks/useApi'
 import { getProduct, getProducts } from '../services/api'
@@ -15,7 +14,8 @@ import { NotFoundPage } from './NotFoundPage'
 const LOW_STOCK = 5
 
 function ProductDetails({ product }: { product: Product }) {
-  const { addItem } = useCart()
+  const { items, addItem } = useCart()
+  const navigate = useNavigate()
   const [quantity, setQuantity] = useState(1)
   const [added, setAdded] = useState(false)
   const timer = useRef<number | undefined>(undefined)
@@ -31,6 +31,12 @@ function ProductDetails({ product }: { product: Product }) {
     timer.current = window.setTimeout(() => setAdded(false), 2000)
   }
 
+  // Straight to the checkout, like an offer's "Commander". A perfume already in the bag isn't added twice.
+  const order = () => {
+    if (!items.some((item) => item.product_id === product.id)) addItem(product, quantity)
+    navigate('/checkout')
+  }
+
   return (
     <div className="product">
       <div className="product__image">
@@ -40,7 +46,6 @@ function ProductDetails({ product }: { product: Product }) {
       <div className="product__info">
         <div className="eyebrow">{product.category.name}</div>
         <h1 className="display-title">{product.name}</h1>
-        {product.rating !== undefined && <Stars rating={product.rating} reviews={product.reviews_count} />}
 
         <div className="product__price">
           {formatPrice(product.price)}
@@ -67,8 +72,14 @@ function ProductDetails({ product }: { product: Product }) {
         {/* Fixed to the bottom of the screen on phones, so it's always in reach. */}
         <div className="buy-bar">
           {!soldOut && <QuantityStepper value={quantity} max={Math.min(product.stock, 99)} label="Quantité" onChange={setQuantity} />}
-          <button type="button" className="button button--accent buy-bar__button" disabled={soldOut} onClick={add}>
-            {soldOut ? 'Épuisé' : added ? <>Ajouté <CheckIcon size={16} /></> : 'Ajouter au panier'}
+          {!soldOut && (
+            // icon only on phones, to leave room for "Commander"
+            <button type="button" className="button button--ghost buy-bar__add" aria-label={added ? 'Ajouté au panier' : 'Ajouter au panier'} onClick={add}>
+              {added ? <CheckIcon size={16} /> : <BagIcon size={17} />} <span>{added ? 'Ajouté' : 'Ajouter au panier'}</span>
+            </button>
+          )}
+          <button type="button" className="button button--accent buy-bar__button" disabled={soldOut} onClick={order}>
+            {soldOut ? 'Épuisé' : 'Commander'}
           </button>
         </div>
 

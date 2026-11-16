@@ -65,12 +65,12 @@ function OfferDetails({ offer }: { offer: Offer }) {
           {/* Fixed to the bottom of the screen on phones, like on the product page. */}
           <div className="buy-bar">
             {inCart ? (
-              <Link to="/cart" className="button button--ghost offer__add" aria-label="Offre dans le panier, voir le panier">
+              <Link to="/cart" className="button button--ghost buy-bar__add" aria-label="Offre dans le panier, voir le panier">
                 <CheckIcon size={16} /> <span>Voir le panier</span>
               </Link>
             ) : (
               available && (
-                <button type="button" className="button button--ghost offer__add" aria-label="Ajouter l’offre au panier" onClick={addOffer}>
+                <button type="button" className="button button--ghost buy-bar__add" aria-label="Ajouter l’offre au panier" onClick={addOffer}>
                   <BagIcon size={17} /> <span>Ajouter au panier</span>
                 </button>
               )

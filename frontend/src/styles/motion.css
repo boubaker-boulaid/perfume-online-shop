@@ -136,13 +136,13 @@ html {
   transition: transform 1s var(--ease-out);
 }
 
-.product-card__like {
+.product-card__add {
   transition:
     color 0.2s ease,
     background 0.2s ease;
 }
 
-.product-card__like.is-liked svg {
+.product-card__add.is-added svg {
   animation: pop 0.6s var(--ease-out);
 }
 

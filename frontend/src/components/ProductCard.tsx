@@ -1,26 +1,45 @@
-import { useState, type CSSProperties } from 'react'
-import { Link } from 'react-router'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { Link, useNavigate } from 'react-router'
+import { useCart } from '../context/cartContext'
 import { useReveal } from '../hooks/useReveal'
 import type { Product } from '../types'
 import { discountPercent, formatDiscount, formatPrice } from '../utils/format'
-import { HeartIcon } from './Icons'
-import { Stars } from './Stars'
+import { BagIcon, CheckIcon } from './Icons'
 
 export function ProductCard({ product, index = 0 }: { product: Product; index?: number }) {
   const ref = useReveal<HTMLElement>()
-  const [liked, setLiked] = useState(false)
+  const { items, addItem } = useCart()
+  const navigate = useNavigate()
+  const [added, setAdded] = useState(false)
+  const timer = useRef<number | undefined>(undefined)
   const soldOut = product.stock === 0
+
+  useEffect(() => () => window.clearTimeout(timer.current), [])
+
+  // The bag button adds one more each time, and shows a check for a moment.
+  const add = () => {
+    addItem(product, 1)
+    setAdded(true)
+    window.clearTimeout(timer.current)
+    timer.current = window.setTimeout(() => setAdded(false), 1500)
+  }
+
+  // "Commander" goes straight to the checkout. A perfume that's already in the bag isn't added twice.
+  const order = () => {
+    if (!items.some((item) => item.product_id === product.id)) addItem(product, 1)
+    navigate('/checkout')
+  }
 
   return (
     <article ref={ref} className="product-card reveal" style={{ '--reveal-delay': `${(index % 5) * 130}ms` } as CSSProperties}>
       <button
         type="button"
-        className={`product-card__like${liked ? ' is-liked' : ''}`}
-        aria-label={liked ? `Retirer ${product.name} des favoris` : `Ajouter ${product.name} aux favoris`}
-        aria-pressed={liked}
-        onClick={() => setLiked(!liked)}
+        className={`product-card__add${added ? ' is-added' : ''}`}
+        aria-label={soldOut ? `${product.name}, épuisé` : `Ajouter ${product.name} au panier`}
+        disabled={soldOut}
+        onClick={add}
       >
-        <HeartIcon filled={liked} />
+        {added ? <CheckIcon size={17} /> : <BagIcon size={17} />}
       </button>
 
       <Link to={`/shop/${product.slug}`} className="product-card__link">
@@ -38,8 +57,11 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
           {formatPrice(product.price)}
           {product.compare_at_price && <s>{formatPrice(product.compare_at_price)}</s>}
         </div>
-        {product.rating !== undefined && <Stars rating={product.rating} reviews={product.reviews_count} />}
       </Link>
+
+      <button type="button" className="button button--accent button--small product-card__order" disabled={soldOut} aria-label={soldOut ? undefined : `Commander ${product.name}`} onClick={order}>
+        {soldOut ? 'Épuisé' : 'Commander'}
+      </button>
     </article>
   )
 }

@@ -31,14 +31,6 @@ export const BadgeCheckIcon = (p: IconProps) => <Icon {...p}><path d="M3.85 8.62
 export const TruckIcon = (p: IconProps) => <Icon {...p}><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" /><path d="M15 18H9" /><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14" /><circle cx="17" cy="18" r="2" /><circle cx="7" cy="18" r="2" /></Icon>
 export const BanknoteIcon = (p: IconProps) => <Icon {...p}><rect width="20" height="12" x="2" y="6" rx="2" /><circle cx="12" cy="12" r="2" /><path d="M6 12h.01M18 12h.01" /></Icon>
 
-export function HeartIcon({ size = 16, filled = false }: { size?: number; filled?: boolean }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" aria-hidden="true">
-      <path d="M12 20s-7-4.3-7-9.2A3.8 3.8 0 0 1 12 8a3.8 3.8 0 0 1 7 2.8C19 15.7 12 20 12 20Z" />
-    </svg>
-  )
-}
-
 // The WhatsApp logo comes from Simple Icons (simpleicons.org), v16.37.0, CC0 1.0. It's a filled shape,
 // so it's drawn a little smaller than the line icons to look the same weight next to them.
 export function WhatsAppIcon({ size = 16 }: { size?: number }) {
