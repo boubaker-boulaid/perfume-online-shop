@@ -8,7 +8,6 @@ const links = [
   { label: 'Accueil', to: '/' },
   { label: 'Boutique', to: '/shop' },
   { label: 'Offres', to: '/offers' },
-  { label: 'Collections', to: '/#collections' },
   { label: 'Nouveautés', to: '/#discover' },
   { label: 'Qui sommes-nous', to: '/#about' },
   { label: 'Contact', to: '/#contact' },
@@ -16,7 +15,7 @@ const links = [
 
 // The logo sits in the middle of the bar, with this many links on its left and the rest on
 // its right. On phones the links are in the menu instead.
-const LINKS_BEFORE_LOGO = 4
+const LINKS_BEFORE_LOGO = 3
 
 export function Header() {
   const { count } = useCart()
