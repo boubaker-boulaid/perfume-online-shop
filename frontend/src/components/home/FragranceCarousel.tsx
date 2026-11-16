@@ -12,10 +12,9 @@ const SWIPE_DISTANCE = 40 // px a finger must travel sideways to change bottle
 
 const count = homeFragrances.length
 const half = Math.floor(count / 2)
-const catalogSlugs = homeFragrances.flatMap((fragrance) => (fragrance.slug ? [fragrance.slug] : []))
 
 // A bottle that has left the catalog must not break the carousel, so it just loads as nothing.
-const loadCatalogProducts = () => Promise.all(catalogSlugs.map((slug) => getProduct(slug).catch(() => null)))
+const loadCatalogProducts = () => Promise.all(homeFragrances.map(({ slug }) => getProduct(slug).catch(() => null)))
 
 // The bottles sit on an arc: the one in the middle is the biggest, and the others get smaller and
 // lower towards the sides. The arrows, a swipe or a click on a side bottle turn the arc. It goes
@@ -60,12 +59,12 @@ export function FragranceCarousel() {
 
   return (
     <section id="discover" className="fragrances">
-      <Flask className="home-art fragrances__flask" />
-      <LeafSprig className="home-art fragrances__leaves" />
+      <Flask className="line-art fragrances__flask" />
+      <LeafSprig className="line-art fragrances__leaves" />
 
       <Reveal className="fragrances__heading">
-        <p className="tag">Du crépuscule à l’aube.</p>
-        <h2 className="home-title fragrances__title">8 parfums</h2>
+        <p className="eyebrow">Du crépuscule à l’aube.</p>
+        <h2 className="display-title fragrances__title">8 parfums</h2>
         <p className="fragrances__intro">Un parfum est plus qu’une odeur. C’est une émotion, un souvenir, un reflet de qui vous êtes.</p>
       </Reveal>
 
@@ -74,9 +73,9 @@ export function FragranceCarousel() {
           <ul className="fragrances__list" onPointerDown={onPointerDown} onPointerUp={onPointerUp} onPointerCancel={() => (swipeStart.current = null)}>
             {homeFragrances.map((fragrance, index) => {
               const position = positionOf(index)
-              const product = fragrance.slug ? catalogProducts.find((item) => item?.slug === fragrance.slug) : null
-              const category = product?.category.name ?? fragrance.category
-              const price = product?.price ?? fragrance.price
+              const product = catalogProducts.find((item) => item?.slug === fragrance.slug)
+              const category = product?.category.name
+              const price = product?.price
               const to = product ? `/shop/${product.slug}` : '/shop'
 
               return (
@@ -92,7 +91,7 @@ export function FragranceCarousel() {
                     <img src={fragrance.image} alt="" width={480} height={620} loading="lazy" draggable={false} />
                   </Link>
                   <div className="fragrance__caption">
-                    {/* a space keeps the line's height while Sauvage's details load */}
+                    {/* a space keeps the line's height while the details load */}
                     <p className="fragrance__category">{category ?? '\u00a0'}</p>
                     <h3 className="fragrance__name">{fragrance.name}</h3>
                     <p className="fragrance__price">{price ? formatPrice(price) : '\u00a0'}</p>

@@ -24,6 +24,12 @@ import kayaliRed from '../assets/images/products/kayali-red.webp'
 import manifesto from '../assets/images/products/manifesto.webp'
 import cocoMademoiselle from '../assets/images/products/coco-mademoiselle.webp'
 import chicForMen from '../assets/images/products/chic-for-men.webp'
+import bleuDeChanel from '../assets/images/home/perfumes/bleu-de-chanel.webp'
+import missDior from '../assets/images/home/perfumes/miss-dior.webp'
+import noirRose from '../assets/images/home/perfumes/noir-eau-de-parfum-rose.webp'
+import noirGold from '../assets/images/home/perfumes/noir-l-eau-de-parfum.webp'
+import noirPourHomme from '../assets/images/home/perfumes/noir-pour-homme.webp'
+import yvesSaintLaurent from '../assets/images/home/perfumes/yves-saint-laurent.webp'
 import type { Product } from '../types'
 import { categories } from './categories'
 
@@ -35,13 +41,14 @@ type Seed = {
   price: string
   compare?: string
   stock?: number
-  description: string
-  notes: string
+  // left out when the shop hasn't written them yet: nothing is made up
+  description?: string
+  notes?: string
   featured?: boolean
   hidden?: boolean
   offer?: boolean
-  rating: number
-  reviews: number
+  rating?: number
+  reviews?: number
   // Moves the product in the shop's default order without changing its id or SKU
   sortOrder?: number
 }
@@ -77,6 +84,15 @@ const seeds: Seed[] = [
   { name: 'Pack Gissah, 4 parfums', slug: 'collection-gissah', category: 'oriental', image: collectionGissahOffer, price: '180.00', offer: true, description: 'Flair, La Luna, Legend of the Sky, Imperial Valley', notes: '', rating: 5, reviews: 0 },
   { name: 'Pack Kayali, 4 parfums', slug: 'collection-kayali', category: 'oriental', image: collectionKayaliOffer, price: '180.00', offer: true, description: 'Kayali Vanilla 28, Kayali Eden Juicy Apple, Kayali Maldives in a Bottle, Kayali Yum Marshmallow', notes: '', rating: 5, reviews: 0 },
   { name: 'Pack 9 PM, 4 parfums', slug: 'collection-9-pm', category: 'woody', image: collection9PmOffer, price: '180.00', offer: true, description: '9 PM, 9 PM Rebel, 9 PM Elixir, 9 PM Night Out', notes: '', rating: 5, reviews: 0 },
+  // The bottles of the home page's carousel, added last so the other products keep their ids.
+  // Their categories and prices are placeholders, and they have no description, notes or
+  // reviews yet: the shop will write those.
+  { name: 'Noir Pour Homme', slug: 'noir-pour-homme', category: 'woody', image: noirPourHomme, price: '85.00' },
+  { name: 'Bleu de Chanel', slug: 'bleu-de-chanel', category: 'woody', image: bleuDeChanel, price: '120.00' },
+  { name: 'Miss Dior', slug: 'miss-dior', category: 'floral', image: missDior, price: '110.00' },
+  { name: 'Noir L’Eau de Parfum', slug: 'noir-l-eau-de-parfum', category: 'oriental', image: noirGold, price: '95.00' },
+  { name: 'Noir Eau de Parfum', slug: 'noir-eau-de-parfum', category: 'floral', image: noirRose, price: '90.00' },
+  { name: 'Yves Saint Laurent', slug: 'yves-saint-laurent', category: 'oriental', image: yvesSaintLaurent, price: '130.00' },
 ]
 
 export const products: Product[] = seeds.map((seed, index) => {
@@ -88,8 +104,8 @@ export const products: Product[] = seeds.map((seed, index) => {
     category,
     name: seed.name,
     slug: seed.slug,
-    description: seed.description,
-    notes: seed.notes,
+    description: seed.description ?? null,
+    notes: seed.notes ?? null,
     sku: `PRF-${String(index + 1).padStart(3, '0')}-050`,
     price: seed.price,
     compare_at_price: seed.compare ?? null,
