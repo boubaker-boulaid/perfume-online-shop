@@ -20,7 +20,7 @@ export function OrderConfirmationPage() {
       <h1 className="display-title">
         Envoyez votre commande <em>sur WhatsApp</em>
       </h1>
-      <p className="confirmation__text">Vos parfums sont réservés. Envoyez-nous la commande sur WhatsApp pour la confirmer. Sans message dans l’heure, la réservation est annulée.</p>
+      <p className="confirmation__text body-text">Vos parfums sont réservés. Envoyez-nous la commande sur WhatsApp pour la confirmer. Sans message dans l’heure, la réservation est annulée.</p>
 
       <div className="panel confirmation__summary">
         <div className="summary__row">

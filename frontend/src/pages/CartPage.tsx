@@ -15,17 +15,19 @@ export function CartPage() {
   if (items.length === 0) {
     return (
       <div className="container page">
-        <PageHeading eyebrow="Votre panier" title={<>Votre panier est <em>vide</em></>}>
+        <PageHeading eyebrow="Votre panier" title={<>Votre panier est <em>vide</em></>} trail={[{ label: 'Panier' }]} center>
           Ajoutez un parfum et il apparaîtra ici.
         </PageHeading>
-        <PillLink to="/shop">Voir les parfums</PillLink>
+        <div className="page-actions">
+          <PillLink to="/shop">Voir les parfums</PillLink>
+        </div>
       </div>
     )
   }
 
   return (
     <div className="container page">
-      <PageHeading eyebrow="Votre panier" title={<>Prêt à <em>commander&nbsp;?</em></>} />
+      <PageHeading eyebrow="Votre panier" title={<>Prêt à <em>commander&nbsp;?</em></>} trail={[{ label: 'Panier' }]} />
 
       <div className="checkout-layout">
         <ul className="cart-list">
@@ -70,6 +72,7 @@ export function CartPage() {
             <span>Total</span>
             <span>{formatPrice(subtotal)}</span>
           </div>
+          <p className="summary__note">Paiement en espèces à la réception, partout au Maroc.</p>
           <Link to="/checkout" className="button button--accent button--block">
             Commander
           </Link>

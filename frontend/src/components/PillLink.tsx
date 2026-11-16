@@ -2,14 +2,12 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router'
 import { ArrowRightIcon } from './Icons'
 
-// The white rounded button with a dark arrow circle, from the design.
+// The black button with an arrow, as on the home page.
 export function PillLink({ to, children }: { to: string; children: ReactNode }) {
   return (
-    <Link to={to} className="pill-link">
+    <Link to={to} className="button button--accent">
       {children}
-      <span className="pill-link__arrow">
-        <ArrowRightIcon size={15} strokeWidth={1.7} />
-      </span>
+      <ArrowRightIcon size={15} strokeWidth={1.6} />
     </Link>
   )
 }

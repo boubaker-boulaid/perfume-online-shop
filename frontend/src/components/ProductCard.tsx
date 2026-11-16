@@ -2,7 +2,7 @@ import { useState, type CSSProperties } from 'react'
 import { Link } from 'react-router'
 import { useReveal } from '../hooks/useReveal'
 import type { Product } from '../types'
-import { formatPrice } from '../utils/format'
+import { discountPercent, formatDiscount, formatPrice } from '../utils/format'
 import { HeartIcon } from './Icons'
 import { Stars } from './Stars'
 
@@ -26,14 +26,19 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
       <Link to={`/shop/${product.slug}`} className="product-card__link">
         <div className="product-card__image">
           <img src={product.image_path} alt={product.name} width={600} height={600} loading="lazy" />
-          {soldOut && <span className="product-card__badge">Épuisé</span>}
+          {soldOut ? (
+            <span className="badge badge--dark product-card__badge">Épuisé</span>
+          ) : (
+            product.compare_at_price && <span className="badge product-card__badge">{formatDiscount(discountPercent(product.price, product.compare_at_price))}</span>
+          )}
         </div>
+        <p className="product-card__category">{product.category.name}</p>
         <h3 className="product-card__name">{product.name}</h3>
         <div className="product-card__price">
           {formatPrice(product.price)}
           {product.compare_at_price && <s>{formatPrice(product.compare_at_price)}</s>}
         </div>
-        <Stars rating={product.rating} reviews={product.reviews_count} />
+        {product.rating !== undefined && <Stars rating={product.rating} reviews={product.reviews_count} />}
       </Link>
     </article>
   )

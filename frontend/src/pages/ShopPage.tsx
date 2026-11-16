@@ -51,7 +51,9 @@ export function ShopPage() {
 
   return (
     <div className="container page">
-      <PageHeading eyebrow="Boutique" title={<>Tous les <em>parfums</em></>} />
+      <PageHeading eyebrow="Boutique" title={<>Tous les <em>parfums</em></>} trail={[{ label: 'Boutique' }]} center>
+        Des parfums originaux, choisis un par un et livrés partout au Maroc.
+      </PageHeading>
 
       <form
         className="search"
@@ -63,7 +65,7 @@ export function ShopPage() {
       >
         <SearchIcon />
         <input key={params.get('q') ?? ''} type="search" name="q" aria-label="Rechercher un parfum" placeholder="Chercher un parfum" defaultValue={params.get('q') ?? ''} maxLength={100} />
-        <button type="submit" className="button button--accent button--small">
+        <button type="submit" className="button button--accent">
           Chercher
         </button>
       </form>
@@ -134,6 +136,9 @@ export function ShopPage() {
         <div className="empty">
           <h2>Aucun parfum trouvé</h2>
           <p>Essayez un autre mot, ou demandez-nous sur WhatsApp.</p>
+          <button type="button" className="button button--ghost" onClick={() => setParams({})}>
+            Voir tous les parfums
+          </button>
         </div>
       )}
 

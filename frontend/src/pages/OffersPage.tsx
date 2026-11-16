@@ -9,7 +9,7 @@ export function OffersPage() {
 
   return (
     <div className="container page">
-      <PageHeading eyebrow="Promos" title={<>Les offres <em>du moment</em></>}>
+      <PageHeading eyebrow="Promos" title={<>Les offres <em>du moment</em></>} trail={[{ label: 'Offres' }]} center>
         Des packs à petit prix, pour une durée limitée.
       </PageHeading>
 

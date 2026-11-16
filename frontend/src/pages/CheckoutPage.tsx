@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { PageHeading } from '../components/PageHeading'
+import { BanknoteIcon } from '../components/Icons'
 import { PillLink } from '../components/PillLink'
 import { useCart } from '../context/cartContext'
 import { ApiError, placeOrder } from '../services/api'
@@ -31,10 +32,12 @@ export function CheckoutPage() {
   if (items.length === 0) {
     return (
       <div className="container page">
-        <PageHeading eyebrow="Commande" title={<>Votre panier est <em>vide</em></>}>
+        <PageHeading eyebrow="Commande" title={<>Votre panier est <em>vide</em></>} trail={[{ label: 'Panier', to: '/cart' }, { label: 'Commande' }]} center>
           Ajoutez un parfum avant de commander.
         </PageHeading>
-        <PillLink to="/shop">Voir les parfums</PillLink>
+        <div className="page-actions">
+          <PillLink to="/shop">Voir les parfums</PillLink>
+        </div>
       </div>
     )
   }
@@ -75,12 +78,13 @@ export function CheckoutPage() {
 
   return (
     <div className="container page">
-      <PageHeading eyebrow="Commande" title={<>Vos <em>informations</em></>}>
+      <PageHeading eyebrow="Commande" title={<>Vos <em>informations</em></>} trail={[{ label: 'Panier', to: '/cart' }, { label: 'Commande' }]}>
         Vous payez en espèces au livreur. À l’étape suivante, vous nous envoyez la commande sur WhatsApp.
       </PageHeading>
 
       <div className="checkout-layout">
-        <form className="panel" onSubmit={submit} noValidate>
+        <form className="panel checkout-form" onSubmit={submit} noValidate>
+          <h2 className="checkout-form__title">Livraison</h2>
           <Field label="Nom et prénom" name="customer_name" error={errors.customer_name}>
             <input id="customer_name" name="customer_name" type="text" autoComplete="name" maxLength={50} required />
           </Field>
@@ -101,6 +105,16 @@ export function CheckoutPage() {
           <Field label="Remarque (facultatif)" name="note">
             <textarea id="note" name="note" rows={3} maxLength={255} placeholder="Ex. : appelez-moi avant de venir" />
           </Field>
+
+          <div className="checkout-form__payment">
+            <span className="tile-icon tile-icon--small">
+              <BanknoteIcon size={17} />
+            </span>
+            <div>
+              <strong>Paiement à la réception</strong>
+              <p>En espèces, au livreur. La livraison est gratuite partout au Maroc.</p>
+            </div>
+          </div>
 
           {message && (
             <p className="form-error" role="alert">

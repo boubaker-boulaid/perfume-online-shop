@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useParams } from 'react-router'
-import { ArrowLeftIcon, CheckIcon } from '../components/Icons'
+import { useParams } from 'react-router'
+import { Breadcrumbs } from '../components/Breadcrumbs'
+import { BadgeCheckIcon, BanknoteIcon, CheckIcon, TruckIcon } from '../components/Icons'
 import { ProductCard } from '../components/ProductCard'
 import { QuantityStepper } from '../components/QuantityStepper'
 import { Stars } from '../components/Stars'
@@ -39,14 +40,14 @@ function ProductDetails({ product }: { product: Product }) {
       <div className="product__info">
         <div className="eyebrow">{product.category.name}</div>
         <h1 className="display-title">{product.name}</h1>
-        <Stars rating={product.rating} reviews={product.reviews_count} />
+        {product.rating !== undefined && <Stars rating={product.rating} reviews={product.reviews_count} />}
 
         <div className="product__price">
           {formatPrice(product.price)}
           {product.compare_at_price && <s>{formatPrice(product.compare_at_price)}</s>}
         </div>
 
-        <p className="product__description">{product.description}</p>
+        {product.description && <p className="product__description body-text">{product.description}</p>}
 
         {notes.length > 0 && (
           <div className="product__notes">
@@ -72,9 +73,17 @@ function ProductDetails({ product }: { product: Product }) {
         </div>
 
         <ul className="product__facts">
-          <li>Livraison gratuite partout au Maroc</li>
-          <li>Paiement à la réception</li>
-          {product.sku && <li>Réf. {product.sku}</li>}
+          <li>
+            <TruckIcon size={17} /> Livraison gratuite partout au Maroc
+          </li>
+          <li>
+            <BanknoteIcon size={17} /> Paiement à la réception
+          </li>
+          {product.sku && (
+            <li>
+              <BadgeCheckIcon size={17} /> Réf. {product.sku}
+            </li>
+          )}
         </ul>
       </div>
     </div>
@@ -90,15 +99,18 @@ export function ProductPage() {
 
   return (
     <div className="container page">
-      <Link to="/shop" className="back-link">
-        <ArrowLeftIcon size={15} strokeWidth={1.6} /> Retour à la boutique
-      </Link>
+      <Breadcrumbs
+        trail={[
+          { label: 'Boutique', to: '/shop' },
+          ...(product ? [{ label: product.category.name, to: `/shop?category=${product.category.slug}` }, { label: product.name }] : []),
+        ]}
+      />
 
-      {loading && <div className="product-skeleton" aria-label="Chargement" />}
+      {loading && <div className="product-skeleton skeleton" aria-label="Chargement" />}
       {product && <ProductDetails key={product.id} product={product} />}
 
       {product && Boolean(related?.data.filter((item) => item.id !== product.id).length) && (
-        <section className="section">
+        <section className="section related">
           <div className="section-bar">
             <h2>Vous aimerez aussi</h2>
           </div>
