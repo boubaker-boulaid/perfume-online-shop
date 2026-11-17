@@ -14,7 +14,15 @@ const count = homeFragrances.length
 const half = Math.floor(count / 2)
 
 // A bottle that has left the catalog must not break the carousel, so it just loads as nothing.
-const loadCatalogProducts = () => Promise.all(homeFragrances.map(({ slug }) => getProduct(slug).catch(() => null)))
+const loadCatalogProduct = async (slug: string) => {
+  try {
+    return await getProduct(slug)
+  } catch {
+    return null
+  }
+}
+
+const loadCatalogProducts = () => Promise.all(homeFragrances.map(({ slug }) => loadCatalogProduct(slug)))
 
 // The bottles sit on an arc: the one in the middle is the biggest, and the others get smaller and
 // lower towards the sides. The arrows, a swipe or a click on a side bottle turn the arc. It goes
