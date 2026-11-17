@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router'
 import { useCart } from '../../context/cartContext'
 import { BagIcon, CloseIcon, MenuIcon } from '../Icons'
@@ -17,14 +17,56 @@ const links = [
 // its right. On phones the links are in the menu instead.
 const LINKS_BEFORE_LOGO = 3
 
+const SECTION_IDS = links.filter((link) => link.to.startsWith('/#')).map((link) => link.to.slice(2))
+
+// On the home page, the section the visitor is reading as they scroll: the block of the page
+// across a thin band at 35% of the screen's height. A block without a link (the hero, the
+// collections, the footer...) means "Accueil". In the space between two blocks the last link
+// stays on, so it doesn't flicker. An IntersectionObserver reports the blocks crossing the band:
+// there's no scroll listener, and nothing is measured on every frame.
+function useSectionInView(enabled: boolean) {
+  const [inView, setInView] = useState<string | null>(null)
+
+  useEffect(() => {
+    const main = document.querySelector('main')
+    if (!enabled || !main?.parentElement) return
+
+    // in page order, so when two are in the band, the lower one (which has just arrived) wins
+    const blocks = [...main.children, ...[...main.parentElement.children].filter((block) => block !== main && block.tagName !== 'HEADER')]
+    const inBand = new Set<Element>()
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => (entry.isIntersecting ? inBand.add(entry.target) : inBand.delete(entry.target)))
+        const block = [...blocks].reverse().find((candidate) => inBand.has(candidate))
+        if (block) setInView(SECTION_IDS.includes(block.id) ? block.id : null)
+      },
+      { rootMargin: '-35% 0px -64% 0px' },
+    )
+    blocks.forEach((block) => observer.observe(block))
+
+    return () => {
+      observer.disconnect()
+      setInView(null)
+    }
+  }, [enabled])
+
+  return inView
+}
+
 export function Header() {
   const { count } = useCart()
-  const { pathname, hash } = useLocation()
+  const { pathname } = useLocation()
   const menu = useRef<HTMLDialogElement>(null)
+  const isHome = pathname === '/'
+  const sectionInView = useSectionInView(isHome)
 
+  // On the home page the active link follows the scroll: a section's link while it's on screen,
+  // "Accueil" elsewhere on the page.
   const isActive = (to: string) => {
     if (!to.startsWith('/#') && to !== '/') return pathname.startsWith(to)
-    return `${pathname}${hash}` === to
+    if (!isHome) return false
+    return to === '/' ? sectionInView === null : to === `/#${sectionInView}`
   }
 
   const closeMenu = () => menu.current?.close()
