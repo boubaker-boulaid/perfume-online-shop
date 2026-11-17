@@ -64,7 +64,7 @@ export function FragranceCarousel() {
 
       <Reveal className="fragrances__heading">
         <p className="eyebrow">Du crépuscule à l’aube.</p>
-        <h2 className="display-title fragrances__title">8 parfums</h2>
+        <h2 className="display-title fragrances__title">Meilleures ventes</h2>
         <p className="fragrances__intro">Un parfum est plus qu’une odeur. C’est une émotion, un souvenir, un reflet de qui vous êtes.</p>
       </Reveal>
 
