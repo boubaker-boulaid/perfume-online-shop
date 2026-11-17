@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef } from 'react'
 import { gsap, MOTION_OK, ScrollTrigger, SplitText } from './gsap'
 
-// The scroll animations. They move CSS variables ("--reveal-y", "--reveal-scale")
+// The scroll animations. They move CSS variables ("--reveal-y", "--reveal-scale", "--parallax-y")
 // that motion.css turns into "translate" and "scale", and never "transform" itself: buttons, cards
 // and photos already animate their transform on hover and touch, and the two would fight.
 // Everything is set before the first paint (useLayoutEffect), so nothing flashes or jumps, and
@@ -173,4 +173,41 @@ export function useCardReveal<T extends HTMLElement>() {
   }, [])
 
   return ref
+}
+
+type ParallaxOptions = {
+  from: string
+  to: string
+  // where the movement starts; it ends when the element's section leaves the top of the screen
+  start?: string
+}
+
+// A slow drift as the page scrolls, for the hero photo and the line drawings. Only on large
+// screens: on phones it costs more than it gives.
+export function useParallax(selector: string, { from, to, start = 'top bottom' }: ParallaxOptions) {
+  useLayoutEffect(() => {
+    const media = gsap.matchMedia()
+
+    media.add(`${MOTION_OK} and (min-width: 1024px)`, () => {
+      const elements = gsap.utils.toArray<HTMLElement>(selector)
+
+      elements.forEach((element) => {
+        element.classList.add('parallax')
+        gsap.fromTo(
+          element,
+          { '--parallax-y': from },
+          {
+            '--parallax-y': to,
+            ease: 'none',
+            // the section, not the element itself, which moves
+            scrollTrigger: { trigger: element.parentElement, start, end: 'bottom top', scrub: true },
+          },
+        )
+      })
+
+      return () => elements.forEach((element) => element.classList.remove('parallax'))
+    })
+
+    return () => media.revert()
+  }, [selector, from, to, start])
 }

@@ -85,6 +85,10 @@ html.lenis {
   scale: var(--reveal-scale, 1);
 }
 
+.parallax {
+  translate: 0 var(--parallax-y, 0px);
+}
+
 /* A heading's lines slide up from behind their own edge. The edge sits a little outside the
    line, so accents and descenders ("À", "ç") are never cut off, without changing its height. */
 .reveal-line-mask {
