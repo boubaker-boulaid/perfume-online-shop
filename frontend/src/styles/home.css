@@ -285,8 +285,8 @@
   text-transform: uppercase;
 }
 
-/* Split sections: a photo on one side and words on the other. "Collections" has its photo on
-   the left, "À propos" on the right. On phones they stack. */
+/* Split sections. "À propos" has a photo on its right, and they stack on phones. "Collections"
+   has words only: centered, on a cream band. */
 
 .split {
   position: relative;
@@ -308,6 +308,24 @@
 .split__content .body-text {
   max-width: 50ch;
   margin: 16px 0 24px;
+}
+
+.split--collections {
+  overflow: hidden;
+  padding: 56px var(--gutter);
+  background: var(--cream);
+  text-align: center;
+}
+
+.split--collections .split__content {
+  max-width: 680px;
+  margin-inline: auto;
+  padding: 0;
+}
+
+.split--collections .body-text {
+  max-width: 54ch;
+  margin: 16px auto 26px;
 }
 
 /* Contact */
@@ -515,11 +533,6 @@
     aspect-ratio: auto;
   }
 
-  .split--collections .split__image img {
-    object-position: left center;
-    mask-image: linear-gradient(90deg, #000 70%, transparent 100%);
-  }
-
   .split--about .split__image img {
     object-position: right center;
     mask-image: linear-gradient(90deg, transparent 0%, #000 36%);
@@ -529,11 +542,22 @@
     padding: 28px var(--gutter);
   }
 
+  /* one column, since there's no photo */
+  .split--collections {
+    grid-template-columns: 1fr;
+    min-height: 0;
+    padding-block: clamp(64px, 6.4vw, 104px);
+  }
+
+  .split--collections .split__content {
+    padding: 0;
+  }
+
   .split--collections .split__leaf {
-    top: 8%;
-    right: -3.5%;
+    top: 50%;
+    right: 4%;
     width: clamp(110px, 13vw, 200px);
-    transform: rotate(14deg);
+    transform: translateY(-50%) rotate(14deg);
   }
 
   /* shown from 1024px, where the words leave a margin for it */
@@ -565,10 +589,6 @@
   .fragrance[data-distance='2'] {
     opacity: 1;
     visibility: visible;
-  }
-
-  .split--collections .split__content {
-    padding-left: clamp(40px, 5.6vw, 96px);
   }
 
   .split--about {
