@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react'
-import { Link } from 'react-router'
+import type { ComponentProps, ReactNode } from 'react'
+import { Link, useLocation } from 'react-router'
 import { WHATSAPP_DISPLAY, WHATSAPP_URL } from '../../utils/whatsapp'
 import { PressedLeaves } from '../home/Botanicals'
 import { ArrowUpIcon, FacebookIcon, InstagramIcon, MailIcon, PinIcon, TikTokIcon, WhatsAppIcon } from '../Icons'
@@ -60,6 +60,13 @@ const socials = [
   { label: 'TikTok', icon: <TikTokIcon size={16} /> },
 ]
 
+// Back to the top of the page. It goes through the router like the section links, so it glides
+// up instead of jumping, and the address still ends in "#top" without losing the shop's filters.
+function TopLink(props: Omit<ComponentProps<typeof Link>, 'to'>) {
+  const { search } = useLocation()
+  return <Link to={{ search, hash: '#top' }} {...props} />
+}
+
 export function Footer() {
   return (
     <footer className="site-footer">
@@ -73,9 +80,9 @@ export function Footer() {
             <p>Parfums originaux, livrés partout au Maroc. Vous payez à la réception.</p>
             <div className="site-footer__socials">
               {socials.map((social) => (
-                <a key={social.label} href="#top" aria-label={social.label}>
+                <TopLink key={social.label} aria-label={social.label}>
                   {social.icon}
-                </a>
+                </TopLink>
               ))}
             </div>
           </div>
@@ -116,13 +123,13 @@ export function Footer() {
         <div className="site-footer__bottom">
           <div>© 2026 Lumé Parfums</div>
           <div className="site-footer__legal">
-            <a href="#top">Confidentialité</a>
+            <TopLink>Confidentialité</TopLink>
             <span aria-hidden="true">|</span>
-            <a href="#top">Conditions de vente</a>
+            <TopLink>Conditions de vente</TopLink>
           </div>
-          <a href="#top" className="site-footer__top" aria-label="Retour en haut de la page">
+          <TopLink className="site-footer__top" aria-label="Retour en haut de la page">
             <ArrowUpIcon size={15} strokeWidth={1.6} />
-          </a>
+          </TopLink>
         </div>
       </div>
     </footer>

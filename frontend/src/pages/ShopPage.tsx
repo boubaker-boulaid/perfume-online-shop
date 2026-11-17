@@ -4,6 +4,7 @@ import { PageHeading } from '../components/PageHeading'
 import { Pagination } from '../components/Pagination'
 import { ProductCard, ProductCardSkeleton } from '../components/ProductCard'
 import { useApi } from '../hooks/useApi'
+import { scrollToTop } from '../motion/smoothScroll'
 import { getCategories, getProducts } from '../services/api'
 import type { ProductFilters, ProductSort } from '../types'
 
@@ -43,7 +44,7 @@ export function ShopPage() {
 
   const goToPage = (page: number) => {
     update({ page: page > 1 ? String(page) : '' })
-    window.scrollTo(0, 0)
+    scrollToTop()
   }
 
   const hasFilters = ['q', 'category', 'min_price', 'max_price'].some((key) => params.get(key))

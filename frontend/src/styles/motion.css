@@ -1,5 +1,7 @@
 /* All the site's animation. Only transform and opacity move, which stays smooth on phones.
-   Visitors who ask for reduced motion get none of it, see the end of this file. */
+   Visitors who ask for reduced motion get none of it, see the end of this file.
+   Scrolling and the scroll animations are in src/motion: Lenis smooths the wheel, and GSAP
+   animates sections as they come into view. */
 
 :root {
   --ease-out: cubic-bezier(0.25, 0.6, 0.3, 1);
@@ -7,6 +9,11 @@
 
 html {
   scroll-behavior: smooth;
+}
+
+/* Lenis does the smoothing: the browser's own would slow every step it takes */
+html.lenis {
+  scroll-behavior: auto;
 }
 
 @keyframes rise {
