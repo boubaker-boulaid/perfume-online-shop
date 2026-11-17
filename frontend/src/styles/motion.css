@@ -74,14 +74,21 @@ html.lenis {
   animation: fade-in 0.9s ease-out backwards;
 }
 
-/* Scrolling into view */
-.reveal {
-  opacity: 0;
+/* Scrolling into view. GSAP moves these variables (src/motion/useScrollReveal.ts). They use
+   "translate" and "scale", which add to "transform" instead of replacing it, so the hover and
+   touch effects below keep working while a section arrives. */
+.reveal-item {
+  translate: 0 var(--reveal-y, 0px);
 }
 
-.reveal.is-visible {
-  opacity: 1;
-  animation: rise 1.3s var(--ease-out) var(--reveal-delay, 0ms) backwards;
+.reveal-image img {
+  scale: var(--reveal-scale, 1);
+}
+
+/* A heading's lines slide up from behind their own edge. The edge sits a little outside the
+   line, so accents and descenders ("À", "ç") are never cut off, without changing its height. */
+.reveal-line-mask {
+  overflow-clip-margin: 0.15em;
 }
 
 /* Hero: the words arrive one by one and the video drifts slowly */
@@ -532,9 +539,5 @@ html.lenis {
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
-  }
-
-  .reveal {
-    opacity: 1;
   }
 }

@@ -129,7 +129,7 @@ export function ProductPage() {
             {related?.data
               .filter((item) => item.id !== product.id)
               .slice(0, 4)
-              .map((item, index) => <ProductCard key={item.id} product={item} index={index} />)}
+              .map((item) => <ProductCard key={item.id} product={item} />)}
           </div>
         </section>
       )}

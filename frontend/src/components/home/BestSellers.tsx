@@ -18,7 +18,7 @@ export function BestSellers() {
       </Reveal>
       <div className="best-sellers">
         {loading && Array.from({ length: 5 }, (_, index) => <ProductCardSkeleton key={index} />)}
-        {products?.map((product, index) => <ProductCard key={product.id} product={product} index={index} />)}
+        {products?.map((product) => <ProductCard key={product.id} product={product} />)}
       </div>
     </section>
   )

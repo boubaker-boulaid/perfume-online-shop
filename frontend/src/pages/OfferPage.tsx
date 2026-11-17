@@ -87,7 +87,7 @@ function OfferDetails({ offer }: { offer: Offer }) {
           <h2>Les parfums du pack</h2>
         </div>
         <div className="product-grid">
-          {offer.products.map((product, index) => <ProductCard key={product.id} product={product} index={index} />)}
+          {offer.products.map((product) => <ProductCard key={product.id} product={product} />)}
         </div>
       </section>
 

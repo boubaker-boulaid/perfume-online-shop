@@ -130,7 +130,7 @@ export function ShopPage() {
 
       <div className="product-grid">
         {loading && Array.from({ length: 6 }, (_, index) => <ProductCardSkeleton key={index} />)}
-        {!loading && result?.data.map((product, index) => <ProductCard key={product.id} product={product} index={index} />)}
+        {!loading && result?.data.map((product) => <ProductCard key={product.id} product={product} />)}
       </div>
 
       {!loading && result?.data.length === 0 && (

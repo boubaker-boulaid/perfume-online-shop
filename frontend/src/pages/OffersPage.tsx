@@ -15,7 +15,7 @@ export function OffersPage() {
 
       <div className="offer-grid">
         {loading && Array.from({ length: 4 }, (_, index) => <OfferCardSkeleton key={index} />)}
-        {offers?.map((offer, index) => <OfferCard key={offer.id} offer={offer} index={index} />)}
+        {offers?.map((offer) => <OfferCard key={offer.id} offer={offer} />)}
       </div>
 
       {(Boolean(error) || offers?.length === 0) && (

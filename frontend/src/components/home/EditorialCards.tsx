@@ -32,7 +32,7 @@ export function EditorialCards() {
   return (
     <section className="container editorial">
       {cards.map((card, index) => (
-        <Reveal key={card.key} delay={index * 150}>
+        <Reveal key={card.key} delay={index * 150} variant="image">
           <Link to={card.to} className={`editorial-card editorial-card--${card.key}`}>
             <img src={card.image} alt="" width={card.width} height={card.height} loading="lazy" />
             <div className="editorial-card__top">

@@ -1,13 +1,13 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { useCart } from '../context/cartContext'
-import { useReveal } from '../hooks/useReveal'
+import { useCardReveal } from '../motion/useScrollReveal'
 import type { Product } from '../types'
 import { discountPercent, formatDiscount, formatPrice } from '../utils/format'
 import { BagIcon, CheckIcon } from './Icons'
 
-export function ProductCard({ product, index = 0 }: { product: Product; index?: number }) {
-  const ref = useReveal<HTMLElement>()
+export function ProductCard({ product }: { product: Product }) {
+  const ref = useCardReveal<HTMLElement>()
   const { items, addItem } = useCart()
   const navigate = useNavigate()
   const [added, setAdded] = useState(false)
@@ -31,7 +31,7 @@ export function ProductCard({ product, index = 0 }: { product: Product; index?: 
   }
 
   return (
-    <article ref={ref} className="product-card reveal" style={{ '--reveal-delay': `${(index % 5) * 130}ms` } as CSSProperties}>
+    <article ref={ref} className="product-card">
       <button
         type="button"
         className={`product-card__add${added ? ' is-added' : ''}`}

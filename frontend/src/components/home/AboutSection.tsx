@@ -21,7 +21,7 @@ export function AboutSection() {
         </a>
       </Reveal>
 
-      <Reveal className="split__image" delay={150}>
+      <Reveal className="split__image" delay={150} variant="image">
         <img src={about} alt="" width={1800} height={740} loading="lazy" />
       </Reveal>
     </section>
