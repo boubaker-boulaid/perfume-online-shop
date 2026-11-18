@@ -4,6 +4,7 @@ import { PageHeading } from '../components/PageHeading'
 import { Pagination } from '../components/Pagination'
 import { ProductCard, ProductCardSkeleton } from '../components/ProductCard'
 import { useApi } from '../hooks/useApi'
+import { scrollToTop } from '../motion/smoothScroll'
 import { getCategories, getProducts } from '../services/api'
 import type { ProductFilters, ProductSort } from '../types'
 
@@ -43,7 +44,7 @@ export function ShopPage() {
 
   const goToPage = (page: number) => {
     update({ page: page > 1 ? String(page) : '' })
-    window.scrollTo(0, 0)
+    scrollToTop()
   }
 
   const hasFilters = ['q', 'category', 'min_price', 'max_price'].some((key) => params.get(key))
@@ -51,7 +52,9 @@ export function ShopPage() {
 
   return (
     <div className="container page">
-      <PageHeading eyebrow="Boutique" title={<>Tous les <em>parfums</em></>} />
+      <PageHeading eyebrow="Boutique" title={<>Tous les <em>parfums</em></>} trail={[{ label: 'Boutique' }]} center>
+        Des parfums originaux, choisis un par un et livrés partout au Maroc.
+      </PageHeading>
 
       <form
         className="search"
@@ -63,7 +66,7 @@ export function ShopPage() {
       >
         <SearchIcon />
         <input key={params.get('q') ?? ''} type="search" name="q" aria-label="Rechercher un parfum" placeholder="Chercher un parfum" defaultValue={params.get('q') ?? ''} maxLength={100} />
-        <button type="submit" className="button button--accent button--small">
+        <button type="submit" className="button button--accent">
           Chercher
         </button>
       </form>
@@ -96,7 +99,7 @@ export function ShopPage() {
             </label>
             <label className="field">
               <span className="field__label">Max</span>
-              <input key={params.get('max_price') ?? ''} type="number" name="max_price" min="0" inputMode="decimal" defaultValue={params.get('max_price') ?? ''} placeholder="200" />
+              <input key={params.get('max_price') ?? ''} type="number" name="max_price" min="0" inputMode="decimal" defaultValue={params.get('max_price') ?? ''} placeholder="400" />
             </label>
             <button type="submit" className="button button--ghost">
               Appliquer
@@ -127,13 +130,16 @@ export function ShopPage() {
 
       <div className="product-grid">
         {loading && Array.from({ length: 6 }, (_, index) => <ProductCardSkeleton key={index} />)}
-        {!loading && result?.data.map((product, index) => <ProductCard key={product.id} product={product} index={index} />)}
+        {!loading && result?.data.map((product) => <ProductCard key={product.id} product={product} />)}
       </div>
 
       {!loading && result?.data.length === 0 && (
         <div className="empty">
           <h2>Aucun parfum trouvé</h2>
           <p>Essayez un autre mot, ou demandez-nous sur WhatsApp.</p>
+          <button type="button" className="button button--ghost" onClick={() => setParams({})}>
+            Voir tous les parfums
+          </button>
         </div>
       )}
 

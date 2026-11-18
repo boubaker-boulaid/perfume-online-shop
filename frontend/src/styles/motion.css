@@ -1,5 +1,7 @@
 /* All the site's animation. Only transform and opacity move, which stays smooth on phones.
-   Visitors who ask for reduced motion get none of it, see the end of this file. */
+   Visitors who ask for reduced motion get none of it, see the end of this file.
+   Scrolling and the scroll animations are in src/motion: Lenis smooths the wheel, and GSAP
+   animates sections as they come into view. */
 
 :root {
   --ease-out: cubic-bezier(0.25, 0.6, 0.3, 1);
@@ -7,6 +9,11 @@
 
 html {
   scroll-behavior: smooth;
+}
+
+/* Lenis does the smoothing: the browser's own would slow every step it takes */
+html.lenis {
+  scroll-behavior: auto;
 }
 
 @keyframes rise {
@@ -67,14 +74,25 @@ html {
   animation: fade-in 0.9s ease-out backwards;
 }
 
-/* Scrolling into view */
-.reveal {
-  opacity: 0;
+/* Scrolling into view. GSAP moves these variables (src/motion/useScrollReveal.ts). They use
+   "translate" and "scale", which add to "transform" instead of replacing it, so the hover and
+   touch effects below keep working while a section arrives. */
+.reveal-item {
+  translate: 0 var(--reveal-y, 0px);
 }
 
-.reveal.is-visible {
-  opacity: 1;
-  animation: rise 1.3s var(--ease-out) var(--reveal-delay, 0ms) backwards;
+.reveal-image img {
+  scale: var(--reveal-scale, 1);
+}
+
+.parallax {
+  translate: 0 var(--parallax-y, 0px);
+}
+
+/* A heading's lines slide up from behind their own edge. The edge sits a little outside the
+   line, so accents and descenders ("À", "ç") are never cut off, without changing its height. */
+.reveal-line-mask {
+  overflow-clip-margin: 0.15em;
 }
 
 /* Hero: the words arrive one by one and the video drifts slowly */
@@ -136,13 +154,13 @@ html {
   transition: transform 1s var(--ease-out);
 }
 
-.product-card__like {
+.product-card__add {
   transition:
     color 0.2s ease,
     background 0.2s ease;
 }
 
-.product-card__like.is-liked svg {
+.product-card__add.is-added svg {
   animation: pop 0.6s var(--ease-out);
 }
 
@@ -407,11 +425,82 @@ html {
   animation-delay: 0.75s;
 }
 
+/* Home page. Its hero uses the hero rules above: the photo drifts and the words arrive one by one. */
+.site-nav__link::after {
+  transition: transform 0.45s var(--ease-out);
+}
+
+.site-nav__link,
+.site-footer__links a,
+.site-footer__legal a,
+.site-footer__socials a,
+.round-button {
+  transition:
+    color 0.2s ease,
+    background 0.2s ease;
+}
+
+.site-footer__top {
+  transition:
+    transform 0.4s var(--ease-out),
+    background 0.2s ease;
+}
+
+/* The carousel: bottles glide along the arc, and fade out as they leave it. "visibility" waits
+   for the fade to end, so a bottle that's leaving can still be seen while it goes. */
+.fragrance {
+  transition:
+    transform 0.9s var(--ease-out),
+    opacity 0.6s ease,
+    visibility 0.6s;
+}
+
+.fragrance__bottle img {
+  transition: transform 0.9s var(--ease-out);
+}
+
+.fragrance__caption,
+.fragrance__details {
+  transition:
+    opacity 0.5s ease,
+    visibility 0.5s;
+}
+
+.editorial-card img,
+.split__image img {
+  transition: transform 1.4s var(--ease-out);
+}
+
+.arrow-link svg,
+.button svg {
+  transition: transform 0.5s var(--ease-out);
+}
+
 /* Only on devices with a real pointer: a hover effect sticks after a tap on a phone */
 @media (hover: hover) {
+  .editorial-card:hover img {
+    transform: scale(1.04);
+  }
+
+  .split__image:hover img {
+    transform: scale(1.03);
+  }
+
+  .fragrance__bottle:hover img {
+    transform: scale(calc(var(--scale, 1) * 1.04));
+  }
+
+  .editorial-card:hover .arrow-link svg,
+  .app--home .button:hover svg {
+    transform: translateX(4px);
+  }
+
+  .site-footer__top:hover {
+    transform: translateY(-3px);
+  }
+
   .product-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 14px 30px rgba(6, 12, 24, 0.35);
+    transform: translateY(-4px);
   }
 
   .product-card:hover .product-card__image img {
@@ -429,8 +518,8 @@ html {
   }
 
   .offer-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 14px 30px rgba(6, 12, 24, 0.35);
+    transform: translateY(-4px);
+    box-shadow: 0 16px 34px rgba(33, 19, 13, 0.2);
   }
 
   .offer-card:hover .offer-card__image img {
@@ -454,9 +543,5 @@ html {
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
-  }
-
-  .reveal {
-    opacity: 1;
   }
 }

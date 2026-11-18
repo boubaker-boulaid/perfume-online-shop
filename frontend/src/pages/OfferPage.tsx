@@ -1,5 +1,6 @@
 import { Link, useNavigate, useParams } from 'react-router'
-import { ArrowLeftIcon, BagIcon, CalendarIcon, CheckIcon, ClockIcon } from '../components/Icons'
+import { Breadcrumbs } from '../components/Breadcrumbs'
+import { BagIcon, CalendarIcon, CheckIcon, ClockIcon } from '../components/Icons'
 import { ProductCard } from '../components/ProductCard'
 import { useCart } from '../context/cartContext'
 import { useApi } from '../hooks/useApi'
@@ -38,7 +39,7 @@ function OfferDetails({ offer }: { offer: Offer }) {
         </div>
 
         <div className="offer__info">
-          <div className="eyebrow">Promo</div>
+          <div className="eyebrow">Promo · {formatDiscount(offer.discount_percent)}</div>
           <h1 className="display-title">{offer.title}</h1>
           <p className="offer__saving">Vous économisez {formatPrice(offer.saving)}</p>
           <p className="offer__description">{offer.description}</p>
@@ -64,12 +65,12 @@ function OfferDetails({ offer }: { offer: Offer }) {
           {/* Fixed to the bottom of the screen on phones, like on the product page. */}
           <div className="buy-bar">
             {inCart ? (
-              <Link to="/cart" className="button button--ghost offer__add" aria-label="Offre dans le panier, voir le panier">
+              <Link to="/cart" className="button button--ghost buy-bar__add" aria-label="Offre dans le panier, voir le panier">
                 <CheckIcon size={16} /> <span>Voir le panier</span>
               </Link>
             ) : (
               available && (
-                <button type="button" className="button button--ghost offer__add" aria-label="Ajouter l’offre au panier" onClick={addOffer}>
+                <button type="button" className="button button--ghost buy-bar__add" aria-label="Ajouter l’offre au panier" onClick={addOffer}>
                   <BagIcon size={17} /> <span>Ajouter au panier</span>
                 </button>
               )
@@ -86,7 +87,7 @@ function OfferDetails({ offer }: { offer: Offer }) {
           <h2>Les parfums du pack</h2>
         </div>
         <div className="product-grid">
-          {offer.products.map((product, index) => <ProductCard key={product.id} product={product} index={index} />)}
+          {offer.products.map((product) => <ProductCard key={product.id} product={product} />)}
         </div>
       </section>
 
@@ -121,11 +122,9 @@ export function OfferPage() {
 
   return (
     <div className="container page">
-      <Link to="/offers" className="back-link">
-        <ArrowLeftIcon size={15} strokeWidth={1.6} /> Retour aux promos
-      </Link>
+      <Breadcrumbs trail={[{ label: 'Offres', to: '/offers' }, ...(offer ? [{ label: offer.title }] : [])]} />
 
-      {loading && <div className="product-skeleton" aria-label="Chargement" />}
+      {loading && <div className="product-skeleton skeleton" aria-label="Chargement" />}
       {offer && <OfferDetails key={offer.id} offer={offer} />}
     </div>
   )

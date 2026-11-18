@@ -8,12 +8,19 @@ export function useApi<T>(load: () => Promise<T>, key: string) {
   const runLoad = useEffectEvent(load)
 
   useEffect(() => {
+    // false once the page has moved on, so an old answer can't replace a newer one
     let active = true
 
-    runLoad().then(
-      (data) => active && setState({ key, data }),
-      (error: unknown) => active && setState({ key, error }),
-    )
+    const fetchData = async () => {
+      try {
+        const data = await runLoad()
+        if (active) setState({ key, data })
+      } catch (error) {
+        if (active) setState({ key, error })
+      }
+    }
+
+    void fetchData()
 
     return () => {
       active = false

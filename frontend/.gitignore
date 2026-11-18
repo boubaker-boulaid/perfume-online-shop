@@ -23,3 +23,6 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
+
+# local settings, such as VITE_API_URL (see .env.example)
+.env

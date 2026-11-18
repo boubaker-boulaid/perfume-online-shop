@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Outlet, useLocation } from 'react-router'
+import { scrollToElement, scrollToTop, startSmoothScroll, watchPageHeight } from '../../motion/smoothScroll'
 import { Footer } from './Footer'
 import { Header } from './Header'
 import { Newsletter } from '../Newsletter'
@@ -15,7 +16,9 @@ if (pageWasRefreshed) {
   window.addEventListener('scroll', () => (history.scrollRestoration = 'auto'), { once: true })
 }
 
-// New pages and refreshes open at the top, and links like /#about scroll to their section.
+// New pages and refreshes open at the top, and links like /#about glide to their section.
+// The router has already put the link in the address bar and the history, so the back button
+// and the URL work as before.
 function useScrollOnNavigate() {
   const { pathname, hash, key } = useLocation()
   const refreshedKey = useRef(pageWasRefreshed ? key : null)
@@ -24,15 +27,17 @@ function useScrollOnNavigate() {
     const isRefreshedPage = key === refreshedKey.current
     if (!isRefreshedPage) history.scrollRestoration = 'auto'
 
-    if (hash && !isRefreshedPage) {
-      document.getElementById(hash.slice(1))?.scrollIntoView()
-    } else {
-      window.scrollTo({ top: 0, behavior: 'instant' }) // a new page shouldn't scroll, only section links
-    }
+    const section = hash && !isRefreshedPage ? document.getElementById(hash.slice(1)) : null
+
+    if (section) scrollToElement(section)
+    else scrollToTop() // a new page shouldn't scroll, only section links
   }, [pathname, hash, key]) // key: clicking the same link again still scrolls
 }
 
 export function Layout() {
+  // before the scrolling below, which goes through it
+  useEffect(() => startSmoothScroll(), [])
+  useEffect(() => watchPageHeight(), [])
   useScrollOnNavigate()
   const { pathname } = useLocation()
 

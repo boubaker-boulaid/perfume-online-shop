@@ -9,13 +9,13 @@ export function OffersPage() {
 
   return (
     <div className="container page">
-      <PageHeading eyebrow="Promos" title={<>Les offres <em>du moment</em></>}>
+      <PageHeading eyebrow="Promos" title={<>Les offres <em>du moment</em></>} trail={[{ label: 'Offres' }]} center>
         Des packs à petit prix, pour une durée limitée.
       </PageHeading>
 
       <div className="offer-grid">
         {loading && Array.from({ length: 4 }, (_, index) => <OfferCardSkeleton key={index} />)}
-        {offers?.map((offer, index) => <OfferCard key={offer.id} offer={offer} index={index} />)}
+        {offers?.map((offer) => <OfferCard key={offer.id} offer={offer} />)}
       </div>
 
       {(Boolean(error) || offers?.length === 0) && (

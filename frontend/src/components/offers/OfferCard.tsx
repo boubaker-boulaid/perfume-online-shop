@@ -1,15 +1,14 @@
-import type { CSSProperties } from 'react'
 import { Link } from 'react-router'
-import { useReveal } from '../../hooks/useReveal'
+import { useCardReveal } from '../../motion/useScrollReveal'
 import type { Offer } from '../../types'
 import { formatDiscount, formatTimeLeft } from '../../utils/format'
 import { ArrowRightIcon, ClockIcon } from '../Icons'
 
-export function OfferCard({ offer, index = 0 }: { offer: Offer; index?: number }) {
-  const ref = useReveal<HTMLElement>()
+export function OfferCard({ offer }: { offer: Offer }) {
+  const ref = useCardReveal<HTMLElement>()
 
   return (
-    <article ref={ref} className="offer-card reveal" style={{ '--reveal-delay': `${(index % 2) * 130}ms` } as CSSProperties}>
+    <article ref={ref} className="offer-card">
       <Link to={`/offers/${offer.slug}`} className="offer-card__link">
         <div className="offer-card__image">
           <img src={offer.image_path} alt="" width={900} height={1200} loading="lazy" />

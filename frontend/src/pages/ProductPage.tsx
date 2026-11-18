@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useParams } from 'react-router'
-import { ArrowLeftIcon, CheckIcon } from '../components/Icons'
+import { useNavigate, useParams } from 'react-router'
+import { Breadcrumbs } from '../components/Breadcrumbs'
+import { BadgeCheckIcon, BagIcon, BanknoteIcon, CheckIcon, TruckIcon } from '../components/Icons'
 import { ProductCard } from '../components/ProductCard'
 import { QuantityStepper } from '../components/QuantityStepper'
-import { Stars } from '../components/Stars'
 import { useCart } from '../context/cartContext'
 import { useApi } from '../hooks/useApi'
 import { getProduct, getProducts } from '../services/api'
@@ -14,7 +14,8 @@ import { NotFoundPage } from './NotFoundPage'
 const LOW_STOCK = 5
 
 function ProductDetails({ product }: { product: Product }) {
-  const { addItem } = useCart()
+  const { items, addItem } = useCart()
+  const navigate = useNavigate()
   const [quantity, setQuantity] = useState(1)
   const [added, setAdded] = useState(false)
   const timer = useRef<number | undefined>(undefined)
@@ -30,6 +31,12 @@ function ProductDetails({ product }: { product: Product }) {
     timer.current = window.setTimeout(() => setAdded(false), 2000)
   }
 
+  // Straight to the checkout, like an offer's "Commander". A perfume already in the bag isn't added twice.
+  const order = () => {
+    if (!items.some((item) => item.product_id === product.id)) addItem(product, quantity)
+    navigate('/checkout')
+  }
+
   return (
     <div className="product">
       <div className="product__image">
@@ -39,14 +46,13 @@ function ProductDetails({ product }: { product: Product }) {
       <div className="product__info">
         <div className="eyebrow">{product.category.name}</div>
         <h1 className="display-title">{product.name}</h1>
-        <Stars rating={product.rating} reviews={product.reviews_count} />
 
         <div className="product__price">
           {formatPrice(product.price)}
           {product.compare_at_price && <s>{formatPrice(product.compare_at_price)}</s>}
         </div>
 
-        <p className="product__description">{product.description}</p>
+        {product.description && <p className="product__description body-text">{product.description}</p>}
 
         {notes.length > 0 && (
           <div className="product__notes">
@@ -66,15 +72,29 @@ function ProductDetails({ product }: { product: Product }) {
         {/* Fixed to the bottom of the screen on phones, so it's always in reach. */}
         <div className="buy-bar">
           {!soldOut && <QuantityStepper value={quantity} max={Math.min(product.stock, 99)} label="Quantité" onChange={setQuantity} />}
-          <button type="button" className="button button--accent buy-bar__button" disabled={soldOut} onClick={add}>
-            {soldOut ? 'Épuisé' : added ? <>Ajouté <CheckIcon size={16} /></> : 'Ajouter au panier'}
+          {!soldOut && (
+            // icon only on phones, to leave room for "Commander"
+            <button type="button" className="button button--ghost buy-bar__add" aria-label={added ? 'Ajouté au panier' : 'Ajouter au panier'} onClick={add}>
+              {added ? <CheckIcon size={16} /> : <BagIcon size={17} />} <span>{added ? 'Ajouté' : 'Ajouter au panier'}</span>
+            </button>
+          )}
+          <button type="button" className="button button--accent buy-bar__button" disabled={soldOut} onClick={order}>
+            {soldOut ? 'Épuisé' : 'Commander'}
           </button>
         </div>
 
         <ul className="product__facts">
-          <li>Livraison gratuite partout au Maroc</li>
-          <li>Paiement à la réception</li>
-          {product.sku && <li>Réf. {product.sku}</li>}
+          <li>
+            <TruckIcon size={17} /> Livraison gratuite partout au Maroc
+          </li>
+          <li>
+            <BanknoteIcon size={17} /> Paiement à la réception
+          </li>
+          {product.sku && (
+            <li>
+              <BadgeCheckIcon size={17} /> Réf. {product.sku}
+            </li>
+          )}
         </ul>
       </div>
     </div>
@@ -90,15 +110,18 @@ export function ProductPage() {
 
   return (
     <div className="container page">
-      <Link to="/shop" className="back-link">
-        <ArrowLeftIcon size={15} strokeWidth={1.6} /> Retour à la boutique
-      </Link>
+      <Breadcrumbs
+        trail={[
+          { label: 'Boutique', to: '/shop' },
+          ...(product ? [{ label: product.category.name, to: `/shop?category=${product.category.slug}` }, { label: product.name }] : []),
+        ]}
+      />
 
-      {loading && <div className="product-skeleton" aria-label="Chargement" />}
+      {loading && <div className="product-skeleton skeleton" aria-label="Chargement" />}
       {product && <ProductDetails key={product.id} product={product} />}
 
       {product && Boolean(related?.data.filter((item) => item.id !== product.id).length) && (
-        <section className="section">
+        <section className="section related">
           <div className="section-bar">
             <h2>Vous aimerez aussi</h2>
           </div>
@@ -106,7 +129,7 @@ export function ProductPage() {
             {related?.data
               .filter((item) => item.id !== product.id)
               .slice(0, 4)
-              .map((item, index) => <ProductCard key={item.id} product={item} index={index} />)}
+              .map((item) => <ProductCard key={item.id} product={item} />)}
           </div>
         </section>
       )}
