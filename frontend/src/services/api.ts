@@ -1,6 +1,6 @@
 // The shop's API calls, one function per endpoint in backend/docs/API.md. They go through axios
-// (http.ts) to the Laravel backend, or to the fake backend when VITE_API_URL isn't set. Each one
-// gives back the data the pages need, or throws an ApiError with a French message.
+// (http.ts) to the Laravel backend. Each one gives back the data the pages need, or throws an
+// ApiError with a French message.
 
 import type { Category, Offer, OrderPayload, Paginated, PlacedOrder, Product, ProductFilters } from '../types'
 import { ApiError } from './apiError'
