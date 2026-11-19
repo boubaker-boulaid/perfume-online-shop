@@ -21,7 +21,7 @@ class OfferSeeder extends Seeder
             'Livraison gratuite, paiement à la réception.',
         ];
 
-        // the same offers as frontend/src/data/offers.ts
+        // the shop's offers
         // each offer's set is the product with the same slug (see ProductSeeder): its price is the offer's price
         // starts and ends are days from today, so the seeded offers don't all expire
         $offers = [
