@@ -1,25 +1,22 @@
 import axios, { type AxiosRequestConfig } from 'axios'
 import type { Paginated } from '../types'
 import { ApiError } from './apiError'
-import { fakeBackend } from './fakeBackend'
 
-// Where the data comes from. With VITE_API_URL set (in frontend/.env, for example
-// VITE_API_URL=http://127.0.0.1:8000), every call goes to the Laravel backend. Without it, the
-// fake backend in fakeBackend.ts answers instead, from the files in src/data. Both answer in the
-// same shape, so nothing else changes.
-const API_URL = import.meta.env.VITE_API_URL?.trim() || null
+// The Laravel backend's address, from VITE_API_URL in frontend/.env (see .env.example)
+const API_URL = import.meta.env.VITE_API_URL?.trim()
 
-export const usesRealBackend = API_URL !== null
+if (!API_URL) {
+  throw new Error('VITE_API_URL is not set. Copy frontend/.env.example to frontend/.env.')
+}
 
 // The settings backend/docs/API.md asks for: the session cookie goes with each request, and the
 // CSRF token from the "XSRF-TOKEN" cookie goes back in the "X-XSRF-TOKEN" header.
 const http = axios.create({
-  baseURL: API_URL ?? undefined,
+  baseURL: API_URL,
   withCredentials: true,
   withXSRFToken: true,
   headers: { Accept: 'application/json' },
   timeout: 15000,
-  adapter: usesRealBackend ? undefined : fakeBackend,
 })
 
 // Every answer from the API has this shape. Lists add "meta".
@@ -52,8 +49,6 @@ function toApiError(error: unknown): ApiError {
 let csrfCookie: Promise<unknown> | null = null
 
 async function ensureCsrfCookie() {
-  if (!usesRealBackend) return
-
   try {
     csrfCookie ??= http.get('/sanctum/csrf-cookie')
     await csrfCookie

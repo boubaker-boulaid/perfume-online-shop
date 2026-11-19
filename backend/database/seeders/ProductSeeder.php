@@ -16,7 +16,7 @@ class ProductSeeder extends Seeder
      */
     public function run(): void
     {
-        // the same products, in the same order, as frontend/src/data/products.ts
+        // the shop's products, in the order of their ids and SKUs
         // left out keys use the defaults below: stock 25, active, not featured, not an offer set
         // a product without a description or notes has none yet: nothing is made up
         $products = [
@@ -61,7 +61,7 @@ class ProductSeeder extends Seeder
         $categoryIds = Category::pluck('id', 'slug');  // pluck returns an array like this [slug1 => id1, ...]
 
         foreach ($products as $index => $product) {
-            $number = $index + 1; // the product's place in the list, like its id in the frontend
+            $number = $index + 1; // the product's place in the list, used for its SKU and sort order
 
             $model = Product::firstOrNew(['slug' => $product['slug']]);
             $model->fill([
@@ -79,7 +79,7 @@ class ProductSeeder extends Seeder
                 'is_featured' => $product['featured'] ?? false,
                 'is_offer' => $product['offer'] ?? false,
             ]);
-            // one day apart from 1 October 2026, like the frontend, so "newest" sorts them the same way
+            // one day apart from 1 October 2026, so "newest" lists them in a fixed order
             // (created_at isn't fillable, so it is set on its own)
             $model->created_at = Carbon::create(2026, 10, 1, 0, 0, 0, 'UTC')->addDays($index);
             $model->save();

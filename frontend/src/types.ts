@@ -29,12 +29,8 @@ export type Product = {
   is_featured: boolean
   is_offer: boolean
   created_at: string
-  // Shown in the design, but the backend doesn't have these yet.
-  rating?: number
-  reviews_count?: number
 }
 
-// The backend has no offers yet: this is what its endpoints would need to return.
 export type Offer = {
   id: number
   slug: string

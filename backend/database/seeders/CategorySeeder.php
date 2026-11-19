@@ -14,7 +14,7 @@ class CategorySeeder extends Seeder
      */
     public function run(): void
     {
-        // the same categories as frontend/src/data/categories.ts
+        // the shop's categories, with their French names and images
         $categories = [
             ['name' => 'Floral',   'slug' => 'floral',   'description' => 'Rose, jasmin, fleurs blanches. Doux et féminin.',     'image' => 'categories/floral.webp',   'sort_order' => 1],
             ['name' => 'Oriental', 'slug' => 'oriental', 'description' => 'Oud, ambre et épices. Ça tient toute la journée.',     'image' => 'categories/oriental.webp', 'sort_order' => 2],
