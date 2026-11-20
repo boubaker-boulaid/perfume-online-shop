@@ -1,0 +1,776 @@
+/* The admin area. It's loaded with the admin's code (AdminApp.tsx), so customers never
+   download it. It reuses the shop's tokens and pieces (global.css: .panel, .field, .button),
+   so the admin looks like part of the same site. Every class here starts with "admin-".
+   Phones first: the menu is a scrolling row, and a side column from 900px. */
+
+.admin {
+  min-height: 100dvh;
+  background: var(--ivory);
+  color: var(--ink);
+}
+
+.admin-loading {
+  padding: 48px var(--gutter);
+  color: var(--muted);
+  font-size: 14px;
+  text-align: center;
+}
+
+/* The menu */
+
+.admin-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px var(--gutter);
+  overflow-x: auto;
+  border-bottom: 1px solid var(--line);
+  background: var(--white);
+}
+
+.admin-nav__brand {
+  flex: none;
+  margin-right: 10px;
+  font-family: var(--serif);
+  font-size: 17px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.admin-nav__link {
+  flex: none;
+  padding: 9px 14px 7px;
+  border-radius: 999px;
+  color: var(--body);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.admin-nav__link:hover {
+  background: rgba(16, 11, 8, 0.06);
+}
+
+.admin-nav__link.active {
+  background: var(--ink);
+  color: var(--ivory);
+}
+
+.admin-nav__user {
+  flex: none;
+  margin-left: auto;
+  padding-left: 12px;
+  color: var(--muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.admin-nav__logout {
+  flex: none;
+  padding: 9px 4px 7px;
+  border: none;
+  background: none;
+  color: var(--ink);
+  font-size: 13px;
+  text-decoration: underline;
+  text-decoration-color: var(--line-strong);
+  text-underline-offset: 4px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.admin-nav__logout:hover {
+  text-decoration-color: currentColor;
+}
+
+.admin-main {
+  width: 100%;
+  max-width: 1200px;
+  padding: 24px var(--gutter) 64px;
+}
+
+/* Titles and shared pieces */
+
+.admin-title {
+  margin-bottom: 20px;
+  font-family: var(--serif);
+  font-size: clamp(26px, 6vw, 34px);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+.admin-main .panel {
+  margin-bottom: 16px;
+}
+
+.admin-main .panel h2 {
+  margin-bottom: 16px;
+  font-family: var(--serif);
+  font-size: 19px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.admin-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  margin-bottom: 8px;
+  color: var(--body);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.admin-check input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--ink);
+}
+
+.admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.admin-muted {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* Tables: a wide table scrolls on phones instead of breaking the page */
+
+.admin-table-wrap {
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.admin-table th {
+  padding: 0 12px 10px;
+  border-bottom: 1px solid var(--line-strong);
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.admin-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+
+.admin-table :is(th, td):first-child {
+  padding-left: 0;
+}
+
+.admin-table :is(th, td):last-child {
+  padding-right: 0;
+}
+
+.admin-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.admin-table td a {
+  text-decoration: underline;
+  text-decoration-color: var(--line-strong);
+  text-underline-offset: 4px;
+}
+
+.admin-table td a:hover {
+  text-decoration-color: currentColor;
+}
+
+.admin-table small {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.admin-table .admin-nowrap {
+  white-space: nowrap;
+}
+
+.admin-table .is-number {
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Lists: the search, the filters and the count above a table */
+
+.admin-toolbar {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.admin-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 4px 4px 4px 14px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--white);
+  color: var(--muted);
+}
+
+.admin-search:focus-within {
+  border-color: var(--ink);
+}
+
+.admin-search input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: none;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 16px;
+}
+
+.admin-select select {
+  display: block;
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 38px 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  outline: none;
+  appearance: none;
+  background: var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23100b08' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 14px center;
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.admin-select select:focus {
+  border-color: var(--ink);
+}
+
+.admin-count {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* The order statuses, as small pills */
+
+.admin-status {
+  display: inline-block;
+  padding: 4px 10px 2px;
+  border-radius: 999px;
+  background: var(--cream);
+  color: var(--ink);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.admin-status--pending {
+  background: var(--gold-soft);
+}
+
+.admin-status--confirmed {
+  background: #e4e9f2;
+}
+
+.admin-status--shipped {
+  background: #e8e2f2;
+}
+
+.admin-status--delivered {
+  background: #e3f0e5;
+  color: var(--success);
+}
+
+.admin-status--cancelled {
+  background: #f6e3e0;
+  color: var(--error);
+}
+
+/* The dashboard */
+
+.admin-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.admin-card {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--white);
+}
+
+.admin-card span {
+  color: var(--muted);
+  font-size: 11.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.admin-card strong {
+  font-family: var(--serif);
+  font-size: 26px;
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+.admin-card small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+a.admin-card:hover {
+  border-color: var(--ink);
+}
+
+.admin-card--wide {
+  grid-column: 1 / -1;
+}
+
+.admin-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 160px;
+  padding-bottom: 1px;
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.admin-bars span {
+  flex: 1;
+  min-height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: var(--gold);
+}
+
+.admin-bars span:hover {
+  background: var(--gold-deep);
+}
+
+.admin-bars__axis {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.admin-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr); /* minmax: a wide table scrolls instead of widening the page */
+  gap: 0 16px;
+}
+
+.admin-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+
+.admin-list li:last-child {
+  border-bottom: 0;
+}
+
+.admin-list a {
+  text-decoration: underline;
+  text-decoration-color: var(--line-strong);
+  text-underline-offset: 4px;
+}
+
+.admin-list small {
+  color: var(--muted);
+}
+
+.admin-list strong {
+  margin-left: auto;
+}
+
+/* a stock under 5 */
+.admin-low {
+  color: var(--error);
+  font-weight: 700;
+}
+
+/* One order */
+
+.admin-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+}
+
+.admin-heading .admin-title {
+  margin-bottom: 0;
+}
+
+.admin-subtitle {
+  margin: 8px 0 20px;
+}
+
+.admin-totals {
+  margin: 16px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--line-strong);
+  font-size: 14px;
+}
+
+.admin-totals div {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+}
+
+.admin-totals dt {
+  color: var(--muted);
+}
+
+.admin-totals dd {
+  margin: 0;
+}
+
+.admin-totals__total {
+  font-family: var(--serif);
+  font-size: 19px;
+}
+
+.admin-totals__total dt {
+  color: var(--ink);
+}
+
+.admin-details {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 10px 16px;
+  margin: 0 0 20px;
+  font-size: 14px;
+}
+
+.admin-details dt {
+  color: var(--muted);
+  font-size: 11.5px;
+  letter-spacing: 0.12em;
+  line-height: 1.8;
+  text-transform: uppercase;
+}
+
+.admin-details dd {
+  margin: 0;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.admin-details a {
+  text-decoration: underline;
+  text-decoration-color: var(--line-strong);
+  text-underline-offset: 4px;
+}
+
+.admin-timeline {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-timeline li {
+  position: relative;
+  padding: 0 0 18px 22px;
+  font-size: 14px;
+}
+
+/* the dot, and the line down to the next one */
+.admin-timeline li::before {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 0;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+
+.admin-timeline li:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 18px;
+  bottom: 2px;
+  left: 4px;
+  width: 1px;
+  background: var(--line-strong);
+}
+
+.admin-timeline small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.admin-timeline p {
+  margin-top: 6px;
+  color: var(--body);
+}
+
+/* The forms: products, categories and offers */
+
+.admin-heading--split {
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.admin-form {
+  max-width: 760px;
+}
+
+.admin-form .field input[type='file'] {
+  padding: 10px 12px;
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+.admin-form__actions {
+  margin: 20px 0 0;
+}
+
+.admin-preview {
+  width: 140px;
+  height: 140px;
+  margin: -4px 0 18px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  object-fit: cover;
+  background: var(--ivory);
+}
+
+.admin-hint {
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  border-left: 3px solid var(--gold);
+  background: var(--ivory);
+  color: var(--body);
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+.admin-table__thumb {
+  width: 60px;
+}
+
+.admin-table__thumb img {
+  width: 48px;
+  height: 48px;
+  border-radius: 3px;
+  object-fit: cover;
+  background: var(--ivory);
+}
+
+/* "Coffret": a product that is an offer's set */
+.admin-tag {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 3px 8px 1px;
+  background: var(--gold-soft);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  vertical-align: 1px;
+}
+
+/* The offer form: the perfumes inside the set */
+
+.admin-fieldset {
+  margin: 0 0 14px;
+  padding: 0;
+  border: 0;
+}
+
+.admin-checks {
+  display: grid;
+  max-height: 320px;
+  padding: 8px 14px;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+}
+
+.admin-fieldset.has-error .admin-checks {
+  border-color: var(--error);
+}
+
+.admin-checks .admin-check {
+  margin-bottom: 0;
+}
+
+.admin-preview--wide {
+  width: 260px;
+  height: auto;
+  aspect-ratio: 16 / 10;
+}
+
+.admin-form__note {
+  margin: -6px 0 14px;
+}
+
+/* The login page */
+
+.admin-login {
+  display: grid;
+  place-items: center;
+  min-height: 100dvh;
+  padding: 24px var(--gutter);
+  background: var(--ivory);
+}
+
+.admin-login .panel {
+  width: 100%;
+  max-width: 420px;
+}
+
+.admin-login h1 {
+  margin-bottom: 24px;
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.admin-login .admin-check {
+  margin-bottom: 14px;
+}
+
+.admin-login__text {
+  margin: -12px 0 20px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.admin-login__link {
+  display: block;
+  margin: 12px auto 0;
+}
+
+.admin-login .form-error a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+/* a good news message: the link was sent, the password changed */
+.admin-notice {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--success);
+  border-radius: 3px;
+  background: rgba(63, 107, 70, 0.06);
+  color: var(--success);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+@media (min-width: 900px) {
+  .admin {
+    display: grid;
+    grid-template-columns: 230px minmax(0, 1fr);
+  }
+
+  .admin-nav {
+    position: sticky;
+    top: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    height: 100dvh;
+    padding: 28px 18px;
+    border-right: 1px solid var(--line);
+    border-bottom: 0;
+  }
+
+  .admin-nav__brand {
+    margin: 0 0 24px 14px;
+  }
+
+  .admin-nav__link {
+    padding: 11px 14px 9px;
+  }
+
+  .admin-nav__user {
+    margin: auto 0 0;
+    padding: 0 14px;
+  }
+
+  .admin-nav__logout {
+    align-self: flex-start;
+    margin-left: 14px;
+  }
+
+  .admin-main {
+    padding: 40px 40px 80px;
+  }
+
+  .admin-cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .admin-toolbar {
+    grid-template-columns: minmax(0, 1fr) 240px 240px;
+  }
+
+  .admin-field-row--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .admin-checks {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 16px;
+  }
+
+  .admin-card--wide {
+    grid-column: auto;
+  }
+}
+
+@media (min-width: 1100px) {
+  .admin-cards {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .admin-columns {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  }
+}

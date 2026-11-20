@@ -40,6 +40,17 @@ class AdminCatalogTest extends TestCase
             ->assertJsonPath('data.sort_order', 0);
     }
 
+    // up to 4 Mo ("max:4096", in kilobytes)
+    public function test_product_images_can_weigh_up_to_4_mo(): void
+    {
+        $this->post('/api/v1/admin/products', $this->productFields(['image' => UploadedFile::fake()->image('oud.jpg')->size(4096)]), ['Accept' => 'application/json'])
+            ->assertCreated();
+
+        $this->post('/api/v1/admin/products', $this->productFields(['image' => UploadedFile::fake()->image('oud.jpg')->size(4097)]), ['Accept' => 'application/json'])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('image');
+    }
+
     public function test_creating_a_category_returns_its_saved_defaults(): void
     {
         $this->postJson('/api/v1/admin/categories', ['name' => 'Woody'])

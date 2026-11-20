@@ -10,6 +10,7 @@ REST API for the Lume Perfums online shop, built with Laravel 13. It serves the 
 - PHP 8.3 or newer, with the `pdo_sqlite` or `pdo_mysql` extension
 - Composer
 - SQLite or MySQL
+- `upload_max_filesize = 4M` (or more) in `php.ini`. The admin uploads images up to 4 MB, but PHP's default is 2M, and PHP refuses a bigger file before Laravel sees it. Find the file with `php --ini`, change the line, and restart `php artisan serve`. Keep `post_max_size` above it (the default, 8M, is enough).
 
 ## Install
 

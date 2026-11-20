@@ -282,6 +282,78 @@ class AdminOfferTest extends TestCase
             ->assertJsonPath('data.is_offer', true);
     }
 
+    // The admin's browser sends exact moments in UTC. They are saved as shop time, so the API
+    // gives back the very same moment, and saving an unchanged form never moves the dates.
+    public function test_dates_with_a_time_zone_keep_their_exact_moment(): void
+    {
+        $set = Product::factory()->create(['is_offer' => true]);
+
+        $created = $this->post(self::ENDPOINT, $this->offerFields($set, [Product::factory()->create()->id], [
+            'starts_at' => '2026-11-30T23:00:00.000Z',
+            'ends_at' => '2026-12-31T22:59:00.000Z',
+        ]), self::JSON)->assertCreated()
+            ->assertJsonPath('data.starts_at', '2026-11-30T23:00:00.000000Z')
+            ->assertJsonPath('data.ends_at', '2026-12-31T22:59:00.000000Z');
+
+        $offer = Offer::sole();
+        $this->assertSame('Africa/Casablanca', $offer->starts_at->tzName);
+        $this->assertTrue($offer->starts_at->equalTo('2026-11-30T23:00:00Z'));
+
+        // the edit form sends back what it was given
+        $this->patchJson(self::ENDPOINT."/{$offer->slug}", [
+            'starts_at' => $created->json('data.starts_at'),
+            'ends_at' => $created->json('data.ends_at'),
+        ])->assertOk()
+            ->assertJsonPath('data.starts_at', '2026-11-30T23:00:00.000000Z')
+            ->assertJsonPath('data.ends_at', '2026-12-31T22:59:00.000000Z');
+    }
+
+    public function test_dates_with_an_offset_and_dates_without_a_zone_are_both_understood(): void
+    {
+        [$offer] = $this->makeOffer();
+
+        // "+01:00": the same moment as 22:00 UTC
+        $this->patchJson(self::ENDPOINT."/{$offer->slug}", ['starts_at' => '2026-12-01T23:00:00+01:00', 'ends_at' => '2026-12-20T00:00:00+01:00'])
+            ->assertOk()
+            ->assertJsonPath('data.starts_at', '2026-12-01T22:00:00.000000Z');
+
+        // no zone: already shop time, saved as it is
+        $this->patchJson(self::ENDPOINT."/{$offer->slug}", ['starts_at' => '2026-12-02 10:00:00', 'ends_at' => '2026-12-20 00:00:00'])
+            ->assertOk();
+        $this->assertSame('2026-12-02 10:00:00', $offer->refresh()->starts_at->format('Y-m-d H:i:s'));
+    }
+
+    public function test_a_wrong_date_with_a_zone_is_still_refused(): void
+    {
+        [$offer] = $this->makeOffer();
+
+        $this->patchJson(self::ENDPOINT."/{$offer->slug}", ['starts_at' => 'not-a-dateZ', 'ends_at' => '2026-12-20T00:00:00Z'])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('starts_at');
+    }
+
+    public function test_offer_errors_name_the_fields_in_french(): void
+    {
+        $this->post(self::ENDPOINT, ['starts_at' => '2026-12-10 00:00:00', 'ends_at' => '2026-12-01 00:00:00'], self::JSON)
+            ->assertUnprocessable()
+            ->assertJsonPath('errors.product_id.0', 'Le champ coffret est obligatoire.')
+            ->assertJsonPath('errors.title.0', 'Le champ titre est obligatoire.')
+            ->assertJsonPath('errors.product_ids.0', 'Le champ parfums inclus est obligatoire.')
+            ->assertJsonPath('errors.ends_at.0', 'La date de fin doit être après la date de début.');
+    }
+
+    // PHP refuses a file above upload_max_filesize before Laravel's "max" rule can run
+    public function test_an_image_too_big_for_php_gets_a_clear_message(): void
+    {
+        $set = Product::factory()->create(['is_offer' => true]);
+        $path = tempnam(sys_get_temp_dir(), 'offer');
+        $tooBig = new UploadedFile($path, 'offer.jpg', 'image/jpeg', UPLOAD_ERR_INI_SIZE, true);
+
+        $this->post(self::ENDPOINT, $this->offerFields($set, [Product::factory()->create()->id], ['image' => $tooBig]), self::JSON)
+            ->assertUnprocessable()
+            ->assertJsonPath('errors.image.0', 'L’image n’a pas pu être reçue : elle doit faire 4 Mo maximum.');
+    }
+
     private function offerFields(Product $set, array $productIds, array $extra = []): array
     {
         return [

@@ -32,7 +32,7 @@ class StoreProductRequest extends FormRequest
             'compare_at_price' => ['nullable', 'numeric', 'max:99999999.99', 'decimal:0,2', 'gt:price'],
             'stock' => ['required', 'integer', 'min:0', 'max:2147483647'],
             'sort_order' => ['nullable', 'integer', 'min:0', 'max:2147483647'],
-            'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
             'is_active' => ['boolean'],
             'is_featured' => ['boolean'],
             'is_offer' => ['boolean'],

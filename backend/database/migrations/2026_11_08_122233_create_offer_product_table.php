@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             // deleting an offer deletes its rows from this pivot table
             $table->foreignId('offer_id')->constrained()->cascadeOnDelete();
-            // deleting a product thats inside an offer is restricted 
+            // deleting a product thats inside an offer is restricted
             $table->foreignId('product_id')->constrained()->restrictOnDelete();
             $table->boolean('is_free')->default(false);
             $table->unique(['offer_id', 'product_id']);

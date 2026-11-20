@@ -2,12 +2,15 @@
 
 namespace App\Http\Requests\V1;
 
+use App\Http\Requests\Concerns\ReadsDatesInShopTime;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class StoreOfferRequest extends FormRequest
 {
+    use ReadsDatesInShopTime;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -29,7 +32,7 @@ class StoreOfferRequest extends FormRequest
             'title' => ['required', 'string', 'max:255'],
             'tagline' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
             'terms' => ['nullable', 'array', 'max:10'],
             'terms.*' => ['string', 'max:255'],
             'starts_at' => ['required', 'date'],
