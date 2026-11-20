@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router'
 import '../styles/admin.css'
 import { AdminLayout } from './AdminLayout'
+import { DashboardPage } from './pages/DashboardPage'
 import { LoginPage } from './pages/LoginPage'
 import { RequireAdmin } from './RequireAdmin'
 
@@ -12,6 +13,7 @@ export default function AdminApp() {
       <Route path="login" element={<LoginPage />} />
       <Route element={<RequireAdmin />}>
         <Route element={<AdminLayout />}>
+          <Route index element={<DashboardPage />} />
         </Route>
       </Route>
     </Routes>
