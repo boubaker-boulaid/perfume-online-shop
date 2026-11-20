@@ -2,12 +2,15 @@
 
 namespace App\Http\Requests\V1;
 
+use App\Http\Requests\Concerns\ReadsDatesInShopTime;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class UpdateOfferRequest extends FormRequest
 {
+    use ReadsDatesInShopTime;
+
     /**
      * Determine if the user is authorized to make this request.
      */

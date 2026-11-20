@@ -451,7 +451,7 @@ Creating an offer takes two steps:
 | `description` | Optional | Optional | Text |
 | `image` | Required | Optional | jpg, jpeg, png or webp, max 2 MB. A new image replaces and deletes the old one. |
 | `terms` | Optional | Optional | Up to 10 lines of text, max 255 characters each |
-| `starts_at`, `ends_at` | Required | Optional | Dates, such as `2026-12-01 00:00:00`. `ends_at` must be after `starts_at`. On an update, always send both together, or the check fails. |
+| `starts_at`, `ends_at` | Required | Optional | Dates in shop time, such as `2026-12-01 00:00:00`, or with a time zone, such as `2026-11-30T23:00:00Z`, which is converted to shop time and keeps its exact moment. `ends_at` must be after `starts_at`. On an update, always send both together, or the check fails. |
 | `is_active` | Optional, default `true` | Optional | Boolean. `false` hides the offer from customers. |
 | `sort_order` | Optional, default 0 | Optional | Whole number, at least 0. Lower numbers are listed first. |
 | `product_ids` | Required | Optional | 1 to 20 IDs of normal products (`is_offer: false`), with no duplicates: the paid perfumes inside the set |
