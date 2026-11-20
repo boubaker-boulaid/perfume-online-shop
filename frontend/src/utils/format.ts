@@ -29,3 +29,12 @@ export function formatTimeLeft(endsAt: string): string {
 export function formatPrice(value: string | number): string {
   return `${Number(value).toFixed(2).replace('.', ',')}\u00a0DH`
 }
+
+// "2026-11-20T22:59:00.000Z" → "2026-11-20T23:59" in the browser's time zone, for
+// <input type="datetime-local">, which wants local time without seconds or a time zone.
+export function toInputDate(iso: string): string {
+  const date = new Date(iso)
+  date.setMinutes(date.getMinutes() - date.getTimezoneOffset())
+
+  return date.toISOString().slice(0, 16)
+}

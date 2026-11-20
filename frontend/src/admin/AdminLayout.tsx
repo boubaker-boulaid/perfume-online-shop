@@ -7,6 +7,7 @@ const LINKS = [
   { to: '/admin/orders', label: 'Commandes', end: false },
   { to: '/admin/products', label: 'Produits', end: false },
   { to: '/admin/categories', label: 'Catégories', end: false },
+  { to: '/admin/offers', label: 'Offres', end: false },
 ]
 
 export function AdminLayout() {

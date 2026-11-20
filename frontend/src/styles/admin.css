@@ -204,6 +204,10 @@
   font-size: 12.5px;
 }
 
+.admin-table .admin-nowrap {
+  white-space: nowrap;
+}
+
 .admin-table .is-number {
   text-align: right;
   white-space: nowrap;
@@ -607,6 +611,41 @@ a.admin-card:hover {
   vertical-align: 1px;
 }
 
+/* The offer form: the perfumes inside the set */
+
+.admin-fieldset {
+  margin: 0 0 14px;
+  padding: 0;
+  border: 0;
+}
+
+.admin-checks {
+  display: grid;
+  max-height: 320px;
+  padding: 8px 14px;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+}
+
+.admin-fieldset.has-error .admin-checks {
+  border-color: var(--error);
+}
+
+.admin-checks .admin-check {
+  margin-bottom: 0;
+}
+
+.admin-preview--wide {
+  width: 260px;
+  height: auto;
+  aspect-ratio: 16 / 10;
+}
+
+.admin-form__note {
+  margin: -6px 0 14px;
+}
+
 /* The login page */
 
 .admin-login {
@@ -686,6 +725,11 @@ a.admin-card:hover {
 
   .admin-field-row--3 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .admin-checks {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 16px;
   }
 
   .admin-card--wide {

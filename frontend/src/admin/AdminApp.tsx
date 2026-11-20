@@ -5,6 +5,8 @@ import { CategoriesPage } from './pages/CategoriesPage'
 import { CategoryFormPage } from './pages/CategoryFormPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { LoginPage } from './pages/LoginPage'
+import { OfferFormPage } from './pages/OfferFormPage'
+import { OffersAdminPage } from './pages/OffersAdminPage'
 import { OrderPage } from './pages/OrderPage'
 import { OrdersPage } from './pages/OrdersPage'
 import { ProductFormPage } from './pages/ProductFormPage'
@@ -29,6 +31,9 @@ export default function AdminApp() {
           <Route path="categories" element={<CategoriesPage />} />
           <Route path="categories/new" element={<CategoryFormPage key="new" />} />
           <Route path="categories/:slug" element={<CategoryFormPage />} />
+          <Route path="offers" element={<OffersAdminPage />} />
+          <Route path="offers/new" element={<OfferFormPage key="new" />} />
+          <Route path="offers/:slug" element={<OfferFormPage />} />
         </Route>
       </Route>
     </Routes>
