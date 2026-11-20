@@ -3,6 +3,7 @@ import '../styles/admin.css'
 import { AdminLayout } from './AdminLayout'
 import { DashboardPage } from './pages/DashboardPage'
 import { LoginPage } from './pages/LoginPage'
+import { OrdersPage } from './pages/OrdersPage'
 import { RequireAdmin } from './RequireAdmin'
 
 // The admin's routes, under /admin. App.tsx loads this file with lazy(), which needs a default
@@ -14,6 +15,7 @@ export default function AdminApp() {
       <Route element={<RequireAdmin />}>
         <Route element={<AdminLayout />}>
           <Route index element={<DashboardPage />} />
+          <Route path="orders" element={<OrdersPage />} />
         </Route>
       </Route>
     </Routes>

@@ -209,6 +209,104 @@
   white-space: nowrap;
 }
 
+/* Lists: the search, the filters and the count above a table */
+
+.admin-toolbar {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.admin-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 4px 4px 4px 14px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--white);
+  color: var(--muted);
+}
+
+.admin-search:focus-within {
+  border-color: var(--ink);
+}
+
+.admin-search input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: none;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 16px;
+}
+
+.admin-select select {
+  display: block;
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 38px 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  outline: none;
+  appearance: none;
+  background: var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23100b08' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 14px center;
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.admin-select select:focus {
+  border-color: var(--ink);
+}
+
+.admin-count {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* The order statuses, as small pills */
+
+.admin-status {
+  display: inline-block;
+  padding: 4px 10px 2px;
+  border-radius: 999px;
+  background: var(--cream);
+  color: var(--ink);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.admin-status--pending {
+  background: var(--gold-soft);
+}
+
+.admin-status--confirmed {
+  background: #e4e9f2;
+}
+
+.admin-status--shipped {
+  background: #e8e2f2;
+}
+
+.admin-status--delivered {
+  background: #e3f0e5;
+  color: var(--success);
+}
+
+.admin-status--cancelled {
+  background: #f6e3e0;
+  color: var(--error);
+}
+
 /* The dashboard */
 
 .admin-cards {
@@ -394,6 +492,10 @@ a.admin-card:hover {
 
   .admin-cards {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .admin-toolbar {
+    grid-template-columns: minmax(0, 1fr) 200px 260px;
   }
 
   .admin-card--wide {
