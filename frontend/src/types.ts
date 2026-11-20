@@ -41,6 +41,8 @@ export type Offer = {
   starts_at: string
   ends_at: string
   terms: string[]
+  is_active: boolean
+  sort_order: number
   set: Product // what goes in the bag, at the offer's fixed price
   products: Product[]
   free_product: Product | null
