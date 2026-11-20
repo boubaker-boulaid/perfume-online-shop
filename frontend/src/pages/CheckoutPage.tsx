@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router'
+import { Field } from '../components/Field'
 import { PageHeading } from '../components/PageHeading'
 import { BanknoteIcon } from '../components/Icons'
 import { PillLink } from '../components/PillLink'
@@ -9,16 +10,6 @@ import { formatPrice } from '../utils/format'
 import { createUuid } from '../utils/uuid'
 
 type Errors = Record<string, string[]>
-
-function Field({ label, name, error, children }: { label: string; name: string; error?: string[]; children: React.ReactNode }) {
-  return (
-    <label className={`field${error ? ' has-error' : ''}`} htmlFor={name}>
-      <span className="field__label">{label}</span>
-      {children}
-      {error && <span className="field__error">{error[0]}</span>}
-    </label>
-  )
-}
 
 export function CheckoutPage() {
   const { items, subtotal, clear } = useCart()
