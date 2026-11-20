@@ -3,6 +3,7 @@ import '../styles/admin.css'
 import { AdminLayout } from './AdminLayout'
 import { DashboardPage } from './pages/DashboardPage'
 import { LoginPage } from './pages/LoginPage'
+import { OrderPage } from './pages/OrderPage'
 import { OrdersPage } from './pages/OrdersPage'
 import { RequireAdmin } from './RequireAdmin'
 
@@ -16,6 +17,7 @@ export default function AdminApp() {
         <Route element={<AdminLayout />}>
           <Route index element={<DashboardPage />} />
           <Route path="orders" element={<OrdersPage />} />
+          <Route path="orders/:orderNumber" element={<OrderPage />} />
         </Route>
       </Route>
     </Routes>
