@@ -1,58 +1,192 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Lume Perfums Backend
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+REST API for the Lume Perfums online shop, built with Laravel 13. It serves the public catalog, takes cash-on-delivery orders that the customer sends through WhatsApp, and powers the admin dashboard.
 
-## About Laravel
+- **API reference:** [docs/API.md](docs/API.md)
+- **Postman collection:** [docs/lume-perfums.postman_collection.json](docs/lume-perfums.postman_collection.json)
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Requirements
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- PHP 8.3 or newer, with the `pdo_sqlite` or `pdo_mysql` extension
+- Composer
+- SQLite or MySQL
+- `upload_max_filesize = 4M` (or more) in `php.ini`. The admin uploads images up to 4 MB, but PHP's default is 2M, and PHP refuses a bigger file before Laravel sees it. Find the file with `php --ini`, change the line, and restart `php artisan serve`. Keep `post_max_size` above it (the default, 8M, is enough).
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Install
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+cd backend
+composer setup
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+This installs the dependencies, creates `.env` from `.env.example`, generates the app key and creates the database tables. By default it uses SQLite. To use MySQL, first copy `.env.example` to `.env` and set `DB_CONNECTION=mysql` and the other `DB_*` values.
 
-## Contributing
+Then check these values in `.env`:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+| Variable | What it's for |
+|---|---|
+| `SHOP_ADMIN_NAME`, `SHOP_ADMIN_EMAIL`, `SHOP_ADMIN_PASSWORD` | The admin account. **Required:** seeding stops with an error if any of them is empty. |
+| `SHOP_MAIL_ADDRESS` | Receives new order emails. Change the example value to your own address. |
+| `SHOP_WHATSAPP_NUMBER` | The number customers send their order to, digits only. Change the example value to your own number. |
+| `FRONTEND_URL` | Your frontend's address. CORS and password reset links use it. |
 
-## Code of Conduct
+## Create and seed the database
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+php artisan db:seed
+php artisan storage:link
+```
 
-## Security Vulnerabilities
+This creates the admin account, the categories and the products. `storage:link` makes product images reachable by URL.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+To start over, run `php artisan migrate:fresh --seed`. **It deletes all the data in the database, including orders.**
 
-## License
+## Run it
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+The shop needs three processes. Run each one in its own terminal:
+
+```bash
+php artisan serve        # the API, on http://127.0.0.1:8000
+php artisan queue:work   # sends the order confirmation and reminder emails
+php artisan schedule:work # sends reminders and cancels abandoned orders
+```
+
+With the default `MAIL_MAILER=log`, emails are written to `storage/logs/laravel.log` instead of being sent.
+
+If you change `.env` or the code, restart `queue:work`, because it keeps the old version in memory.
+
+### Scheduled tasks
+
+These run every 5 minutes:
+
+| Command | What it does |
+|---|---|
+| `orders:send-payment-reminders` | Emails customers who haven't opened WhatsApp 30 minutes after ordering |
+| `orders:cancel-unpaid --hours=1 --unopened` | Cancels pending orders whose WhatsApp link wasn't opened within 1 hour, and restores the stock |
+| `orders:cancel-unpaid --hours=24` | Cancels orders still pending after 24 hours, and restores the stock |
+
+`cache:prune-expired` also runs every hour and deletes expired rows from the database cache table.
+
+In production, run `php artisan schedule:run` from cron every minute, and keep `queue:work` running under a process manager such as Supervisor.
+
+## Run the tests
+
+```bash
+composer test
+```
+
+Tests run on an in-memory SQLite database set in `phpunit.xml`, so they don't need any setup. They also don't write to the real log files: `tests/TestCase.php` silences the log channels, so add any new channel to its list.
+
+> **Protect your data:** use `composer test` rather than `php artisan test`, because it clears the config cache first. If you ran `php artisan config:cache`, the tests can ignore `phpunit.xml` and connect to the database in your `.env`, and `RefreshDatabase` would then delete everything in it.
+
+The tests focus on where a bug would cost money:
+
+| File | What it protects |
+|---|---|
+| `OrderPricingTest` | Totals are calculated on the server, so customers can't choose their own price |
+| `OrderStockTest` | Stock can't be oversold, and is taken and given back exactly once |
+| `OrderIdempotencyTest` | Retrying a request doesn't create a duplicate order |
+| `OrderStatusTest` | Orders can only move through the allowed statuses |
+| `AdminAccessTest` | Every admin route refuses guests and non-admins |
+| `HiddenProductsTest` | Hidden products stay out of the public API, even when the catalog is cached |
+| `OfferOrderTest` | Ordering a set charges the set's price, takes one of each perfume inside it, and gives them back on cancel |
+| `PublicOffersTest` | Customers only see running offers with the right totals, and the sets stay out of the shop |
+| `AdminOfferTest` | The admin can manage offers and their images, and can't delete a product an offer uses |
+
+Two customers buying the last unit at the same moment isn't covered. It relies on database row locks, which SQLite ignores, so test it by hand on MySQL.
+
+## Editor support
+
+[Laravel IDE Helper](https://github.com/barryvdh/laravel-ide-helper) tells your editor about Laravel's query methods and your model columns. The files it generates aren't committed, so create them after installing, and rerun the second command after changing the database tables:
+
+```bash
+php artisan ide-helper:generate
+php artisan ide-helper:models --nowrite
+php artisan ide-helper:meta
+```
+
+The second command reads the table structure from the database in your `.env`, and doesn't change any data.
+
+## How orders work
+
+1. The customer places an order. The server calculates the total from database prices and reduces the stock straight away.
+2. The API returns a WhatsApp link with the order filled in, and the customer sends that message to the shop.
+3. An admin moves the order along: `pending` → `confirmed` → `shipped` → `delivered`. Delivery marks it as paid, because payment is cash on delivery.
+4. Orders can be cancelled while `pending` or `confirmed`. Cancelling restores the stock and emails the customer.
+
+## How offers work
+
+An offer such as "Collection Gissah, 2 perfumes + 1 free for 100 DH" is sold as one product, its set. The set is a normal product with `is_offer` turned on: it has its own price and stock, and it never shows in the shop. The perfumes inside it are linked through the `offer_product` table.
+
+1. The admin creates the set as a product, then the offer with its dates and the perfumes inside it.
+2. Customers see the offer while it's switched on and between its start and end dates.
+3. Ordering the set takes one bottle of each perfume inside it, including the free one. Once the offer is over, the set can't be ordered any more.
+4. Cancelling the order gives back the set and its perfumes.
+
+The endpoints and field rules are in [docs/API.md](docs/API.md#get-apiv1offers).
+
+## Demo mode
+
+The public demo of this shop (a portfolio project) runs with fake data that starts again from the seeders. It's switched on with `SHOP_DEMO=true`, and never on a real shop.
+
+```bash
+php artisan shop:demo-reset
+```
+
+This wipes the database and seeds the demo catalog, its offers and the admin account again (`migrate:fresh --seed`). Run it every time the server starts. If the scheduler runs, it also resets every night at 04:00. With `SHOP_DEMO` off, it refuses and changes nothing, so it can't wipe your real data by mistake.
+
+The settings that differ for a demo host:
+
+| Variable | Demo value |
+|---|---|
+| `SHOP_DEMO` | `true` |
+| `APP_ENV`, `APP_DEBUG` | `production`, `false` |
+| `DB_CONNECTION` | `sqlite`: the demo is rebuilt at every start, so a file on the server's disk is enough |
+| `QUEUE_CONNECTION` | `sync`: emails are handled during the request, no worker needed |
+| `MAIL_MAILER` | `log`: nothing is really sent |
+| `SHOP_ADMIN_NAME`, `SHOP_ADMIN_EMAIL`, `SHOP_ADMIN_PASSWORD` | A demo account you're happy to publish, since visitors log in with it |
+| `SHOP_WHATSAPP_NUMBER` | The placeholder `212600000000` |
+
+The frontend shows a demo notice and the demo login when it's built with `VITE_DEMO_MODE=true` (see `frontend/.env.example`).
+
+## Deploy the demo (Render and Vercel)
+
+The public demo runs on two free services. The shop is on **Vercel**, at `https://perfume-shop-beta-blond.vercel.app`, and the API on **Render**, as `perfume-shop-api`. Vercel forwards the API's addresses to Render (`frontend/vercel.json`): `/api`, `/sanctum`, `/storage`, `/login`, `/logout`, `/forgot-password` and `/reset-password`. For the browser, the shop and the API are one site, so the login and CSRF cookies work.
+
+**The API on Render** is built from `Dockerfile` (FrankenPHP, PHP 8.4), with every setting in `render.yaml` at the repository's root:
+
+- At every start, `docker/start.sh` resets the demo (`shop:demo-reset`), links the storage, caches the config and starts the server. The free plan sleeps after 15 minutes without visitors, so the first visit after that waits about a minute and finds a fresh demo.
+- SQLite allows one write at a time. `DB_TRANSACTION_MODE=IMMEDIATE`, `DB_BUSY_TIMEOUT` and `DB_JOURNAL_MODE=wal` make orders wait their turn instead of failing, and the cache and sessions are kept in files.
+- `TRUSTED_PROXIES=*` lets Laravel read Render's and Vercel's `X-Forwarded-*` headers, so it sees https, the visitor's address and the shop's host.
+- `APP_KEY` is generated by Render the first time.
+- It deploys from `main`, and only a change in `backend/` rebuilds it.
+
+To create it: on render.com, **New → Blueprint**, choose this repository, and confirm. To try the image on your computer first:
+
+```bash
+docker build -t perfume-shop-api backend
+docker run --rm -p 8080:8080 -e SHOP_DEMO=true -e DB_CONNECTION=sqlite -e DB_DATABASE=/app/database/database.sqlite \
+  -e APP_KEY=base64:$(head -c 32 /dev/urandom | base64) -e SHOP_ADMIN_NAME=Demo -e SHOP_ADMIN_EMAIL=demo@example.com \
+  -e SHOP_ADMIN_PASSWORD=demo-password perfume-shop-api
+```
+
+**The shop on Vercel** is deployed from `frontend/` with `vercel deploy --prod`. Its settings, for Production:
+
+| Variable | Value |
+|---|---|
+| `VITE_API_URL`, `VITE_SITE_URL` | `https://perfume-shop-beta-blond.vercel.app` (its own address: the API is forwarded) |
+| `VITE_DEMO_MODE` | `true` |
+| `VITE_DEMO_ADMIN_EMAIL`, `VITE_DEMO_ADMIN_PASSWORD` | The demo account from `render.yaml` |
+
+If either address changes, update `frontend/vercel.json`, and `APP_URL`, `FRONTEND_URL` and `SANCTUM_STATEFUL_DOMAINS` in `render.yaml`.
+
+## Logs
+
+Written to `storage/logs/`:
+
+| Location | Contents |
+|---|---|
+| `orders/` | Orders placed, status changes, failed stock checks |
+| `admin/` | Logins, failed logins, price changes |
+| `queue/` | Background jobs that failed after their last try |
+| `laravel.log` | Everything else |

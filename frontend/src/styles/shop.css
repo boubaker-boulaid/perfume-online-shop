@@ -1,0 +1,613 @@
+/* Product cards, the shop page and the product page */
+
+/* Product cards: the bottle on a cream square, then its category, name and price, centered
+   like the bottles of the home page's carousel. The original photos fill the square; the
+   carousel's cut-out bottles stand in the middle of it. */
+
+/* a column, so the "Commander" buttons of a row line up even when a name takes two lines */
+.product-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+}
+
+/* the bag button, on the picture's top right corner */
+.product-card__add {
+  position: absolute;
+  z-index: 2;
+  top: 8px;
+  right: 8px;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.product-card__add:hover:not(:disabled),
+.product-card__add.is-added {
+  background: var(--ink);
+  color: var(--ivory);
+}
+
+.product-card__add:disabled {
+  display: none;
+}
+
+.product-card__order {
+  width: 100%;
+  margin-top: auto;
+}
+
+.product-card__link {
+  margin-bottom: 8px;
+}
+
+.product-card__link {
+  display: block;
+}
+
+.product-card__image {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  margin-bottom: 14px;
+  background: var(--cream);
+}
+
+.product-card__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.product-card__badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+.product-card__category {
+  margin-bottom: 3px;
+  color: #776c61;
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.product-card__name {
+  margin-bottom: 4px;
+  font-size: 14.5px;
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+.product-card__price {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  column-gap: 8px;
+  margin-bottom: 6px;
+  font-size: 14.5px;
+}
+
+.product-card__price s,
+.product__price s {
+  color: var(--muted);
+  font-size: 0.85em;
+}
+
+.product__price s {
+  margin-left: 10px;
+}
+
+.product-card--skeleton {
+  aspect-ratio: 3 / 4;
+  background: var(--cream);
+  animation: pulse 1.2s ease-in-out infinite alternate;
+}
+
+/* A swipeable row on phones, and five across on desktop */
+.best-sellers {
+  display: flex;
+  gap: 14px;
+  margin-inline: calc(var(--gutter) * -1);
+  padding-inline: var(--gutter);
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: var(--gutter);
+  scrollbar-width: none;
+}
+
+.best-sellers::-webkit-scrollbar {
+  display: none;
+}
+
+.best-sellers .product-card {
+  flex: 0 0 min(46%, 210px);
+  scroll-snap-align: start;
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px 14px;
+}
+
+/* Shop: search, categories, price and sorting */
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 620px;
+  margin: 0 auto 18px;
+  padding: 4px 4px 4px 16px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--white);
+  color: var(--muted);
+}
+
+.search:focus-within {
+  border-color: var(--ink);
+}
+
+.search svg {
+  flex: none;
+}
+
+.search input {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 16px;
+}
+
+.search .button {
+  flex: none;
+}
+
+.chips {
+  display: flex;
+  gap: 8px;
+  margin-inline: calc(var(--gutter) * -1);
+  margin-bottom: 18px;
+  padding-inline: var(--gutter);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.chips::-webkit-scrollbar {
+  display: none;
+}
+
+.chip {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 9px 16px 7px;
+  border: 1px solid var(--line-strong);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--ink);
+  font-size: 12.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.chip:hover {
+  border-color: var(--ink);
+}
+
+.chip span {
+  color: var(--muted);
+  font-size: 11.5px;
+}
+
+.chip.is-active {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--ivory);
+  font-weight: 700;
+}
+
+.chip.is-active span {
+  color: rgba(247, 243, 236, 0.7);
+}
+
+.shop-tools {
+  position: relative;
+  margin-bottom: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+/* Price and sort share one row. The price fields open full width below them. */
+.price-filter summary {
+  display: flex;
+  width: calc(40% - 5px);
+  align-items: center;
+  justify-content: space-between;
+  min-height: 48px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--white);
+  font-size: 12.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  list-style: none;
+}
+
+.price-filter summary::-webkit-details-marker {
+  display: none;
+}
+
+.price-filter summary::after {
+  content: '+';
+  font-size: 16px;
+}
+
+.price-filter[open] summary::after {
+  content: '−';
+}
+
+.price-filter form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--white);
+}
+
+.price-filter .field {
+  margin: 0;
+}
+
+.price-filter .button {
+  min-height: 48px;
+}
+
+.sort {
+  position: absolute;
+  top: 16px;
+  right: 0;
+  width: calc(60% - 5px);
+}
+
+.sort select {
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+.shop-count {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 44px;
+  margin-bottom: 14px;
+  color: var(--muted);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 44px;
+}
+
+.pagination__status {
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Product page */
+
+.product {
+  display: grid;
+  gap: 26px;
+}
+
+.product__image {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: var(--cream);
+}
+
+.product__image img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: contain;
+}
+
+.product__info .eyebrow {
+  margin-bottom: 16px;
+}
+
+.product__info .display-title {
+  margin-bottom: 12px;
+  font-size: clamp(30px, 8.4vw, 40px);
+}
+
+.product__price {
+  margin-top: 18px;
+  font-family: var(--serif);
+  font-size: 28px;
+}
+
+.product__description {
+  margin-top: 16px;
+}
+
+.product__notes {
+  margin-top: 22px;
+}
+
+.product__note-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.product__note-list span {
+  padding: 7px 14px 5px;
+  border: 1px solid var(--line-strong);
+  border-radius: 3px;
+  font-size: 13px;
+}
+
+.product__stock {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 22px;
+  color: var(--success);
+  font-size: 13.5px;
+  letter-spacing: 0.04em;
+}
+
+.product__stock::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.product__stock.is-out {
+  color: var(--error);
+}
+
+.product__facts {
+  display: grid;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  color: var(--body);
+  font-size: 13.5px;
+}
+
+.product__facts li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.product__facts svg {
+  flex: none;
+  color: var(--gold-deep);
+}
+
+.product-skeleton {
+  height: 480px;
+}
+
+/* Always in reach on phones: the footer leaves room for it below */
+.buy-bar {
+  position: fixed;
+  z-index: 8;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px var(--gutter) calc(12px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
+  background: rgba(247, 243, 236, 0.96);
+  backdrop-filter: blur(14px);
+}
+
+.buy-bar__button {
+  flex: 1;
+  min-width: 0;
+  min-height: 48px;
+  padding-inline: 14px;
+}
+
+/* "Ajouter au panier" beside "Commander": an icon only on phones, to leave room */
+.buy-bar__add {
+  flex: none;
+  width: 48px;
+  min-height: 48px;
+  padding-inline: 0;
+}
+
+.buy-bar__add span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.stepper {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 3px;
+  background: var(--white);
+}
+
+.stepper button {
+  width: 44px;
+  height: 44px;
+  border: none;
+  background: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.stepper button:disabled {
+  cursor: not-allowed;
+  opacity: 0.3;
+}
+
+.stepper span {
+  min-width: 24px;
+  font-size: 15px;
+  text-align: center;
+}
+
+.related .section-bar {
+  justify-content: center;
+}
+
+@media (min-width: 640px) {
+  .product-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 36px 18px;
+  }
+}
+
+@media (min-width: 768px) {
+  .search input {
+    font-size: 15px;
+  }
+
+  .chips {
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-inline: 0;
+    padding-inline: 0;
+    overflow: visible;
+  }
+
+  .price-filter summary {
+    width: 180px;
+  }
+
+  .price-filter form {
+    max-width: 480px;
+  }
+
+  .sort {
+    width: 280px;
+  }
+
+  .product {
+    grid-template-columns: 1fr 1fr;
+    gap: 44px;
+    align-items: start;
+  }
+
+  .buy-bar {
+    position: static;
+    flex-wrap: wrap;
+    margin-top: 24px;
+    padding: 0;
+    border: none;
+    background: none;
+    backdrop-filter: none;
+  }
+
+  .buy-bar__add {
+    width: auto;
+    padding-inline: 22px;
+  }
+
+  .buy-bar__add span {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+  }
+}
+
+@media (min-width: 1024px) {
+  .product-card__add {
+    top: 12px;
+    right: 12px;
+    width: 38px;
+    height: 38px;
+  }
+
+  .best-sellers {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 20px;
+    margin-inline: 0;
+    padding-inline: 0;
+    overflow: visible;
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 44px 20px;
+  }
+
+  /* "Vous aimerez aussi" has at most four cards: they sit in the middle, under the title */
+  .related .best-sellers {
+    grid-template-columns: repeat(auto-fit, minmax(0, 250px));
+    justify-content: center;
+  }
+
+  .product {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+    gap: clamp(48px, 6vw, 96px);
+  }
+
+  .product__info {
+    padding-top: 12px;
+  }
+
+  .product__info .display-title {
+    font-size: clamp(36px, 3.4vw, 50px);
+  }
+
+  /* "Commander" fills the rest of the row, and goes under the others only if the row is too narrow */
+  .buy-bar__button {
+    flex: 1 1 200px;
+    max-width: 360px;
+  }
+}

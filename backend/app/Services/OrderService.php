@@ -1,0 +1,413 @@
+<?php
+
+namespace App\Services;
+
+use App\Exceptions\InsufficientStockException;
+use App\Jobs\SendOrderConfirmation;
+use App\Mail\CustomerOrderCancelledMail;
+use App\Models\Offer;
+use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Product;
+use App\Models\User;
+use App\Services\Concerns\HandlesCache;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\ValidationException;
+use Throwable;
+
+class OrderService
+{
+    use HandlesCache;
+
+    // simultaneous orders can deadlock on the row locks: the database undoes one of them, so try it again
+    private const PLACE_ATTEMPTS = 5;
+
+    /**
+     * Create a new class instance.
+     */
+    public function __construct()
+    {
+        //
+    }
+
+    public function place(array $data)
+    {
+        // a retry of an order that already exists gets that order back.
+        // this is a plain read, before the transaction on purpose: locking a key that doesn't exist yet
+        // locks the gap in the index where it would go, and the orders insert below then deadlocks with
+        // the other orders placed at the same moment. two copies arriving together both pass this check,
+        // and the unique index on idempotency_key refuses the second insert (see the catch below)
+        $orderExists = Order::where('idempotency_key', $data['idempotency_key'])->first();
+        if ($orderExists) {
+            if (is_null($orderExists->confirmation_sent_at)) {
+                SendOrderConfirmation::dispatch($orderExists->id);
+            }
+
+            return $orderExists;
+        }
+
+        try {
+            return DB::transaction(function () use ($data) {
+                $products = $this->lockAndValidateProduct($data['items']);
+                // stock changed: the cached catalog shows old stock (bumped only once the order commits)
+                $this->bumpCacheVersion('catalog');
+                // calculate the total
+                $total = collect($data['items'])->sum(function ($item) use ($products) {
+                    $product = $products->get($item['product_id']);
+
+                    return $product->price * $item['quantity'];
+                });
+
+                $orderNumber = $this->generateOrderNumber();
+
+                $order = Order::create([
+                    'order_number' => $orderNumber,
+                    'idempotency_key' => $data['idempotency_key'],
+                    'customer_name' => $data['customer_name'],
+                    'phone' => $data['phone'],
+                    'email' => $data['email'],
+                    'city' => $data['city'],
+                    'address' => $data['address'],
+                    'note' => $data['note'] ?? null,
+                    'subtotal' => $total,
+                    'total' => $total,
+                ]);
+
+                $this->saveOrderItems($order, $products, $data['items']);
+                $order->load('items');
+
+                SendOrderConfirmation::dispatch($order->id);
+
+                Log::channel('orders')->info('order.placed', [
+                    'order_number' => $order->order_number,
+                    'total' => $order->total,
+                    'items' => $order->items->count(),
+                ]);
+
+                return $order;
+            }, self::PLACE_ATTEMPTS);
+        } catch (InsufficientStockException $e) {
+            // handled (the customer gets a clear error), but worth knowing what people try to buy
+            Log::channel('orders')->warning('order.insufficient_stock', [
+                'product' => $e->productName,
+                'requested' => $e->stockRequested,
+                'available' => $e->stockAvaliable,
+            ]);
+            throw $e;
+        } catch (UniqueConstraintViolationException $e) {
+            // a simultaneous retry saved this key first, so send back its order.
+            // any other collision (the order number...) is a real error
+            return Order::where('idempotency_key', $data['idempotency_key'])->first() ?? throw $e;
+        } catch (ValidationException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            // no customer details in the log (name, phone, address): the key and items are enough to investigate
+            Log::channel('daily')->error('order.place_failed', [
+                'idempotency_key' => $data['idempotency_key'] ?? null,
+                'items' => collect($data['items'] ?? [])->map(fn ($i) => ['product_id' => $i['product_id'] ?? null, 'quantity' => $i['quantity'] ?? null])->all(),
+                'exception' => $e,
+            ]);
+            throw $e;
+        }
+    }
+
+    private function lockAndValidateProduct(array $items)
+    {
+        $productsIds = collect($items)->pluck('product_id');
+
+        // the ids of the perfumes inside the sets in the order, with a locking read: on MariaDB a plain read here
+        // would take the transaction's snapshot, and locking a product changed after it fails with error 1020.
+        // only the offer_product rows get the shared lock, never the products (they are locked for update below)
+        $offersProductsIds = DB::table('offer_product')
+            ->join('offers', 'offers.id', '=', 'offer_product.offer_id')
+            ->whereIn('offers.product_id', $productsIds)
+            ->sharedLock()
+            ->pluck('offer_product.product_id');
+
+        // lock everything at once, always sorted by id, so two orders never wait on each other
+        $products = Product::whereIn('id', $productsIds->merge($offersProductsIds)->unique())->orderBy('id')->lockForUpdate()->get()->keyBy('id');
+
+        // a plain read is safe now: the products are locked, nobody can change them any more
+        $offers = Offer::with('products')->whereIn('product_id', $productsIds)->get()->keyBy('product_id');
+
+        foreach ($items as $item) {
+            $product = $products->get($item['product_id']);
+
+            if (! $product) {
+                throw new ModelNotFoundException('Le produit n° '.$item['product_id'].' est introuvable.');
+            }
+
+            // if ($product->stock < $item['quantity']) {
+            //     throw new InsufficientStockException($product->name, $item['quantity'], $product->stock);
+            // }
+
+            $this->takeStock($product, $item['quantity']);
+
+            // a set also takes one of each perfume inside it (the free one too), for every set ordered
+            if ($product->is_offer) {
+                $offer = $offers->get($product->id);
+
+                // the offer may have ended (or been switched off) since the customer filled the bag
+                if (! $offer?->isCurrent()) {
+                    throw ValidationException::withMessages([
+                        'items' => ["L’offre {$product->name} n’est plus disponible."],
+                    ]);
+                }
+
+                foreach ($offer->products as $p) {
+                    $this->takeStock($products->get($p->id), $item['quantity']); // use $products intade of $p cause they are locked and up to date
+                }
+            }
+        }
+
+        return $products;
+    }
+
+    private function takeStock(Product $product, int $quantity)
+    {
+        if ($product->stock < $quantity) {
+            throw new InsufficientStockException($product->name, $quantity, $product->stock);
+        }
+
+        // decrement() also updates $product in memory, so a perfume ordered alone and inside a set
+        // in the same bag is checked against what the first line already took
+        $product->decrement('stock', $quantity);
+    }
+
+    private function generateOrderNumber()
+    {
+        $year = now()->year;
+        // get the sequence of the current year and lock the table to prevant having the same name for several orders placed at the same time
+        $sequence = DB::table('order_sequences')->where('year', $year)->lockForUpdate()->first();
+
+        if (! $sequence) {
+            // manualy create the first sequence
+            DB::table('order_sequences')->insert([
+                'year' => $year,
+                'last_number' => 1,
+            ]);
+            $number = 1;
+        } else {
+            $number = $sequence->last_number + 1;
+            // increase the last_number of the last sequence by 1
+            DB::table('order_sequences')->where('year', $year)->update([
+                'last_number' => $number,
+            ]);
+        }
+
+        return sprintf('ORD-%d-%06d', $year, $number);
+    }
+
+    private function saveOrderItems(Order $order, Collection $products, array $items)
+    {
+        collect($items)->each(function ($i) use ($products, $order) {
+            $p = $products->get($i['product_id']);
+            OrderItem::create([
+                'order_id' => $order->id,
+                'product_id' => $p->id,
+                // a set keeps the perfumes inside it in its name: the WhatsApp message and the emails show them
+                'product_name' => $p->is_offer && $p->description ? "{$p->name} ({$p->description})" : $p->name,
+                'unit_price' => $p->price,
+                'quantity' => $i['quantity'],
+                'line_total' => $i['quantity'] * $p->price,
+            ]);
+        });
+    }
+
+    public function updateWhatsappOpened(string $orderKey)
+    {
+        // a late call can't bring a cancelled order back, so only pending orders are recorded
+        Order::where('idempotency_key', $orderKey)->where('status', 'pending')->whereNull('whatsapp_opened_at')->update([
+            'whatsapp_opened_at' => now(),
+        ]);
+    }
+
+    public function getOrders(array $filters)
+    {
+        $query = Order::query();
+        $query->when($filters['q'] ?? null, function ($q, $search) {
+            $q->whereAny(['customer_name', 'phone', 'order_number'], 'like', '%'.$search.'%');
+        })->when($filters['status'] ?? null, function ($q, $status) {
+            $q->where('status', $status);
+        })->when($filters['payment_status'] ?? null, function ($q, $payment_status) {
+            $q->where('payment_status', $payment_status);
+        })->when($filters['city'] ?? null, function ($q, $city) {
+            $q->where('city', 'like', '%'.$city.'%');
+        })->when($filters['date_from'] ?? null, function ($q, $from) {
+            $q->whereDate('created_at', '>=', $from);
+        })->when($filters['date_to'] ?? null, function ($q, $to) {
+            $q->whereDate('created_at', '<=', $to);
+        })->when($filters['older_than_hours'] ?? null, function ($q, $hours) {
+            // e.g. pending orders older than 12h to follow up on, before they are cancelled at 24h
+            $q->where('created_at', '<=', now()->subHours($hours));
+        });
+
+        match ($filters['sort'] ?? null) {
+            'oldest' => $query->oldest(),
+            'total_desc' => $query->orderByDesc('total'),
+            'total_asc' => $query->orderBy('total'),
+            default => $query->latest(),
+        };
+
+        return $query->with('items')->withCount('items')->paginate(10)->appends($filters);
+    }
+
+    public function getOrder(Order $order)
+    {
+        return $order->load(['history.user', 'items'])->loadCount('items');
+    }
+
+    // cancel pending orders older than $olderThanHours and give their stock back
+    public function cancelUnpaidOrders(int $olderThanHours, bool $onlyUnopened = false): int
+    {
+        $note = $onlyUnopened
+            ? "Annulation automatique : WhatsApp non ouvert sous {$olderThanHours} h."
+            : "Annulation automatique : commande non confirmée sous {$olderThanHours} h.";
+
+        $orderIds = $this->unpaidOrdersQuery($olderThanHours, $onlyUnopened)->pluck('id');
+
+        // one transaction per order, so a failure on one doesn't undo the others
+        return $orderIds->filter(fn ($id) => $this->cancelUnpaidOrder($id, $olderThanHours, $onlyUnopened, $note))->count();
+    }
+
+    private function unpaidOrdersQuery(int $olderThanHours, bool $onlyUnopened)
+    {
+        return Order::where('status', 'pending')
+            ->where('created_at', '<=', now()->subHours($olderThanHours))
+            ->when($onlyUnopened, fn ($q) => $q->whereNull('whatsapp_opened_at'));
+    }
+
+    private function cancelUnpaidOrder(int $orderId, int $olderThanHours, bool $onlyUnopened, string $note): bool
+    {
+        $order = DB::transaction(function () use ($orderId, $olderThanHours, $onlyUnopened, $note) {
+            // re-check the conditions in the update itself: if the admin confirmed the order
+            // (or the customer opened whatsapp) in the meantime, nothing is updated and the stock stays
+            $cancelled = $this->unpaidOrdersQuery($olderThanHours, $onlyUnopened)
+                ->where('id', $orderId)
+                ->update(['status' => 'cancelled']);
+
+            if (! $cancelled) {
+                return null;
+            }
+
+            $order = Order::with('items')->find($orderId);
+
+            $this->restoreStock($order);
+
+            $order->history()->create([
+                'user_id' => null, // done by the system, not an admin
+                'from_status' => 'pending',
+                'to_status' => 'cancelled',
+                'note' => $note,
+            ]);
+
+            Log::channel('orders')->info('order.auto_cancelled', [
+                'order_number' => $order->order_number,
+                'reason' => $note,
+                'items' => $order->items->count(),
+            ]);
+
+            return $order;
+        });
+
+        if (! $order) {
+            return false;
+        }
+
+        $this->notifyCancelled($order);
+
+        return true;
+    }
+
+    public function changeStatus(Order $order, string $to, ?User $user, ?string $note)
+    {
+        $order = DB::transaction(function () use ($order, $to, $user, $note) {
+            // re-read the order under the lock so we check the real current status,
+            // not the one loaded by route binding (another admin may have changed it)
+            $order = Order::whereKey($order->id)->lockForUpdate()->firstOrFail();
+            $from = $order->status;
+
+            if (! $order->canTransitionTo($to)) {
+                abort(422, "Impossible de passer le statut de la commande de {$from} à {$to}.");
+            }
+
+            // restore the stock if the order is cancelled
+            if ($to === 'cancelled') {
+                $this->restoreStock($order->load('items'));
+            }
+
+            // save the new status (cash on delivery: delivered means the money was collected)
+            $changes = ['status' => $to];
+            if ($to === 'delivered') {
+                $changes['payment_status'] = 'paid';
+            }
+            $order->update($changes);
+
+            $order->history()->create([
+                'user_id' => $user?->id,
+                'from_status' => $from,
+                'to_status' => $to,
+                'note' => $note,
+            ]);
+
+            Log::channel('orders')->info('order.status_changed', [
+                'order_number' => $order->order_number,
+                'from_status' => $from,
+                'to_status' => $to,
+                'payment_status' => $order->payment_status,
+                'by' => $user?->name ?? 'system',
+            ]);
+
+            return $order;
+        });
+
+        if ($to === 'cancelled') {
+            $this->notifyCancelled($order);
+        }
+
+        return $order;
+    }
+
+    // runs after the transaction: an email problem must never undo the cancellation
+    private function notifyCancelled(Order $order): void
+    {
+        if (! $order->email) {
+            return;
+        }
+
+        try {
+            Mail::to($order->email)->send(new CustomerOrderCancelledMail($order));
+        } catch (Throwable $e) {
+            Log::channel('orders')->error('order.cancelled_email_failed', [
+                'order_number' => $order->order_number,
+                'exception' => $e,
+            ]);
+        }
+    }
+
+    // give back the stock of every item of the order (items must be loaded)
+    private function restoreStock(Order $order): void
+    {
+        foreach ($order->items as $item) {
+            // product_id is null when the product was deleted, nothing to give back
+            if ($item->product_id) {
+                Product::where('id', $item->product_id)->increment('stock', $item->quantity);
+
+                // a set also gives back the perfumes inside it. it reads the offer as it is now, so if its
+                // perfumes were changed after the order, the new ones come back (see docs/API.md, Offers)
+                $offer = Offer::with('products')->where('product_id', $item->product_id)->first();
+                foreach ($offer?->products ?? [] as $p) {
+                    Product::where('id', $p->id)->increment('stock', $item->quantity);
+                }
+            }
+        }
+
+        // query increments don't fire the observer, so make the cached catalog stale here
+        $this->bumpCacheVersion('catalog');
+    }
+}

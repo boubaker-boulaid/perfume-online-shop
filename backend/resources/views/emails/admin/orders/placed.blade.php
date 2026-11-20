@@ -1,0 +1,169 @@
+@php
+    $money = fn ($v) => number_format((float) $v, 2, ',', ' ') . ' DH';
+    $statuses = ['pending' => 'En attente', 'confirmed' => 'Confirmée', 'shipped' => 'Expédiée', 'delivered' => 'Livrée', 'cancelled' => 'Annulée'];
+    $payments = ['paid' => 'Payée', 'unpaid' => 'Non payée'];
+    $itemCount = $order->items->count();
+@endphp
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="x-apple-disable-message-reformatting">
+    <title>Alerte nouvelle commande</title>
+    <style>
+        @media screen and (max-width: 620px) {
+            .container { width: 100% !important; }
+            .pad { padding: 24px 16px 0 !important; }
+            .pad-header { padding: 22px 16px 18px !important; }
+            .pad-footer { padding: 20px 16px !important; }
+            .brand { font-size: 13px !important; letter-spacing: 3px !important; }
+            .hide-sm { display: none !important; }
+            .totals { float: none !important; width: 100% !important; margin-bottom: 24px !important; }
+            .fact-cell { padding: 10px 12px !important; }
+        }
+    </style>
+</head>
+<body style="margin:0; padding:0; background-color:#f6f4ef; font-family:Helvetica, Arial, sans-serif;">
+    {{-- preheader, invisible but picked up by mail clients --}}
+    <div style="display:none; max-height:0; overflow:hidden;">
+        Nouvelle commande {{ $order->order_number }} : {{ $itemCount }} {{ $itemCount > 1 ? 'articles' : 'article' }}, {{ $money($order->total) }}.
+    </div>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f6f4ef; padding:24px 12px;">
+        <tr>
+            <td align="center">
+                <table role="presentation" class="container" width="600" cellpadding="0" cellspacing="0" style="width:600px; max-width:100%;">
+
+                    {{-- header --}}
+                    <tr>
+                        <td align="center" class="pad-header" style="background-color:#221a12; padding:28px 40px 24px; border-radius:16px 16px 0 0;">
+                            <p class="brand" style="margin:0 0 6px; font-family:Georgia, 'Times New Roman', serif; font-size:13px; letter-spacing:4px; color:#c8a24a;">LUME PERFUMS</p>
+                            <p style="margin:0; font-size:12px; letter-spacing:2px; text-transform:uppercase; color:#8a7f72;">Alerte nouvelle commande</p>
+                        </td>
+                    </tr>
+
+                    {{-- body --}}
+                    <tr>
+                        <td class="pad" style="background-color:#ffffff; padding:40px 40px 0; border-left:1px solid #e8e1d6; border-right:1px solid #e8e1d6;">
+
+                            <h1 style="margin:0 0 4px; font-family:Georgia, 'Times New Roman', serif; font-size:24px; color:#221a12;">
+                                Une nouvelle commande a été passée
+                            </h1>
+                            <p style="margin:0 0 28px; font-size:14px; line-height:22px; color:#6d635a;">
+                                {{ $order->created_at?->format('d/m/Y H:i') }} — commande {{ $order->order_number }}
+                            </p>
+
+                            {{-- quick facts --}}
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
+                                <tr>
+                                    <td style="padding-right:12px;">
+                                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#fbf9f5; border:1px solid #e8e1d6; border-radius:12px;">
+                                            <tr>
+                                                <td class="fact-cell" style="padding:14px 16px;">
+                                                    <span style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#a2957f;">Statut</span><br>
+                                                    <span style="background-color:#f3ece2; border-radius:20px; padding:4px 12px; font-size:12px; color:#221a12;">{{ $statuses[$order->status] ?? $order->status }}</span>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                    <td>
+                                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#fbf9f5; border:1px solid #e8e1d6; border-radius:12px;">
+                                            <tr>
+                                                <td class="fact-cell" style="padding:14px 16px;">
+                                                    <span style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#a2957f;">Paiement</span><br>
+                                                    <span style="background-color:{{ $order->payment_status === 'paid' ? '#e7f0e4' : '#faf0e3' }}; border-radius:20px; padding:4px 12px; font-size:12px; color:#221a12;">{{ $payments[$order->payment_status] ?? $order->payment_status }}</span>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            {{-- customer details --}}
+                            <h2 style="margin:0 0 12px; font-family:Georgia, 'Times New Roman', serif; font-size:16px; color:#221a12;">Client</h2>
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:14px; color:#6d635a; margin-bottom:32px;">
+                                <tr>
+                                    <td style="padding:6px 0; width:110px; color:#a2957f;">Nom</td>
+                                    <td style="padding:6px 0; color:#221a12;">{{ $order->customer_name }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:6px 0;">Téléphone</td>
+                                    <td style="padding:6px 0; color:#221a12;"><a href="tel:{{ $order->phone }}" style="color:#221a12; text-decoration:none;">{{ $order->phone }}</a></td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:6px 0;">E-mail</td>
+                                    <td style="padding:6px 0; color:#221a12; word-wrap:break-word;"><a href="mailto:{{ $order->email }}" style="color:#221a12; text-decoration:none; word-wrap:break-word;">{{ $order->email }}</a></td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:6px 0;">Ville</td>
+                                    <td style="padding:6px 0; color:#221a12;">{{ $order->city ?? '—' }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:6px 0;">Adresse</td>
+                                    <td style="padding:6px 0; color:#221a12; word-wrap:break-word;">{{ $order->address ?? '—' }}</td>
+                                </tr>
+                                @if ($order->note)
+                                    <tr>
+                                        <td style="padding:6px 0;">Note</td>
+                                        <td style="padding:6px 0; color:#221a12; word-wrap:break-word;">{{ $order->note }}</td>
+                                    </tr>
+                                @endif
+                            </table>
+
+                            {{-- items — the unit price column hides on small screens --}}
+                            <h2 style="margin:0 0 12px; font-family:Georgia, 'Times New Roman', serif; font-size:16px; color:#221a12;">Articles</h2>
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse; margin-bottom:28px;">
+                                <tr>
+                                    <th align="left" style="border-bottom:2px solid #221a12; padding:8px 8px 8px 0; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:#a2957f;">Produit</th>
+                                    <th align="center" style="border-bottom:2px solid #221a12; padding:8px; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:#a2957f;">Qté</th>
+                                    <th align="right" class="hide-sm" style="border-bottom:2px solid #221a12; padding:8px; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:#a2957f;">Prix</th>
+                                    <th align="right" style="border-bottom:2px solid #221a12; padding:8px 0 8px 8px; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:#a2957f;">Total</th>
+                                </tr>
+                                @forelse ($order->items as $item)
+                                    <tr>
+                                        <td style="border-bottom:1px solid #eeeadf; padding:14px 8px 14px 0; font-size:14px; color:#221a12; word-wrap:break-word;">{{ $item->product_name }}</td>
+                                        <td align="center" style="border-bottom:1px solid #eeeadf; padding:14px 8px; font-size:14px; color:#6d635a;">x{{ $item->quantity }}</td>
+                                        <td align="right" class="hide-sm" style="border-bottom:1px solid #eeeadf; padding:14px 8px; font-size:14px; color:#6d635a;">{{ $money($item->unit_price) }}</td>
+                                        <td align="right" style="border-bottom:1px solid #eeeadf; padding:14px 0 14px 8px; font-size:14px; color:#221a12;">{{ $money($item->line_total) }}</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4" style="padding:14px 0; font-size:14px; color:#a2957f;">Aucun article enregistré pour cette commande.</td>
+                                    </tr>
+                                @endforelse
+                            </table>
+
+                            {{-- totals — floats right on desktop, full width on mobile --}}
+                            <table role="presentation" class="totals" width="100%" cellpadding="0" cellspacing="0" align="right" style="width:240px; float:right; margin-bottom:32px; font-size:14px; color:#221a12;">
+                                <tr>
+                                    <td style="padding:6px 0; color:#6d635a;">Sous-total</td>
+                                    <td align="right" style="padding:6px 0;">{{ $money($order->subtotal) }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:6px 0; color:#6d635a;">Livraison</td>
+                                    <td align="right" style="padding:6px 0;">{{ $order->shipping_cost == 0 ? 'Offerte' : $money($order->shipping_cost) }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:12px 0 0; border-top:2px solid #221a12; font-family:Georgia, 'Times New Roman', serif; font-size:16px;">Total</td>
+                                    <td align="right" style="padding:12px 0 0; border-top:2px solid #221a12; font-family:Georgia, 'Times New Roman', serif; font-size:16px; color:#c8a24a;">{{ $money($order->total) }}</td>
+                                </tr>
+                            </table>
+                            <div style="clear:both;"></div>
+                        </td>
+                    </tr>
+
+                    {{-- footer --}}
+                    <tr>
+                        <td align="center" class="pad-footer" style="background-color:#221a12; padding:24px 40px; border-radius:0 0 16px 16px;">
+                            <p style="margin:0; font-size:12px; line-height:18px; color:#8a7f72;">
+                                Notification automatique envoyée lorsqu’une commande est passée.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

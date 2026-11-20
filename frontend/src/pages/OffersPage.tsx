@@ -1,0 +1,31 @@
+import { OfferCard, OfferCardSkeleton } from '../components/offers/OfferCard'
+import { PageHeading } from '../components/PageHeading'
+import { PillLink } from '../components/PillLink'
+import { useApi } from '../hooks/useApi'
+import { getOffers } from '../services/api'
+import { PageTitle } from '../components/PageTitle'
+
+export function OffersPage() {
+  const { data: offers, error, loading } = useApi(getOffers, 'offers')
+
+  return (
+    <div className="container page">
+      <PageTitle>Offres</PageTitle>
+      <PageHeading eyebrow="Promos" title={<>Les offres <em>du moment</em></>} trail={[{ label: 'Offres' }]} center>
+        Des packs à petit prix, pour une durée limitée.
+      </PageHeading>
+
+      <div className="offer-grid">
+        {loading && Array.from({ length: 4 }, (_, index) => <OfferCardSkeleton key={index} />)}
+        {offers?.map((offer) => <OfferCard key={offer.id} offer={offer} />)}
+      </div>
+
+      {(Boolean(error) || offers?.length === 0) && (
+        <div className="empty">
+          <p>{error ? 'Impossible de charger les offres. Réessayez dans un instant.' : 'Pas d’offre en ce moment. Revenez bientôt\u00a0!'}</p>
+          <PillLink to="/shop">Voir la boutique</PillLink>
+        </div>
+      )}
+    </div>
+  )
+}

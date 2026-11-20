@@ -1,0 +1,74 @@
+<?php
+
+namespace App\Http\Controllers\Api\V1;
+
+use App\ApiResponseTrait;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\StoreCategoryRequest;
+use App\Http\Requests\V1\UpdateCategoryRequest;
+use App\Http\Resources\V1\CategoryResource;
+use App\Models\Category;
+use App\Services\CategoryService;
+
+class CategoryController extends Controller
+{
+    use ApiResponseTrait;
+
+    public function __construct(protected CategoryService $category_service) {}
+
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        $categories = $this->category_service->getAdminCategories();
+
+        return $this->ok(CategoryResource::collection($categories), 'Catégories récupérées.');
+    }
+
+    public function active()
+    {
+        $categories = $this->category_service->getCategories();
+
+        return $this->ok(CategoryResource::collection($categories), 'Catégories récupérées.');
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(StoreCategoryRequest $request)
+    {
+        $category = $this->category_service->createCategory($request->validated(), $request->file('image'));
+
+        return $this->created(new CategoryResource($category), 'Catégorie créée.');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(Category $category)
+    {
+        return $this->okNoPgs(new CategoryResource($category->loadCount('products')),
+            'Catégorie récupérée.');
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(UpdateCategoryRequest $request, Category $category)
+    {
+        $category = $this->category_service->updateCategory($category, $request->validated(), $request->file('image'));
+
+        return $this->okNoPgs(new CategoryResource($category), 'Catégorie mise à jour.');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Category $category)
+    {
+        $this->category_service->deleteCategory($category);
+
+        return $this->noContent();
+    }
+}

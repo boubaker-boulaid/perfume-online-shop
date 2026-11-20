@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "https://perfume-shop-api.onrender.com/api/:path*" },
+    { "source": "/sanctum/:path*", "destination": "https://perfume-shop-api.onrender.com/sanctum/:path*" },
+    { "source": "/storage/:path*", "destination": "https://perfume-shop-api.onrender.com/storage/:path*" },
+    { "source": "/login", "destination": "https://perfume-shop-api.onrender.com/login" },
+    { "source": "/logout", "destination": "https://perfume-shop-api.onrender.com/logout" },
+    { "source": "/forgot-password", "destination": "https://perfume-shop-api.onrender.com/forgot-password" },
+    { "source": "/reset-password", "destination": "https://perfume-shop-api.onrender.com/reset-password" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

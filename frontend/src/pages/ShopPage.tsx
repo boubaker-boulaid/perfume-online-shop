@@ -1,0 +1,142 @@
+import { SearchIcon } from '../components/Icons'
+import { PageHeading } from '../components/PageHeading'
+import { Pagination } from '../components/Pagination'
+import { ProductCard, ProductCardSkeleton } from '../components/ProductCard'
+import { useApi } from '../hooks/useApi'
+import { useFilters } from '../hooks/useFilters'
+import { scrollToTop } from '../motion/smoothScroll'
+import { getCategories, getProducts } from '../services/api'
+import type { ProductFilters, ProductSort } from '../types'
+import { PageTitle } from '../components/PageTitle'
+
+const sortOptions: { value: ProductSort | ''; label: string }[] = [
+  { value: '', label: 'Recommandés' },
+  { value: 'newest', label: 'Nouveautés' },
+  { value: 'oldest', label: 'Plus anciens' },
+  { value: 'price_asc', label: 'Prix : du moins cher au plus cher' },
+  { value: 'price_desc', label: 'Prix : du plus cher au moins cher' },
+]
+
+export function ShopPage() {
+  // The filters live in the url with the API's own parameter names, so a filtered
+  // page can be shared and the back button works.
+  const { params, update, clear } = useFilters()
+
+  const filters: ProductFilters = {
+    q: params.get('q') ?? undefined,
+    category: params.get('category') ?? undefined,
+    min_price: params.get('min_price') ?? undefined,
+    max_price: params.get('max_price') ?? undefined,
+    sort: (params.get('sort') as ProductSort) ?? undefined,
+    page: Number(params.get('page')) || 1,
+  }
+
+  const { data: categories } = useApi(getCategories, 'categories')
+  const { data: result, loading } = useApi(() => getProducts(filters), params.toString())
+
+  const goToPage = (page: number) => {
+    update({ page: page > 1 ? String(page) : '' })
+    scrollToTop()
+  }
+
+  const hasFilters = ['q', 'category', 'min_price', 'max_price'].some((key) => params.get(key))
+  const hasPriceFilter = Boolean(params.get('min_price') || params.get('max_price'))
+
+  return (
+    <div className="container page">
+      <PageTitle>Boutique</PageTitle>
+      <PageHeading eyebrow="Boutique" title={<>Tous les <em>parfums</em></>} trail={[{ label: 'Boutique' }]} center>
+        Des parfums originaux, choisis un par un et livrés partout au Maroc.
+      </PageHeading>
+
+      <form
+        className="search"
+        role="search"
+        onSubmit={(event) => {
+          event.preventDefault()
+          update({ q: String(new FormData(event.currentTarget).get('q') ?? '').trim() })
+        }}
+      >
+        <SearchIcon />
+        <input key={params.get('q') ?? ''} type="search" name="q" aria-label="Rechercher un parfum" placeholder="Chercher un parfum" defaultValue={params.get('q') ?? ''} maxLength={100} />
+        <button type="submit" className="button button--accent">
+          Chercher
+        </button>
+      </form>
+
+      <div className="chips" role="group" aria-label="Catégorie">
+        <button type="button" className={`chip${!params.get('category') ? ' is-active' : ''}`} aria-pressed={!params.get('category')} onClick={() => update({ category: '' })}>
+          Tous
+        </button>
+        {categories?.map((category) => (
+          <button key={category.id} type="button" className={`chip${params.get('category') === category.slug ? ' is-active' : ''}`} aria-pressed={params.get('category') === category.slug} onClick={() => update({ category: category.slug })}>
+            {category.name}
+            <span>{category.products_count}</span>
+          </button>
+        ))}
+      </div>
+
+      <div className="shop-tools">
+        <details className="price-filter" open={hasPriceFilter || undefined}>
+          <summary>Prix</summary>
+          <form
+            onSubmit={(event) => {
+              event.preventDefault()
+              const data = new FormData(event.currentTarget)
+              update({ min_price: String(data.get('min_price') ?? ''), max_price: String(data.get('max_price') ?? '') })
+            }}
+          >
+            <label className="field">
+              <span className="field__label">Min</span>
+              <input key={params.get('min_price') ?? ''} type="number" name="min_price" min="0" inputMode="decimal" defaultValue={params.get('min_price') ?? ''} placeholder="0" />
+            </label>
+            <label className="field">
+              <span className="field__label">Max</span>
+              <input key={params.get('max_price') ?? ''} type="number" name="max_price" min="0" inputMode="decimal" defaultValue={params.get('max_price') ?? ''} placeholder="400" />
+            </label>
+            <button type="submit" className="button button--ghost">
+              Appliquer
+            </button>
+          </form>
+        </details>
+
+        <label className="sort">
+          <span className="sr-only">Trier par</span>
+          <select value={params.get('sort') ?? ''} onChange={(event) => update({ sort: event.target.value })}>
+            {sortOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+
+      <div className="shop-count" role="status">
+        {result && !loading && `${result.meta.total} ${result.meta.total > 1 ? 'parfums' : 'parfum'}`}
+        {hasFilters && (
+          <button type="button" className="text-button" onClick={() => clear()}>
+            Effacer les filtres
+          </button>
+        )}
+      </div>
+
+      <div className="product-grid">
+        {loading && Array.from({ length: 6 }, (_, index) => <ProductCardSkeleton key={index} />)}
+        {!loading && result?.data.map((product) => <ProductCard key={product.id} product={product} />)}
+      </div>
+
+      {!loading && result?.data.length === 0 && (
+        <div className="empty">
+          <h2>Aucun parfum trouvé</h2>
+          <p>Essayez un autre mot, ou demandez-nous sur WhatsApp.</p>
+          <button type="button" className="button button--ghost" onClick={() => clear()}>
+            Voir tous les parfums
+          </button>
+        </div>
+      )}
+
+      {result && !loading && <Pagination page={result.meta.current_page} lastPage={result.meta.last_page} onChange={goToPage} />}
+    </div>
+  )
+}

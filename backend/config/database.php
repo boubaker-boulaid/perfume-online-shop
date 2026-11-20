@@ -38,10 +38,14 @@ return [
             'database' => env('DB_DATABASE', database_path('database.sqlite')),
             'prefix' => '',
             'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
-            'busy_timeout' => null,
-            'journal_mode' => null,
+            // set on the demo host (render.yaml): wait for a busy database instead of failing,
+            // and let reads run during a write
+            'busy_timeout' => env('DB_BUSY_TIMEOUT'),
+            'journal_mode' => env('DB_JOURNAL_MODE'),
             'synchronous' => null,
-            'transaction_mode' => 'DEFERRED',
+            // IMMEDIATE on the demo host: an order takes the write lock when its transaction
+            // starts, so a second order waits its turn instead of failing with "database is locked"
+            'transaction_mode' => env('DB_TRANSACTION_MODE', 'DEFERRED'),
         ],
 
         'mysql' => [

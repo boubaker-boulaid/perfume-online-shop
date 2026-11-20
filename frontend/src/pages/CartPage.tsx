@@ -1,0 +1,89 @@
+import { Link } from 'react-router'
+import { TrashIcon } from '../components/Icons'
+import { PageHeading } from '../components/PageHeading'
+import { PillLink } from '../components/PillLink'
+import { QuantityStepper } from '../components/QuantityStepper'
+import { useCart } from '../context/cartContext'
+import type { CartItem } from '../types'
+import { formatPrice } from '../utils/format'
+import { PageTitle } from '../components/PageTitle'
+
+const itemPath = (item: CartItem) => (item.offer_contents ? `/offers/${item.slug}` : `/shop/${item.slug}`)
+
+export function CartPage() {
+  const { items, subtotal, setQuantity, removeItem } = useCart()
+
+  if (items.length === 0) {
+    return (
+      <div className="container page">
+        <PageTitle>Panier</PageTitle>
+        <PageHeading eyebrow="Votre panier" title={<>Votre panier est <em>vide</em></>} trail={[{ label: 'Panier' }]} center>
+          Ajoutez un parfum et il apparaîtra ici.
+        </PageHeading>
+        <div className="page-actions">
+          <PillLink to="/shop">Voir les parfums</PillLink>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="container page">
+      <PageTitle>Panier</PageTitle>
+      <PageHeading eyebrow="Votre panier" title={<>Prêt à <em>commander&nbsp;?</em></>} trail={[{ label: 'Panier' }]} />
+
+      <div className="checkout-layout">
+        <ul className="cart-list">
+          {items.map((item) => (
+            <li key={item.product_id} className="cart-item">
+              <Link to={itemPath(item)} className="cart-item__image">
+                <img src={item.image_path} alt="" width={600} height={600} />
+              </Link>
+              <div className="cart-item__body">
+                <div className="cart-item__top">
+                  <div>
+                    <Link to={itemPath(item)} className="cart-item__name">
+                      {item.name}
+                    </Link>
+                    {item.offer_contents && <small className="cart-item__contents">{item.offer_contents}</small>}
+                  </div>
+                  <button type="button" className="icon-button" aria-label={`Retirer ${item.name}`} onClick={() => removeItem(item.product_id)}>
+                    <TrashIcon size={16} />
+                  </button>
+                </div>
+                <div className="cart-item__price">{formatPrice(item.price)}</div>
+                <div className="cart-item__bottom">
+                  <QuantityStepper value={item.quantity} max={Math.min(item.stock, 99)} label={`Quantité de ${item.name}`} onChange={(quantity) => setQuantity(item.product_id, quantity)} />
+                  <strong>{formatPrice(Number(item.price) * item.quantity)}</strong>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+
+        <aside className="panel summary">
+          <h2>Récapitulatif</h2>
+          <div className="summary__row">
+            <span>Sous-total</span>
+            <span>{formatPrice(subtotal)}</span>
+          </div>
+          <div className="summary__row">
+            <span>Livraison</span>
+            <span>Gratuite</span>
+          </div>
+          <div className="summary__row summary__row--total">
+            <span>Total</span>
+            <span>{formatPrice(subtotal)}</span>
+          </div>
+          <p className="summary__note">Paiement en espèces à la réception, partout au Maroc.</p>
+          <Link to="/checkout" className="button button--accent button--block">
+            Commander
+          </Link>
+          <Link to="/shop" className="text-button summary__continue">
+            Continuer mes achats
+          </Link>
+        </aside>
+      </div>
+    </div>
+  )
+}

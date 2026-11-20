@@ -54,7 +54,7 @@ return [
 
         'stack' => [
             'driver' => 'stack',
-            'channels' => explode(',', (string) env('LOG_STACK', 'single')),
+            'channels' => explode(',', (string) env('LOG_STACK', 'daily')),
             'ignore_exceptions' => false,
         ],
 
@@ -133,6 +133,31 @@ return [
 
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
+        ],
+
+        'orders' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/orders/order.log'),
+            'level' => 'info',
+            'days' => 90,
+        ],
+
+        // logins, failed logins, lockouts, price changes
+        'admin' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/admin/admin.log'),
+            'level' => 'info',
+            'days' => 90,
+            'replace_placeholders' => true,
+        ],
+
+        // failed background jobs
+        'queue' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/queue/queue.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 30,
+            'replace_placeholders' => true,
         ],
 
     ],

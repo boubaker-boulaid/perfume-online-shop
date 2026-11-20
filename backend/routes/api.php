@@ -1,0 +1,21 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+
+// api status/health check
+Route::get('/status', function () {
+    return response()->json([
+        'success' => true,
+        'message' => 'L’API de la boutique fonctionne',
+        'version' => '1.0.0',
+        'timestamp' => now()->toISOString(),
+    ], 200);
+});
+
+Route::prefix('v1')->middleware('throttle:api')->group(function () {
+    // customers public routes
+    Route::name('customer.')->group(base_path('routes/customer.php'));
+
+    // admin routes
+    Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->name('admin.')->group(base_path('routes/admin.php'));
+});
