@@ -6,6 +6,7 @@ import { useApi } from '../../hooks/useApi'
 import { ApiError } from '../../services/apiError'
 import { formatPrice, toInputDate } from '../../utils/format'
 import { deleteOffer, getAdminOffer, getAllAdminProducts, saveOffer } from '../adminApi'
+import { checkImage } from '../images'
 
 type Errors = Record<string, string[]>
 
@@ -44,6 +45,15 @@ export function OfferFormPage() {
 
     form.set('is_active', form.has('is_active') ? '1' : '0')
 
+    // The inputs hold the browser's local time. They're sent as exact moments in UTC, and the
+    // backend turns them into shop time, so the browser converts both ways with the same rules
+    // and saving an unchanged form never moves the dates.
+    for (const name of ['starts_at', 'ends_at']) {
+      const local = String(form.get(name) ?? '')
+      const date = new Date(local)
+      if (local && !Number.isNaN(date.getTime())) form.set(name, date.toISOString())
+    }
+
     // one condition per line in the textarea, sent as terms[]
     const terms = String(form.get('terms') ?? '')
       .split('\n')
@@ -52,8 +62,13 @@ export function OfferFormPage() {
     form.delete('terms')
     terms.forEach((term) => form.append('terms[]', term))
 
-    const image = form.get('image')
-    if (image instanceof File && image.size === 0) form.delete('image')
+    // leaves out an empty file input, and stops an image too big for the backend
+    const imageError = checkImage(form)
+    if (imageError) {
+      setErrors({ image: [imageError] })
+      setMessage('')
+      return
+    }
 
     setSaving(true)
     setErrors({})

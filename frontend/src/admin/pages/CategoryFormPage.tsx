@@ -5,6 +5,7 @@ import { ArrowLeftIcon } from '../../components/Icons'
 import { useApi } from '../../hooks/useApi'
 import { ApiError } from '../../services/apiError'
 import { deleteCategory, getAdminCategory, saveCategory } from '../adminApi'
+import { checkImage } from '../images'
 
 // One form for /admin/categories/new and /admin/categories/:slug, like the product form
 export function CategoryFormPage() {
@@ -32,8 +33,13 @@ export function CategoryFormPage() {
     // only one checkbox this time: an unchecked box is missing from FormData
     form.set('is_active', form.has('is_active') ? '1' : '0')
 
-    const image = form.get('image')
-    if (image instanceof File && image.size === 0) form.delete('image')
+    // leaves out an empty file input, and stops an image too big for the backend
+    const imageError = checkImage(form)
+    if (imageError) {
+      setErrors({ image: [imageError] })
+      setMessage('')
+      return
+    }
 
     setSaving(true)
     setErrors({})

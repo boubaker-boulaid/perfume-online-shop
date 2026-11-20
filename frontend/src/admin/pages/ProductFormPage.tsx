@@ -5,6 +5,7 @@ import { ArrowLeftIcon } from '../../components/Icons'
 import { useApi } from '../../hooks/useApi'
 import { ApiError } from '../../services/apiError'
 import { deleteProduct, getAdminProduct, getAllAdminCategories, saveProduct } from '../adminApi'
+import { checkImage } from '../images'
 
 // unchecked boxes are missing from FormData: these are always sent as 1 or 0
 const BOOLEAN_FIELDS = ['is_active', 'is_featured', 'is_offer'] as const
@@ -36,9 +37,13 @@ export function ProductFormPage() {
 
     for (const name of BOOLEAN_FIELDS) form.set(name, form.has(name) ? '1' : '0')
 
-    // no new image chosen: an empty file would fail the "image" rule
-    const image = form.get('image')
-    if (image instanceof File && image.size === 0) form.delete('image')
+    // leaves out an empty file input, and stops an image too big for the backend
+    const imageError = checkImage(form)
+    if (imageError) {
+      setErrors({ image: [imageError] })
+      setMessage('')
+      return
+    }
 
     setSaving(true)
     setErrors({})
