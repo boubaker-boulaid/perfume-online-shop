@@ -14,6 +14,8 @@ import { ShopPage } from './pages/ShopPage'
 
 // A separate file, downloaded only when someone opens /admin
 const AdminApp = lazy(() => import('./admin/AdminApp'))
+// The link in the password reset e-mail, outside /admin because the backend chose the address
+const ResetPasswordPage = lazy(() => import('./admin/pages/ResetPasswordPage'))
 
 export default function App() {
   return (
@@ -25,6 +27,14 @@ export default function App() {
             element={
               <Suspense fallback={<p className="admin-loading">Chargement…</p>}>
                 <AdminApp />
+              </Suspense>
+            }
+          />
+          <Route
+            path="password-reset/:token"
+            element={
+              <Suspense fallback={<p className="admin-loading">Chargement…</p>}>
+                <ResetPasswordPage />
               </Suspense>
             }
           />

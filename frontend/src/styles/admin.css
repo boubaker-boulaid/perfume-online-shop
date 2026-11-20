@@ -675,6 +675,34 @@ a.admin-card:hover {
   margin-bottom: 14px;
 }
 
+.admin-login__text {
+  margin: -12px 0 20px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.admin-login__link {
+  display: block;
+  margin: 12px auto 0;
+}
+
+.admin-login .form-error a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+/* a good news message: the link was sent, the password changed */
+.admin-notice {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--success);
+  border-radius: 3px;
+  background: rgba(63, 107, 70, 0.06);
+  color: var(--success);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
 @media (min-width: 900px) {
   .admin {
     display: grid;

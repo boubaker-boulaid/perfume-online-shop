@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router'
+import { Link, useLocation, useNavigate } from 'react-router'
 import { ApiError } from '../../services/apiError'
 import { login } from '../adminApi'
 
@@ -7,6 +7,8 @@ type Errors = Record<string, string[]>
 
 export function LoginPage() {
   const navigate = useNavigate()
+  // set by the password reset page, once the new password is saved
+  const notice = (useLocation().state as { notice?: string } | null)?.notice
   const [errors, setErrors] = useState<Errors>({})
   const [message, setMessage] = useState('')
   const [sending, setSending] = useState(false)
@@ -37,6 +39,11 @@ export function LoginPage() {
     <div className="admin-login">
       <form className="panel" onSubmit={submit} noValidate>
         <h1>Administration</h1>
+        {notice && (
+          <p className="admin-notice" role="status">
+            {notice}
+          </p>
+        )}
         <label className={`field${errors.email ? ' has-error' : ''}`}>
           <span className="field__label">E-mail</span>
           <input name="email" type="email" autoComplete="username" required />
@@ -58,6 +65,9 @@ export function LoginPage() {
         <button type="submit" className="button button--accent button--block" disabled={sending}>
           {sending ? 'Connexion…' : 'Se connecter'}
         </button>
+        <Link to="/admin/forgot-password" className="text-button admin-login__link">
+          Mot de passe oublié ?
+        </Link>
       </form>
     </div>
   )

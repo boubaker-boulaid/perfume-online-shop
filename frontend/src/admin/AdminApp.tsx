@@ -4,6 +4,7 @@ import { AdminLayout } from './AdminLayout'
 import { CategoriesPage } from './pages/CategoriesPage'
 import { CategoryFormPage } from './pages/CategoryFormPage'
 import { DashboardPage } from './pages/DashboardPage'
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
 import { LoginPage } from './pages/LoginPage'
 import { OfferFormPage } from './pages/OfferFormPage'
 import { OffersAdminPage } from './pages/OffersAdminPage'
@@ -19,6 +20,7 @@ export default function AdminApp() {
   return (
     <Routes>
       <Route path="login" element={<LoginPage />} />
+      <Route path="forgot-password" element={<ForgotPasswordPage />} />
       <Route element={<RequireAdmin />}>
         <Route element={<AdminLayout />}>
           <Route index element={<DashboardPage />} />
