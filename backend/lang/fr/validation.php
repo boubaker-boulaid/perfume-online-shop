@@ -161,6 +161,15 @@ return [
         'attribute-name' => [
             'rule-name' => 'custom-message',
         ],
+        // PHP drops a file above its upload_max_filesize (2 Mo) before Laravel sees it, so the
+        // "max" rule never runs: this is the message the admin gets instead
+        // the general "after" message reads "postérieure au :date", wrong for "date de début"
+        'ends_at' => [
+            'after' => 'La date de fin doit être après la date de début.',
+        ],
+        'image' => [
+            'uploaded' => 'L’image n’a pas pu être reçue : elle doit faire 2 Mo maximum.',
+        ],
     ],
 
     // The names customers and admins see, in place of the API's field names.
@@ -195,5 +204,16 @@ return [
         'sort' => 'tri',
         'page' => 'page',
         'q' => 'recherche',
+        'is_offer' => 'coffret d’une offre',
+        'product_id' => 'coffret',
+        'title' => 'titre',
+        'tagline' => 'accroche',
+        'terms' => 'conditions',
+        'terms.*' => 'condition',
+        'starts_at' => 'date de début',
+        'ends_at' => 'date de fin',
+        'product_ids' => 'parfums inclus',
+        'product_ids.*' => 'parfum inclus',
+        'free_product_id' => 'parfum offert',
     ],
 ];

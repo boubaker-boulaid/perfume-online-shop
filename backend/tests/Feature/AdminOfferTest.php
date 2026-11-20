@@ -332,6 +332,28 @@ class AdminOfferTest extends TestCase
             ->assertJsonValidationErrors('starts_at');
     }
 
+    public function test_offer_errors_name_the_fields_in_french(): void
+    {
+        $this->post(self::ENDPOINT, ['starts_at' => '2026-12-10 00:00:00', 'ends_at' => '2026-12-01 00:00:00'], self::JSON)
+            ->assertUnprocessable()
+            ->assertJsonPath('errors.product_id.0', 'Le champ coffret est obligatoire.')
+            ->assertJsonPath('errors.title.0', 'Le champ titre est obligatoire.')
+            ->assertJsonPath('errors.product_ids.0', 'Le champ parfums inclus est obligatoire.')
+            ->assertJsonPath('errors.ends_at.0', 'La date de fin doit être après la date de début.');
+    }
+
+    // PHP refuses a file above upload_max_filesize before Laravel's "max" rule can run
+    public function test_an_image_too_big_for_php_gets_a_clear_message(): void
+    {
+        $set = Product::factory()->create(['is_offer' => true]);
+        $path = tempnam(sys_get_temp_dir(), 'offer');
+        $tooBig = new UploadedFile($path, 'offer.jpg', 'image/jpeg', UPLOAD_ERR_INI_SIZE, true);
+
+        $this->post(self::ENDPOINT, $this->offerFields($set, [Product::factory()->create()->id], ['image' => $tooBig]), self::JSON)
+            ->assertUnprocessable()
+            ->assertJsonPath('errors.image.0', 'L’image n’a pas pu être reçue : elle doit faire 2 Mo maximum.');
+    }
+
     private function offerFields(Product $set, array $productIds, array $extra = []): array
     {
         return [
