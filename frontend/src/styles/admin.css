@@ -1,0 +1,216 @@
+/* The admin area. It's loaded with the admin's code (AdminApp.tsx), so customers never
+   download it. It reuses the shop's tokens and pieces (global.css: .panel, .field, .button),
+   so the admin looks like part of the same site. Every class here starts with "admin-".
+   Phones first: the menu is a scrolling row, and a side column from 900px. */
+
+.admin {
+  min-height: 100dvh;
+  background: var(--ivory);
+  color: var(--ink);
+}
+
+.admin-loading {
+  padding: 48px var(--gutter);
+  color: var(--muted);
+  font-size: 14px;
+  text-align: center;
+}
+
+/* The menu */
+
+.admin-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px var(--gutter);
+  overflow-x: auto;
+  border-bottom: 1px solid var(--line);
+  background: var(--white);
+}
+
+.admin-nav__brand {
+  flex: none;
+  margin-right: 10px;
+  font-family: var(--serif);
+  font-size: 17px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.admin-nav__link {
+  flex: none;
+  padding: 9px 14px 7px;
+  border-radius: 999px;
+  color: var(--body);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.admin-nav__link:hover {
+  background: rgba(16, 11, 8, 0.06);
+}
+
+.admin-nav__link.active {
+  background: var(--ink);
+  color: var(--ivory);
+}
+
+.admin-nav__user {
+  flex: none;
+  margin-left: auto;
+  padding-left: 12px;
+  color: var(--muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.admin-nav__logout {
+  flex: none;
+  padding: 9px 4px 7px;
+  border: none;
+  background: none;
+  color: var(--ink);
+  font-size: 13px;
+  text-decoration: underline;
+  text-decoration-color: var(--line-strong);
+  text-underline-offset: 4px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.admin-nav__logout:hover {
+  text-decoration-color: currentColor;
+}
+
+.admin-main {
+  width: 100%;
+  max-width: 1200px;
+  padding: 24px var(--gutter) 64px;
+}
+
+/* Titles and shared pieces */
+
+.admin-title {
+  margin-bottom: 20px;
+  font-family: var(--serif);
+  font-size: clamp(26px, 6vw, 34px);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+.admin-main .panel {
+  margin-bottom: 16px;
+}
+
+.admin-main .panel h2 {
+  margin-bottom: 16px;
+  font-family: var(--serif);
+  font-size: 19px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.admin-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  margin-bottom: 8px;
+  color: var(--body);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.admin-check input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--ink);
+}
+
+.admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.admin-muted {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* The login page */
+
+.admin-login {
+  display: grid;
+  place-items: center;
+  min-height: 100dvh;
+  padding: 24px var(--gutter);
+  background: var(--ivory);
+}
+
+.admin-login .panel {
+  width: 100%;
+  max-width: 420px;
+}
+
+.admin-login h1 {
+  margin-bottom: 24px;
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.admin-login .admin-check {
+  margin-bottom: 14px;
+}
+
+@media (min-width: 900px) {
+  .admin {
+    display: grid;
+    grid-template-columns: 230px minmax(0, 1fr);
+  }
+
+  .admin-nav {
+    position: sticky;
+    top: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    height: 100dvh;
+    padding: 28px 18px;
+    border-right: 1px solid var(--line);
+    border-bottom: 0;
+  }
+
+  .admin-nav__brand {
+    margin: 0 0 24px 14px;
+  }
+
+  .admin-nav__link {
+    padding: 11px 14px 9px;
+  }
+
+  .admin-nav__user {
+    margin: auto 0 0;
+    padding: 0 14px;
+  }
+
+  .admin-nav__logout {
+    align-self: flex-start;
+    margin-left: 14px;
+  }
+
+  .admin-main {
+    padding: 40px 40px 80px;
+  }
+}

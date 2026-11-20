@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router'
 import { Layout } from './components/layout/Layout'
 import { CartProvider } from './context/CartProvider'
@@ -11,11 +12,22 @@ import { OrderConfirmationPage } from './pages/OrderConfirmationPage'
 import { ProductPage } from './pages/ProductPage'
 import { ShopPage } from './pages/ShopPage'
 
+// A separate file, downloaded only when someone opens /admin
+const AdminApp = lazy(() => import('./admin/AdminApp'))
+
 export default function App() {
   return (
     <CartProvider>
       <BrowserRouter>
         <Routes>
+          <Route
+            path="admin/*"
+            element={
+              <Suspense fallback={<p className="admin-loading">Chargement…</p>}>
+                <AdminApp />
+              </Suspense>
+            }
+          />
           <Route element={<Layout />}>
             <Route index element={<HomePage />} />
             <Route path="shop" element={<ShopPage />} />

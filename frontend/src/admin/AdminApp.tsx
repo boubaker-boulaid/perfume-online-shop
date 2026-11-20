@@ -1,0 +1,19 @@
+import { Route, Routes } from 'react-router'
+import '../styles/admin.css'
+import { AdminLayout } from './AdminLayout'
+import { LoginPage } from './pages/LoginPage'
+import { RequireAdmin } from './RequireAdmin'
+
+// The admin's routes, under /admin. App.tsx loads this file with lazy(), which needs a default
+// export, so customers never download the admin's code.
+export default function AdminApp() {
+  return (
+    <Routes>
+      <Route path="login" element={<LoginPage />} />
+      <Route element={<RequireAdmin />}>
+        <Route element={<AdminLayout />}>
+        </Route>
+      </Route>
+    </Routes>
+  )
+}
