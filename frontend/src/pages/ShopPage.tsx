@@ -1,9 +1,9 @@
-import { useSearchParams } from 'react-router'
 import { SearchIcon } from '../components/Icons'
 import { PageHeading } from '../components/PageHeading'
 import { Pagination } from '../components/Pagination'
 import { ProductCard, ProductCardSkeleton } from '../components/ProductCard'
 import { useApi } from '../hooks/useApi'
+import { useFilters } from '../hooks/useFilters'
 import { scrollToTop } from '../motion/smoothScroll'
 import { getCategories, getProducts } from '../services/api'
 import type { ProductFilters, ProductSort } from '../types'
@@ -19,7 +19,7 @@ const sortOptions: { value: ProductSort | ''; label: string }[] = [
 export function ShopPage() {
   // The filters live in the url with the API's own parameter names, so a filtered
   // page can be shared and the back button works.
-  const [params, setParams] = useSearchParams()
+  const { params, update, clear } = useFilters()
 
   const filters: ProductFilters = {
     q: params.get('q') ?? undefined,
@@ -32,15 +32,6 @@ export function ShopPage() {
 
   const { data: categories } = useApi(getCategories, 'categories')
   const { data: result, loading } = useApi(() => getProducts(filters), params.toString())
-
-  const update = (changes: Record<string, string>) => {
-    const next = new URLSearchParams(params)
-
-    Object.entries(changes).forEach(([key, value]) => (value ? next.set(key, value) : next.delete(key)))
-    if (!('page' in changes)) next.delete('page') // new filters start again from page 1
-
-    setParams(next)
-  }
 
   const goToPage = (page: number) => {
     update({ page: page > 1 ? String(page) : '' })
@@ -122,7 +113,7 @@ export function ShopPage() {
       <div className="shop-count" role="status">
         {result && !loading && `${result.meta.total} ${result.meta.total > 1 ? 'parfums' : 'parfum'}`}
         {hasFilters && (
-          <button type="button" className="text-button" onClick={() => setParams({})}>
+          <button type="button" className="text-button" onClick={() => clear()}>
             Effacer les filtres
           </button>
         )}
@@ -137,7 +128,7 @@ export function ShopPage() {
         <div className="empty">
           <h2>Aucun parfum trouvé</h2>
           <p>Essayez un autre mot, ou demandez-nous sur WhatsApp.</p>
-          <button type="button" className="button button--ghost" onClick={() => setParams({})}>
+          <button type="button" className="button button--ghost" onClick={() => clear()}>
             Voir tous les parfums
           </button>
         </div>
