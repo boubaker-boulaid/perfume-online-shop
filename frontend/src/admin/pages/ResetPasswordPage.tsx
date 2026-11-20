@@ -4,6 +4,7 @@ import '../../styles/admin.css'
 import { Field } from '../../components/Field'
 import { ApiError } from '../../services/apiError'
 import { resetPassword } from '../adminApi'
+import { PageTitle } from '../../components/PageTitle'
 
 // The page the reset e-mail links to: {FRONTEND_URL}/password-reset/{token}?email=…
 // App.tsx loads it with lazy(), which needs a default export.
@@ -40,6 +41,7 @@ export default function ResetPasswordPage() {
 
   return (
     <div className="admin-login">
+      <PageTitle admin>Nouveau mot de passe</PageTitle>
       <form className="panel" onSubmit={submit} noValidate>
         <h1>Nouveau mot de passe</h1>
         <p className="admin-muted admin-login__text">Pour le compte {email || 'inconnu'}.</p>

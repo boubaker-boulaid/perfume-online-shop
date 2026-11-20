@@ -6,6 +6,7 @@ import { useApi } from '../../hooks/useApi'
 import { ApiError } from '../../services/apiError'
 import { deleteCategory, getAdminCategory, saveCategory } from '../adminApi'
 import { checkImage } from '../images'
+import { PageTitle } from '../../components/PageTitle'
 
 // One form for /admin/categories/new and /admin/categories/:slug, like the product form
 export function CategoryFormPage() {
@@ -76,6 +77,7 @@ export function CategoryFormPage() {
 
   return (
     <>
+      <PageTitle admin>{category ? category.name : 'Nouvelle catégorie'}</PageTitle>
       <Link to="/admin/categories" className="back-link">
         <ArrowLeftIcon size={15} /> Retour aux catégories
       </Link>

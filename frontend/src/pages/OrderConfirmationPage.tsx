@@ -4,6 +4,7 @@ import { CheckIcon } from '../components/Icons'
 import { markWhatsappOpened } from '../services/api'
 import type { PlacedOrder } from '../types'
 import { formatPrice } from '../utils/format'
+import { PageTitle } from '../components/PageTitle'
 
 export function OrderConfirmationPage() {
   const order = (useLocation().state as { order?: PlacedOrder } | null)?.order
@@ -13,6 +14,7 @@ export function OrderConfirmationPage() {
 
   return (
     <div className="container page confirmation">
+      <PageTitle>Commande envoyée</PageTitle>
       <span className="confirmation__icon">
         <CheckIcon size={26} />
       </span>

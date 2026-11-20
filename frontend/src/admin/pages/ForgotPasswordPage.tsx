@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 import { Field } from '../../components/Field'
 import { ApiError } from '../../services/apiError'
 import { sendResetLink } from '../adminApi'
+import { PageTitle } from '../../components/PageTitle'
 
 const SENT = 'Si ce compte existe, un e-mail a été envoyé.'
 
@@ -29,6 +30,7 @@ export function ForgotPasswordPage() {
 
   return (
     <div className="admin-login">
+      <PageTitle admin>Mot de passe oublié</PageTitle>
       <form className="panel" onSubmit={submit} noValidate>
         <h1>Mot de passe oublié</h1>
         <p className="admin-muted admin-login__text">Saisissez l’e-mail du compte : vous recevrez un lien pour choisir un nouveau mot de passe.</p>

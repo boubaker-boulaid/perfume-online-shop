@@ -7,6 +7,7 @@ import { ApiError } from '../../services/apiError'
 import { formatPrice, toInputDate } from '../../utils/format'
 import { deleteOffer, getAdminOffer, getAllAdminProducts, saveOffer } from '../adminApi'
 import { checkImage } from '../images'
+import { PageTitle } from '../../components/PageTitle'
 
 type Errors = Record<string, string[]>
 
@@ -107,6 +108,7 @@ export function OfferFormPage() {
 
   return (
     <>
+      <PageTitle admin>{offer ? offer.title : 'Nouvelle offre'}</PageTitle>
       <Link to="/admin/offers" className="back-link">
         <ArrowLeftIcon size={15} /> Retour aux offres
       </Link>

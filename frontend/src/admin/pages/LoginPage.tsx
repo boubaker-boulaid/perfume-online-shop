@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router'
 import { ApiError } from '../../services/apiError'
 import { login } from '../adminApi'
+import { PageTitle } from '../../components/PageTitle'
 
 type Errors = Record<string, string[]>
 
@@ -37,6 +38,7 @@ export function LoginPage() {
 
   return (
     <div className="admin-login">
+      <PageTitle admin>Connexion</PageTitle>
       <form className="panel" onSubmit={submit} noValidate>
         <h1>Administration</h1>
         {notice && (

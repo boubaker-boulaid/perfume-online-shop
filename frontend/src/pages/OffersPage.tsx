@@ -3,12 +3,14 @@ import { PageHeading } from '../components/PageHeading'
 import { PillLink } from '../components/PillLink'
 import { useApi } from '../hooks/useApi'
 import { getOffers } from '../services/api'
+import { PageTitle } from '../components/PageTitle'
 
 export function OffersPage() {
   const { data: offers, error, loading } = useApi(getOffers, 'offers')
 
   return (
     <div className="container page">
+      <PageTitle>Offres</PageTitle>
       <PageHeading eyebrow="Promos" title={<>Les offres <em>du moment</em></>} trail={[{ label: 'Offres' }]} center>
         Des packs à petit prix, pour une durée limitée.
       </PageHeading>

@@ -6,6 +6,7 @@ import { QuantityStepper } from '../components/QuantityStepper'
 import { useCart } from '../context/cartContext'
 import type { CartItem } from '../types'
 import { formatPrice } from '../utils/format'
+import { PageTitle } from '../components/PageTitle'
 
 const itemPath = (item: CartItem) => (item.offer_contents ? `/offers/${item.slug}` : `/shop/${item.slug}`)
 
@@ -15,6 +16,7 @@ export function CartPage() {
   if (items.length === 0) {
     return (
       <div className="container page">
+        <PageTitle>Panier</PageTitle>
         <PageHeading eyebrow="Votre panier" title={<>Votre panier est <em>vide</em></>} trail={[{ label: 'Panier' }]} center>
           Ajoutez un parfum et il apparaîtra ici.
         </PageHeading>
@@ -27,6 +29,7 @@ export function CartPage() {
 
   return (
     <div className="container page">
+      <PageTitle>Panier</PageTitle>
       <PageHeading eyebrow="Votre panier" title={<>Prêt à <em>commander&nbsp;?</em></>} trail={[{ label: 'Panier' }]} />
 
       <div className="checkout-layout">

@@ -10,6 +10,7 @@ import { ApiError, getOffer } from '../services/api'
 import type { Offer } from '../types'
 import { formatDate, formatDiscount, formatPrice, formatTimeLeft } from '../utils/format'
 import { NotFoundPage } from './NotFoundPage'
+import { PageTitle } from '../components/PageTitle'
 
 function OfferDetails({ offer }: { offer: Offer }) {
   const { items, addItem } = useCart()
@@ -127,6 +128,7 @@ export function OfferPage() {
   if (error) {
     return (
       <div className="container page">
+        <PageTitle>Chargement impossible</PageTitle>
         <LoadError onRetry={() => setAttempt((current) => current + 1)} />
       </div>
     )
@@ -134,6 +136,7 @@ export function OfferPage() {
 
   return (
     <div className="container page">
+      <PageTitle>{offer ? offer.title : 'Offres'}</PageTitle>
       <Breadcrumbs trail={[{ label: 'Offres', to: '/offers' }, ...(offer ? [{ label: offer.title }] : [])]} />
 
       {loading && <div className="product-skeleton skeleton" aria-label="Chargement" />}

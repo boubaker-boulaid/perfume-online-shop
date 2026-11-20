@@ -11,6 +11,7 @@ import { ApiError, getProduct, getProducts } from '../services/api'
 import type { Product } from '../types'
 import { formatPrice } from '../utils/format'
 import { NotFoundPage } from './NotFoundPage'
+import { PageTitle } from '../components/PageTitle'
 
 const LOW_STOCK = 5
 
@@ -114,6 +115,7 @@ export function ProductPage() {
   if (error) {
     return (
       <div className="container page">
+        <PageTitle>Chargement impossible</PageTitle>
         <LoadError onRetry={() => setAttempt((current) => current + 1)} />
       </div>
     )
@@ -121,6 +123,7 @@ export function ProductPage() {
 
   return (
     <div className="container page">
+      <PageTitle>{product ? product.name : 'Boutique'}</PageTitle>
       <Breadcrumbs
         trail={[
           { label: 'Boutique', to: '/shop' },

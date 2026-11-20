@@ -7,6 +7,7 @@ import { formatDate, formatPrice } from '../../utils/format'
 import { getOrders } from '../adminApi'
 import { ORDER_SORT_LABELS, STATUS_LABELS } from '../labels'
 import type { OrderFilters, OrderStatus } from '../types'
+import { PageTitle } from '../../components/PageTitle'
 
 export function OrdersPage() {
   // Like the shop: the filters live in the address, and the key of useApi is the address's
@@ -26,6 +27,7 @@ export function OrdersPage() {
 
   return (
     <>
+      <PageTitle admin>Commandes</PageTitle>
       <h1 className="admin-title">Commandes</h1>
 
       <div className="admin-toolbar">

@@ -1,6 +1,7 @@
 import { Link } from 'react-router'
 import { useApi } from '../../hooks/useApi'
 import { getAllAdminCategories } from '../adminApi'
+import { PageTitle } from '../../components/PageTitle'
 
 // Every category, hidden ones included, in the shop's order
 export function CategoriesPage() {
@@ -8,6 +9,7 @@ export function CategoriesPage() {
 
   return (
     <>
+      <PageTitle admin>Catégories</PageTitle>
       <div className="admin-heading admin-heading--split">
         <h1 className="admin-title">Catégories</h1>
         <Link to="/admin/categories/new" className="button button--accent button--small">
