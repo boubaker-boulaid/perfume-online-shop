@@ -1,10 +1,12 @@
+import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { Breadcrumbs } from '../components/Breadcrumbs'
 import { BagIcon, CalendarIcon, CheckIcon, ClockIcon } from '../components/Icons'
+import { LoadError } from '../components/LoadError'
 import { ProductCard } from '../components/ProductCard'
 import { useCart } from '../context/cartContext'
 import { useApi } from '../hooks/useApi'
-import { getOffer } from '../services/api'
+import { ApiError, getOffer } from '../services/api'
 import type { Offer } from '../types'
 import { formatDate, formatDiscount, formatPrice, formatTimeLeft } from '../utils/format'
 import { NotFoundPage } from './NotFoundPage'
@@ -116,9 +118,19 @@ function OfferDetails({ offer }: { offer: Offer }) {
 
 export function OfferPage() {
   const { slug = '' } = useParams()
-  const { data: offer, error, loading } = useApi(() => getOffer(slug), slug)
+  // a new attempt is a new key: useApi loads again
+  const [attempt, setAttempt] = useState(0)
+  const { data: offer, error, loading } = useApi(() => getOffer(slug), `${slug}-${attempt}`)
 
-  if (error) return <NotFoundPage />
+  // "not found" only when the server says so: a network failure doesn't mean it doesn't exist
+  if (error instanceof ApiError && error.status === 404) return <NotFoundPage />
+  if (error) {
+    return (
+      <div className="container page">
+        <LoadError onRetry={() => setAttempt((current) => current + 1)} />
+      </div>
+    )
+  }
 
   return (
     <div className="container page">
