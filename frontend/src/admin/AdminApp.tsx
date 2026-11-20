@@ -1,6 +1,8 @@
 import { Route, Routes } from 'react-router'
 import '../styles/admin.css'
 import { AdminLayout } from './AdminLayout'
+import { CategoriesPage } from './pages/CategoriesPage'
+import { CategoryFormPage } from './pages/CategoryFormPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { LoginPage } from './pages/LoginPage'
 import { OrderPage } from './pages/OrderPage'
@@ -24,6 +26,9 @@ export default function AdminApp() {
           {/* key="new": coming from an edit form, "new" must start from an empty form */}
           <Route path="products/new" element={<ProductFormPage key="new" />} />
           <Route path="products/:slug" element={<ProductFormPage />} />
+          <Route path="categories" element={<CategoriesPage />} />
+          <Route path="categories/new" element={<CategoryFormPage key="new" />} />
+          <Route path="categories/:slug" element={<CategoryFormPage />} />
         </Route>
       </Route>
     </Routes>

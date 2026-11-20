@@ -6,6 +6,7 @@ const LINKS = [
   { to: '/admin', label: 'Tableau de bord', end: true },
   { to: '/admin/orders', label: 'Commandes', end: false },
   { to: '/admin/products', label: 'Produits', end: false },
+  { to: '/admin/categories', label: 'Catégories', end: false },
 ]
 
 export function AdminLayout() {
