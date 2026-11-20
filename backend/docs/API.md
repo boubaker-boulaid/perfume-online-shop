@@ -388,7 +388,7 @@ Fields for create and update:
 | `name` | Required | Optional | Max 255 characters |
 | `price` | Required | Optional | From 0 to 99999999.99, up to 2 decimals. On an update, it must stay below the saved `compare_at_price`, unless you change or clear that too. |
 | `stock` | Required | Optional | Whole number, at least 0 |
-| `image` | Required | Optional | jpg, jpeg, png or webp, max 2 MB |
+| `image` | Required | Optional | jpg, jpeg, png or webp, max 4 MB |
 | `compare_at_price` | Optional | Optional | The old price, shown as a discount. Must be above `price`. On an update, that's the `price` in the same request, or the current price if none is sent. |
 | `description`, `notes` | Optional | Optional | Text |
 | `sku` | Optional | Optional | Max 100 characters |
@@ -424,7 +424,7 @@ await api.post(`/api/v1/admin/products/${slug}`, form);
 |---|---|---|---|
 | `name` | Required | Optional | Max 255 characters, must be unique |
 | `description` | Optional | Optional | Text |
-| `image` | Optional | Optional | jpg, jpeg, png or webp, max 2 MB |
+| `image` | Optional | Optional | jpg, jpeg, png or webp, max 4 MB |
 | `is_active` | Optional, default `true` | Optional | Boolean. `false` hides the category and all its products from the public API. |
 | `sort_order` | Optional, default 0 | Optional | Whole number, at least 0. Lower numbers are listed first. |
 
@@ -449,7 +449,7 @@ Creating an offer takes two steps:
 | `title` | Required | Optional | Max 255 characters |
 | `tagline` | Optional | Optional | Max 255 characters |
 | `description` | Optional | Optional | Text |
-| `image` | Required | Optional | jpg, jpeg, png or webp, max 2 MB. A new image replaces and deletes the old one. |
+| `image` | Required | Optional | jpg, jpeg, png or webp, max 4 MB. A new image replaces and deletes the old one. |
 | `terms` | Optional | Optional | Up to 10 lines of text, max 255 characters each |
 | `starts_at`, `ends_at` | Required | Optional | Dates in shop time, such as `2026-12-01 00:00:00`, or with a time zone, such as `2026-11-30T23:00:00Z`, which is converted to shop time and keeps its exact moment. `ends_at` must be after `starts_at`. On an update, always send both together, or the check fails. |
 | `is_active` | Optional, default `true` | Optional | Boolean. `false` hides the offer from customers. |

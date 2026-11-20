@@ -118,7 +118,7 @@ export function ProductFormPage() {
         <Field label="Notes" name="notes" error={errors.notes}>
           <input id="notes" name="notes" defaultValue={product?.notes ?? ''} placeholder="Safran, Rose, Ambre" />
         </Field>
-        <Field label="Image (jpg, png ou webp, 2 Mo maximum)" name="image" error={errors.image}>
+        <Field label="Image (jpg, png ou webp, 4 Mo maximum)" name="image" error={errors.image}>
           <input id="image" name="image" type="file" accept="image/jpeg,image/png,image/webp" onChange={choose} />
         </Field>
         {(preview ?? product?.image_path) && <img className="admin-preview" src={preview ?? product?.image_path} alt="" />}

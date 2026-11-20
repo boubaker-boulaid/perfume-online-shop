@@ -30,7 +30,7 @@ class UpdateOfferRequest extends FormRequest
             'title' => ['sometimes', 'string', 'max:255'],
             'tagline' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'image' => ['sometimes', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'image' => ['sometimes', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
             'terms' => ['nullable', 'array', 'max:10'],
             'terms.*' => ['string', 'max:255'],
             'starts_at' => ['sometimes', 'date'],

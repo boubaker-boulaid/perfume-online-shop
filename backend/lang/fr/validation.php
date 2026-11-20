@@ -161,14 +161,14 @@ return [
         'attribute-name' => [
             'rule-name' => 'custom-message',
         ],
-        // PHP drops a file above its upload_max_filesize (2 Mo) before Laravel sees it, so the
-        // "max" rule never runs: this is the message the admin gets instead
         // the general "after" message reads "postérieure au :date", wrong for "date de début"
         'ends_at' => [
             'after' => 'La date de fin doit être après la date de début.',
         ],
+        // PHP drops a file above its upload_max_filesize (4M, see the README) before Laravel
+        // sees it, so the "max" rule never runs: this is the message the admin gets instead
         'image' => [
-            'uploaded' => 'L’image n’a pas pu être reçue : elle doit faire 2 Mo maximum.',
+            'uploaded' => 'L’image n’a pas pu être reçue : elle doit faire 4 Mo maximum.',
         ],
     ],
 

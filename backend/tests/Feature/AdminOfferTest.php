@@ -351,7 +351,7 @@ class AdminOfferTest extends TestCase
 
         $this->post(self::ENDPOINT, $this->offerFields($set, [Product::factory()->create()->id], ['image' => $tooBig]), self::JSON)
             ->assertUnprocessable()
-            ->assertJsonPath('errors.image.0', 'L’image n’a pas pu être reçue : elle doit faire 2 Mo maximum.');
+            ->assertJsonPath('errors.image.0', 'L’image n’a pas pu être reçue : elle doit faire 4 Mo maximum.');
     }
 
     private function offerFields(Product $set, array $productIds, array $extra = []): array

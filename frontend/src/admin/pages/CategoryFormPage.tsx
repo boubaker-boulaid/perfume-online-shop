@@ -88,7 +88,7 @@ export function CategoryFormPage() {
         <Field label="Description" name="description" error={errors.description}>
           <textarea id="description" name="description" rows={3} defaultValue={category?.description ?? ''} />
         </Field>
-        <Field label="Image (facultative : jpg, png ou webp, 2 Mo maximum)" name="image" error={errors.image}>
+        <Field label="Image (facultative : jpg, png ou webp, 4 Mo maximum)" name="image" error={errors.image}>
           <input id="image" name="image" type="file" accept="image/jpeg,image/png,image/webp" onChange={choose} />
         </Field>
         {image && <img className="admin-preview" src={image} alt="" />}

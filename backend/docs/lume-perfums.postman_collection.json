@@ -1927,7 +1927,7 @@
                   "key": "image",
                   "type": "file",
                   "src": "",
-                  "description": "Choose a jpg, jpeg, png or webp file, max 2 MB"
+                  "description": "Choose a jpg, jpeg, png or webp file, max 4 MB"
                 }
               ]
             }
@@ -1988,7 +1988,7 @@
                       "key": "image",
                       "type": "file",
                       "src": "",
-                      "description": "Choose a jpg, jpeg, png or webp file, max 2 MB"
+                      "description": "Choose a jpg, jpeg, png or webp file, max 4 MB"
                     }
                   ]
                 }
@@ -2373,7 +2373,7 @@
                   "key": "image",
                   "type": "file",
                   "src": "",
-                  "description": "Choose a jpg, jpeg, png or webp file, max 2 MB"
+                  "description": "Choose a jpg, jpeg, png or webp file, max 4 MB"
                 }
               ]
             }
@@ -2674,7 +2674,7 @@
                   "key": "image",
                   "type": "file",
                   "src": "",
-                  "description": "Choose a jpg, jpeg, png or webp file, max 2 MB"
+                  "description": "Choose a jpg, jpeg, png or webp file, max 4 MB"
                 }
               ]
             }
@@ -2766,7 +2766,7 @@
                   "key": "image",
                   "type": "file",
                   "src": "",
-                  "description": "Choose a jpg, jpeg, png or webp file, max 2 MB"
+                  "description": "Choose a jpg, jpeg, png or webp file, max 4 MB"
                 }
               ]
             }
@@ -2964,7 +2964,7 @@
                   "key": "image",
                   "type": "file",
                   "src": "",
-                  "description": "Choose a jpg, jpeg, png or webp file, max 2 MB"
+                  "description": "Choose a jpg, jpeg, png or webp file, max 4 MB"
                 }
               ]
             }
