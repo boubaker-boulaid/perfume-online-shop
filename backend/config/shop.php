@@ -1,6 +1,10 @@
 <?php
 
 return [
+    // A public demo of the shop (a portfolio project): the catalog is fake, and
+    // "php artisan shop:demo-reset" may wipe and re-seed the database. Never on a real shop.
+    'demo' => (bool) env('SHOP_DEMO', false),
+
     'whatsapp' => [
         'number' => env('SHOP_WHATSAPP_NUMBER') ?: '212693303131',
     ],

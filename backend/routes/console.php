@@ -2,6 +2,7 @@
 
 use App\Console\Commands\CancelUnpaidOrders;
 use App\Console\Commands\PruneExpiredCache;
+use App\Console\Commands\ResetDemo;
 use App\Console\Commands\SendPaymentReminder;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -24,3 +25,6 @@ Schedule::command(CancelUnpaidOrders::class, ['--hours=24'])->everyFiveMinutes()
 
 // old catalog versions in the database cache are never read again, so they have to be removed
 Schedule::command(PruneExpiredCache::class)->hourly()->withoutOverlapping($lockMinutes);
+
+// the public demo starts again from the fake catalog every night, if the host runs the scheduler
+Schedule::command(ResetDemo::class)->dailyAt('04:00')->when(fn () => config('shop.demo'))->withoutOverlapping($lockMinutes);

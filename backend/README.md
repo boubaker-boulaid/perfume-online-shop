@@ -125,6 +125,30 @@ An offer such as "Collection Gissah, 2 perfumes + 1 free for 100 DH" is sold as 
 
 The endpoints and field rules are in [docs/API.md](docs/API.md#get-apiv1offers).
 
+## Demo mode
+
+The public demo of this shop (a portfolio project) runs with fake data that starts again from the seeders. It's switched on with `SHOP_DEMO=true`, and never on a real shop.
+
+```bash
+php artisan shop:demo-reset
+```
+
+This wipes the database and seeds the demo catalog, its offers and the admin account again (`migrate:fresh --seed`). Run it every time the server starts. If the scheduler runs, it also resets every night at 04:00. With `SHOP_DEMO` off, it refuses and changes nothing, so it can't wipe your real data by mistake.
+
+The settings that differ for a demo host:
+
+| Variable | Demo value |
+|---|---|
+| `SHOP_DEMO` | `true` |
+| `APP_ENV`, `APP_DEBUG` | `production`, `false` |
+| `DB_CONNECTION` | `sqlite`: the demo is rebuilt at every start, so a file on the server's disk is enough |
+| `QUEUE_CONNECTION` | `sync`: emails are handled during the request, no worker needed |
+| `MAIL_MAILER` | `log`: nothing is really sent |
+| `SHOP_ADMIN_NAME`, `SHOP_ADMIN_EMAIL`, `SHOP_ADMIN_PASSWORD` | A demo account you're happy to publish, since visitors log in with it |
+| `SHOP_WHATSAPP_NUMBER` | The placeholder `212600000000` |
+
+The frontend shows a demo notice and the demo login when it's built with `VITE_DEMO_MODE=true` (see `frontend/.env.example`).
+
 ## Logs
 
 Written to `storage/logs/`:
