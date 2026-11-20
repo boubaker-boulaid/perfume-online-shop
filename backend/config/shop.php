@@ -6,7 +6,7 @@ return [
     'demo' => (bool) env('SHOP_DEMO', false),
 
     'whatsapp' => [
-        'number' => env('SHOP_WHATSAPP_NUMBER') ?: '212693303131',
+        'number' => env('SHOP_WHATSAPP_NUMBER') ?: '212600000000',
     ],
 
     'admin' => [
