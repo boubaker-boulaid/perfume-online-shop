@@ -826,7 +826,7 @@
                   "value": "application/json"
                 }
               ],
-              "body": "{\n    \"success\": true,\n    \"message\": \"La commande a bien été créée.\",\n    \"data\": {\n        \"total\": \"1780.00\",\n        \"whatsapp_link\": \"https://wa.me/212693303131?text=Nouvelle%20commande%0A%0ACelestial%20Rose%3A%20quantity%202%20%2F%20cost%201780%2C00%20DH%20%0A%0AShipping%3A%20free%0ATotal%3A%201780%2C00%20DH%0AName%3A%20Test%20Customer%0ACity%3A%20Agadir%0AAddress%3A%201%20Test%20Street%0ACall%20before%20delivery\",\n        \"whatsapp_opened_url\": \"http://127.0.0.1:8000/api/v1/orders/8f14e45f-ceea-4e7a-9c1d-2b6f0a3d7e11/whatsapp-opened?expires=1793918705&signature=abc123\"\n    },\n    \"errors\": null\n}"
+              "body": "{\n    \"success\": true,\n    \"message\": \"La commande a bien été créée.\",\n    \"data\": {\n        \"total\": \"1780.00\",\n        \"whatsapp_link\": \"https://wa.me/212600000000?text=Nouvelle%20commande%0A%0ACelestial%20Rose%3A%20quantity%202%20%2F%20cost%201780%2C00%20DH%20%0A%0AShipping%3A%20free%0ATotal%3A%201780%2C00%20DH%0AName%3A%20Test%20Customer%0ACity%3A%20Agadir%0AAddress%3A%201%20Test%20Street%0ACall%20before%20delivery\",\n        \"whatsapp_opened_url\": \"http://127.0.0.1:8000/api/v1/orders/8f14e45f-ceea-4e7a-9c1d-2b6f0a3d7e11/whatsapp-opened?expires=1793918705&signature=abc123\"\n    },\n    \"errors\": null\n}"
             }
           ]
         },
