@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router'
 import { ApiError } from '../../services/apiError'
 import { login } from '../adminApi'
 import { PageTitle } from '../../components/PageTitle'
+import { DEMO_ADMIN } from '../../utils/demo'
 
 type Errors = Record<string, string[]>
 
@@ -41,6 +42,11 @@ export function LoginPage() {
       <PageTitle admin>Connexion</PageTitle>
       <form className="panel" onSubmit={submit} noValidate>
         <h1>Administration</h1>
+        {DEMO_ADMIN && (
+          <p className="admin-notice" role="note">
+            Démo : connectez-vous avec {DEMO_ADMIN.email} et le mot de passe {DEMO_ADMIN.password}. Tout est remis à zéro régulièrement.
+          </p>
+        )}
         {notice && (
           <p className="admin-notice" role="status">
             {notice}
@@ -48,12 +54,12 @@ export function LoginPage() {
         )}
         <label className={`field${errors.email ? ' has-error' : ''}`}>
           <span className="field__label">E-mail</span>
-          <input name="email" type="email" autoComplete="username" required />
+          <input name="email" type="email" autoComplete="username" defaultValue={DEMO_ADMIN?.email} required />
           {errors.email && <span className="field__error">{errors.email[0]}</span>}
         </label>
         <label className={`field${errors.password ? ' has-error' : ''}`}>
           <span className="field__label">Mot de passe</span>
-          <input name="password" type="password" autoComplete="current-password" required />
+          <input name="password" type="password" autoComplete="current-password" defaultValue={DEMO_ADMIN?.password} required />
           {errors.password && <span className="field__error">{errors.password[0]}</span>}
         </label>
         <label className="admin-check">

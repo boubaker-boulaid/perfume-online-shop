@@ -20,6 +20,22 @@
   text-transform: uppercase;
 }
 
+/* The public demo's notice (DemoNotice), above the header and at the top of the admin */
+.demo-notice {
+  padding: 8px var(--gutter) 6px;
+  background: var(--ink);
+  color: var(--ivory);
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.admin-main .demo-notice {
+  margin-bottom: 20px;
+  border-radius: 3px;
+}
+
 /* Header: the gold announcement line, then the white bar. On phones the bar shows the logo, the
    bag and the menu button. From 1024px the links appear on both sides of the logo. */
 
