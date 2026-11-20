@@ -1,0 +1,77 @@
+# Render Blueprint: the backend's public demo (a portfolio project), on Render's free plan.
+# The shop itself is on Vercel, which forwards the API's addresses here (frontend/vercel.json),
+# so for the browser the shop and the API are one site and the login cookies work.
+services:
+  - type: web
+    name: perfume-shop-api
+    runtime: docker
+    plan: free
+    region: frankfurt
+    branch: main
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    # only a change in backend/ rebuilds the API
+    buildFilter:
+      paths:
+        - backend/**
+    healthCheckPath: /api/status
+    envVars:
+      - key: APP_KEY
+        generateValue: true
+      - key: APP_NAME
+        value: Lumé Parfums
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_LOCALE
+        value: fr
+      # the shop's address: images, password reset links and the WhatsApp link point there
+      - key: APP_URL
+        value: https://perfume-shop-beta-blond.vercel.app
+      - key: FRONTEND_URL
+        value: https://perfume-shop-beta-blond.vercel.app
+      - key: SANCTUM_STATEFUL_DOMAINS
+        value: perfume-shop-beta-blond.vercel.app
+      - key: SESSION_SECURE_COOKIE
+        value: "true"
+      - key: TRUSTED_PROXIES
+        value: "*"
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: info
+      # the demo is rebuilt at every start (docker/start.sh), so SQLite on the server's disk is enough
+      - key: DB_CONNECTION
+        value: sqlite
+      - key: DB_DATABASE
+        value: /app/database/database.sqlite
+      # one write at a time in SQLite: wait up to 5 s for it, and keep the cache and the
+      # sessions (written on nearly every request) in files instead
+      - key: DB_BUSY_TIMEOUT
+        value: "5000"
+      - key: DB_JOURNAL_MODE
+        value: wal
+      - key: DB_TRANSACTION_MODE
+        value: IMMEDIATE
+      - key: CACHE_STORE
+        value: file
+      - key: SESSION_DRIVER
+        value: file
+      - key: QUEUE_CONNECTION
+        value: sync
+      - key: MAIL_MAILER
+        value: log
+      - key: SHOP_DEMO
+        value: "true"
+      # the demo's admin account: public on purpose, the login page shows it
+      - key: SHOP_ADMIN_NAME
+        value: Démo
+      - key: SHOP_ADMIN_EMAIL
+        value: demo@lume-parfums.test
+      - key: SHOP_ADMIN_PASSWORD
+        value: demo-lume-2026
+      - key: SHOP_WHATSAPP_NUMBER
+        value: "212600000000"
+      - key: SHOP_MAIL_ADDRESS
+        value: shop@example.com

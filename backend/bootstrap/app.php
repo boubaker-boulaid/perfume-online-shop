@@ -37,6 +37,14 @@ return Application::configure(basePath: dirname(__DIR__))
             EnsureFrontendRequestsAreStateful::class,
         ]);
 
+        // Behind a host's proxies (Render, then Vercel's forwarding), Laravel must believe their
+        // X-Forwarded-* headers to see https, the visitor's address and the site's own host.
+        // Only when TRUSTED_PROXIES is set: "*" or a list of addresses. Unset on your computer.
+        $trustedProxies = env('TRUSTED_PROXIES');
+        if ($trustedProxies) {
+            $middleware->trustProxies(at: $trustedProxies === '*' ? '*' : explode(',', $trustedProxies));
+        }
+
         $middleware->alias([
             'verified' => EnsureEmailIsVerified::class,
             'admin' => IsAdmin::class,
