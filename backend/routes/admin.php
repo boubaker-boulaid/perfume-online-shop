@@ -21,7 +21,7 @@ Route::apiResource('categories', CategoryController::class)->parameters([
 ]);
 
 Route::apiResource('offers', OfferController::class)->parameters([
-    'offers' => 'offer:slug'
+    'offers' => 'offer:slug',
 ]);
 
 Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
