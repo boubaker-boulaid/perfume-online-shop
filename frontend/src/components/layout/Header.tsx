@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router'
 import { useCart } from '../../context/cartContext'
 import { BagIcon, CloseIcon, MenuIcon } from '../Icons'
 import { Logo } from '../Logo'
+import { DemoNotice } from '../DemoNotice'
 
 const links = [
   { label: 'Accueil', to: '/' },
@@ -79,6 +80,7 @@ export function Header() {
 
   return (
     <header className="site-header">
+      <DemoNotice />
       <p className="site-header__announcement">
         Livraison gratuite partout au Maroc <span aria-hidden="true">·</span> Paiement à la réception
       </p>

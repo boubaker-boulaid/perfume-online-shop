@@ -1,4 +1,5 @@
 import { NavLink, Outlet, useNavigate, useOutletContext } from 'react-router'
+import { DemoNotice } from '../components/DemoNotice'
 import { logout } from './adminApi'
 import type { Admin } from './types'
 
@@ -35,6 +36,7 @@ export function AdminLayout() {
         </button>
       </aside>
       <main className="admin-main">
+        <DemoNotice />
         <Outlet context={admin} />
       </main>
     </div>
