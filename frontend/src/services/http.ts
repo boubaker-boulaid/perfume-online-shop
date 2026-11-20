@@ -59,14 +59,26 @@ async function ensureCsrfCookie() {
 }
 
 const CSRF_EXPIRED = 419
+const NOT_LOGGED_IN = 401
 
-// Sends one request and gives back the API's answer, or throws an ApiError.
-export async function request<T>(config: AxiosRequestConfig): Promise<Envelope<T>> {
+// The admin's session ended (it lasts 120 minutes): back to the login page. The shop never
+// gets a 401, so this only ever happens on the admin pages.
+function leaveIfSessionEnded(error: unknown) {
+  const { pathname } = window.location
+
+  if (axios.isAxiosError(error) && error.response?.status === NOT_LOGGED_IN && pathname.startsWith('/admin') && pathname !== '/admin/login') {
+    window.location.assign('/admin/login')
+  }
+}
+
+// Sends one request and gives back the body exactly as the API sent it, or throws an ApiError.
+// Only GET /api/v1/admin/me needs this: every other answer comes in the envelope (see request).
+export async function send<T>(config: AxiosRequestConfig): Promise<T> {
   const changesSomething = config.method !== undefined && config.method.toLowerCase() !== 'get'
 
   try {
     if (changesSomething) await ensureCsrfCookie()
-    const response = await http.request<Envelope<T>>(config)
+    const response = await http.request<T>(config)
     return response.data
   } catch (error) {
     // an expired CSRF token: get a new one and try once more
@@ -74,13 +86,20 @@ export async function request<T>(config: AxiosRequestConfig): Promise<Envelope<T
       csrfCookie = null
       try {
         await ensureCsrfCookie()
-        const response = await http.request<Envelope<T>>(config)
+        const response = await http.request<T>(config)
         return response.data
       } catch (retryError) {
+        leaveIfSessionEnded(retryError)
         throw toApiError(retryError)
       }
     }
 
+    leaveIfSessionEnded(error)
     throw toApiError(error)
   }
+}
+
+// Sends one request and gives back the API's answer, or throws an ApiError.
+export function request<T>(config: AxiosRequestConfig): Promise<Envelope<T>> {
+  return send<Envelope<T>>(config)
 }
