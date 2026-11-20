@@ -542,6 +542,71 @@ a.admin-card:hover {
   color: var(--body);
 }
 
+/* The forms: products, categories and offers */
+
+.admin-heading--split {
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.admin-form {
+  max-width: 760px;
+}
+
+.admin-form .field input[type='file'] {
+  padding: 10px 12px;
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+.admin-form__actions {
+  margin: 20px 0 0;
+}
+
+.admin-preview {
+  width: 140px;
+  height: 140px;
+  margin: -4px 0 18px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  object-fit: cover;
+  background: var(--ivory);
+}
+
+.admin-hint {
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  border-left: 3px solid var(--gold);
+  background: var(--ivory);
+  color: var(--body);
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+.admin-table__thumb {
+  width: 60px;
+}
+
+.admin-table__thumb img {
+  width: 48px;
+  height: 48px;
+  border-radius: 3px;
+  object-fit: cover;
+  background: var(--ivory);
+}
+
+/* "Coffret": a product that is an offer's set */
+.admin-tag {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 3px 8px 1px;
+  background: var(--gold-soft);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  vertical-align: 1px;
+}
+
 /* The login page */
 
 .admin-login {
@@ -616,7 +681,11 @@ a.admin-card:hover {
   }
 
   .admin-toolbar {
-    grid-template-columns: minmax(0, 1fr) 200px 260px;
+    grid-template-columns: minmax(0, 1fr) 240px 240px;
+  }
+
+  .admin-field-row--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .admin-card--wide {

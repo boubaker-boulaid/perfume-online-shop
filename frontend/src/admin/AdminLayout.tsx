@@ -5,6 +5,7 @@ import type { Admin } from './types'
 const LINKS = [
   { to: '/admin', label: 'Tableau de bord', end: true },
   { to: '/admin/orders', label: 'Commandes', end: false },
+  { to: '/admin/products', label: 'Produits', end: false },
 ]
 
 export function AdminLayout() {

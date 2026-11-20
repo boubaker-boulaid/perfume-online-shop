@@ -5,6 +5,8 @@ import { DashboardPage } from './pages/DashboardPage'
 import { LoginPage } from './pages/LoginPage'
 import { OrderPage } from './pages/OrderPage'
 import { OrdersPage } from './pages/OrdersPage'
+import { ProductFormPage } from './pages/ProductFormPage'
+import { ProductsPage } from './pages/ProductsPage'
 import { RequireAdmin } from './RequireAdmin'
 
 // The admin's routes, under /admin. App.tsx loads this file with lazy(), which needs a default
@@ -18,6 +20,10 @@ export default function AdminApp() {
           <Route index element={<DashboardPage />} />
           <Route path="orders" element={<OrdersPage />} />
           <Route path="orders/:orderNumber" element={<OrderPage />} />
+          <Route path="products" element={<ProductsPage />} />
+          {/* key="new": coming from an edit form, "new" must start from an empty form */}
+          <Route path="products/new" element={<ProductFormPage key="new" />} />
+          <Route path="products/:slug" element={<ProductFormPage />} />
         </Route>
       </Route>
     </Routes>
