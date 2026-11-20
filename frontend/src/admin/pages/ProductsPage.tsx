@@ -6,6 +6,7 @@ import { useFilters } from '../../hooks/useFilters'
 import type { ProductFilters, ProductSort } from '../../types'
 import { formatPrice } from '../../utils/format'
 import { getAdminProducts, getAllAdminCategories } from '../adminApi'
+import { PageTitle } from '../../components/PageTitle'
 
 const SORT_LABELS: Record<ProductSort, string> = {
   newest: 'Plus récents',
@@ -34,6 +35,7 @@ export function ProductsPage() {
 
   return (
     <>
+      <PageTitle admin>Produits</PageTitle>
       <div className="admin-heading admin-heading--split">
         <h1 className="admin-title">Produits</h1>
         <Link to="/admin/products/new" className="button button--accent button--small">

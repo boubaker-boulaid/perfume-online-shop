@@ -7,6 +7,7 @@ import { formatPrice } from '../../utils/format'
 import { changeOrderStatus, getOrder } from '../adminApi'
 import { NEXT_STATUSES, PAYMENT_LABELS, STATUS_LABELS, whatsappNumber } from '../labels'
 import type { OrderStatus } from '../types'
+import { PageTitle } from '../../components/PageTitle'
 
 // "2026-11-20T14:05:00.000Z" → "20 novembre 2026 à 15:05", in the admin's time zone
 const formatDateTime = (iso: string) => new Intl.DateTimeFormat('fr-MA', { dateStyle: 'long', timeStyle: 'short' }).format(new Date(iso))
@@ -39,6 +40,7 @@ export function OrderPage() {
 
   return (
     <>
+      <PageTitle admin>{order.order_number}</PageTitle>
       <Link to="/admin/orders" className="back-link">
         <ArrowLeftIcon size={15} /> Retour aux commandes
       </Link>

@@ -5,6 +5,7 @@ import { useFilters } from '../../hooks/useFilters'
 import type { Offer } from '../../types'
 import { formatPrice } from '../../utils/format'
 import { getAdminOffers } from '../adminApi'
+import { PageTitle } from '../../components/PageTitle'
 
 // "2026-11-15T…" → "15 nov. 2026", short enough to stay on one line
 const shortDate = (iso: string) => new Intl.DateTimeFormat('fr-MA', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(iso))
@@ -28,6 +29,7 @@ export function OffersAdminPage() {
 
   return (
     <>
+      <PageTitle admin>Offres</PageTitle>
       <div className="admin-heading admin-heading--split">
         <h1 className="admin-title">Offres</h1>
         <Link to="/admin/offers/new" className="button button--accent button--small">

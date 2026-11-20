@@ -6,6 +6,7 @@ import { useApi } from '../../hooks/useApi'
 import { ApiError } from '../../services/apiError'
 import { deleteProduct, getAdminProduct, getAllAdminCategories, saveProduct } from '../adminApi'
 import { checkImage } from '../images'
+import { PageTitle } from '../../components/PageTitle'
 
 // unchecked boxes are missing from FormData: these are always sent as 1 or 0
 const BOOLEAN_FIELDS = ['is_active', 'is_featured', 'is_offer'] as const
@@ -78,6 +79,7 @@ export function ProductFormPage() {
 
   return (
     <>
+      <PageTitle admin>{product ? product.name : 'Nouveau produit'}</PageTitle>
       <Link to="/admin/products" className="back-link">
         <ArrowLeftIcon size={15} /> Retour aux produits
       </Link>

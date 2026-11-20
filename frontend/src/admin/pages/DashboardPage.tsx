@@ -4,6 +4,7 @@ import { formatPrice } from '../../utils/format'
 import { getStats } from '../adminApi'
 import { STATUS_LABELS } from '../labels'
 import type { OrderStatus } from '../types'
+import { PageTitle } from '../../components/PageTitle'
 
 // "2026-11-05" → "5 nov."
 const shortDate = (date: string) => new Intl.DateTimeFormat('fr-MA', { day: 'numeric', month: 'short' }).format(new Date(`${date}T12:00:00`))
@@ -23,6 +24,7 @@ export function DashboardPage() {
 
   return (
     <>
+      <PageTitle admin>Tableau de bord</PageTitle>
       <h1 className="admin-title">Tableau de bord</h1>
 
       <div className="admin-cards">

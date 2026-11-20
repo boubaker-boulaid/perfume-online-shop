@@ -7,6 +7,7 @@ import { useFilters } from '../hooks/useFilters'
 import { scrollToTop } from '../motion/smoothScroll'
 import { getCategories, getProducts } from '../services/api'
 import type { ProductFilters, ProductSort } from '../types'
+import { PageTitle } from '../components/PageTitle'
 
 const sortOptions: { value: ProductSort | ''; label: string }[] = [
   { value: '', label: 'Recommandés' },
@@ -43,6 +44,7 @@ export function ShopPage() {
 
   return (
     <div className="container page">
+      <PageTitle>Boutique</PageTitle>
       <PageHeading eyebrow="Boutique" title={<>Tous les <em>parfums</em></>} trail={[{ label: 'Boutique' }]} center>
         Des parfums originaux, choisis un par un et livrés partout au Maroc.
       </PageHeading>

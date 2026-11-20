@@ -8,6 +8,7 @@ import { useCart } from '../context/cartContext'
 import { ApiError, placeOrder } from '../services/api'
 import { formatPrice } from '../utils/format'
 import { createUuid } from '../utils/uuid'
+import { PageTitle } from '../components/PageTitle'
 
 type Errors = Record<string, string[]>
 
@@ -23,6 +24,7 @@ export function CheckoutPage() {
   if (items.length === 0) {
     return (
       <div className="container page">
+        <PageTitle>Commande</PageTitle>
         <PageHeading eyebrow="Commande" title={<>Votre panier est <em>vide</em></>} trail={[{ label: 'Panier', to: '/cart' }, { label: 'Commande' }]} center>
           Ajoutez un parfum avant de commander.
         </PageHeading>
@@ -69,6 +71,7 @@ export function CheckoutPage() {
 
   return (
     <div className="container page">
+      <PageTitle>Commande</PageTitle>
       <PageHeading eyebrow="Commande" title={<>Vos <em>informations</em></>} trail={[{ label: 'Panier', to: '/cart' }, { label: 'Commande' }]}>
         Vous payez en espèces au livreur. À l’étape suivante, vous nous envoyez la commande sur WhatsApp.
       </PageHeading>

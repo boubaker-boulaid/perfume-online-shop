@@ -2,14 +2,16 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import { Breadcrumbs } from '../components/Breadcrumbs'
 import { BadgeCheckIcon, BagIcon, BanknoteIcon, CheckIcon, TruckIcon } from '../components/Icons'
+import { LoadError } from '../components/LoadError'
 import { ProductCard } from '../components/ProductCard'
 import { QuantityStepper } from '../components/QuantityStepper'
 import { useCart } from '../context/cartContext'
 import { useApi } from '../hooks/useApi'
-import { getProduct, getProducts } from '../services/api'
+import { ApiError, getProduct, getProducts } from '../services/api'
 import type { Product } from '../types'
 import { formatPrice } from '../utils/format'
 import { NotFoundPage } from './NotFoundPage'
+import { PageTitle } from '../components/PageTitle'
 
 const LOW_STOCK = 5
 
@@ -103,13 +105,25 @@ function ProductDetails({ product }: { product: Product }) {
 
 export function ProductPage() {
   const { slug = '' } = useParams()
-  const { data: product, error, loading } = useApi(() => getProduct(slug), slug)
+  // a new attempt is a new key: useApi loads again
+  const [attempt, setAttempt] = useState(0)
+  const { data: product, error, loading } = useApi(() => getProduct(slug), `${slug}-${attempt}`)
   const { data: related } = useApi(() => getProducts({ category: product?.category.slug }), `related-${product?.id}`)
 
-  if (error) return <NotFoundPage />
+  // "not found" only when the server says so: a network failure doesn't mean it doesn't exist
+  if (error instanceof ApiError && error.status === 404) return <NotFoundPage />
+  if (error) {
+    return (
+      <div className="container page">
+        <PageTitle>Chargement impossible</PageTitle>
+        <LoadError onRetry={() => setAttempt((current) => current + 1)} />
+      </div>
+    )
+  }
 
   return (
     <div className="container page">
+      <PageTitle>{product ? product.name : 'Boutique'}</PageTitle>
       <Breadcrumbs
         trail={[
           { label: 'Boutique', to: '/shop' },

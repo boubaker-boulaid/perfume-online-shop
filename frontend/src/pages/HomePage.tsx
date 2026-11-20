@@ -13,6 +13,7 @@ export function HomePage() {
 
   return (
     <>
+      <title>Lumé Parfums · Parfums originaux livrés partout au Maroc</title>
       <Hero />
       <FragranceCarousel />
       <EditorialCards />

@@ -633,7 +633,7 @@ textarea::placeholder {
   text-align: center;
 }
 
-.empty h2 {
+.empty :is(h1, h2) {
   font-family: var(--serif);
   font-size: 24px;
   font-weight: 400;
